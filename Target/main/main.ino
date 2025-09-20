@@ -6,6 +6,7 @@
 #include "Piezo.h"
 #include <RGBLed.h>
 #include "RGBRing.h"
+#include "SevenSegmentDisplay.h"
 
 // Components
 WirelessManager wireless;
@@ -13,15 +14,18 @@ PairingManager pairingManager(wireless);
 RGBLed rgbLed(redLEDPin, greenLEDPin, blueLEDPin);
 RGBRing rgbRing(ledRingPin, 24);
 Piezo piezo(piezoSensorPin);
+SevenSegmentDisplay scoreDisplay(displayDataPin, displayClockPin, displayLatchPin);
 
 void setup() {
   Serial.begin(9600);
   Serial.println("Target starting...");
 
+  // ToDo: Create a button module/library
   pinMode(pairingResetPin, INPUT_PULLUP);
   piezo.setup();
   rgbLed.setup();
   rgbRing.setup();
+  scoreDisplay.setup();
 
   wireless.setup();
 
@@ -82,8 +86,15 @@ void loop() {
     if (piezo.isHit()) {
       // ✅ Trigger feedback
       Serial.println("✅ Target got hit.");
-      rgbRing.chase("Green", 30);          // Animate LED ring
-      // sendHitPacket();                // Optional: notify hub via NRF24L01
+      rgbRing.chase("Green", 30);
+      // To-Do: Emit Sound                                      <-------------
+      uint8_t targetId = EEPROM.read(1);
+      uint8_t score;
+      if (wireless.sendHitPacket(targetId, score)) {
+        Serial.print("✅ Score: ");
+        Serial.println(score);
+        scoreDisplay.showScore(score);
+      }
     }
     // Add any runtime logic here (e.g., hit detection, LED updates)
   }

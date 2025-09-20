@@ -16,9 +16,9 @@ const uint8_t greenLEDPin = 6;
 const uint8_t blueLEDPin  = 7;
 
 // 7-Segment Display via Shift Register
-const uint8_t latchPin = 4;  // LOAD
-const uint8_t clockPin = 3;  // SCLK
-const uint8_t dataPin  = 2;  // SDI
+const uint8_t displayLatchPin = 4;  // LOAD
+const uint8_t displayClockPin = 3;  // SCLK
+const uint8_t displayDataPin  = 2;  // SDI
 
 // RGB Ring
 const uint8_t ledRingPin = 5;  // LED Ring

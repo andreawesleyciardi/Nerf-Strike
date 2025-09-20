@@ -29,6 +29,37 @@ void WirelessManager::setup() {
   Serial.println("📡 Radio listening on pairing pipe.");
 }
 
+struct HitPacket {
+  uint8_t targetId;
+  char type[4]; // "HIT"
+};
+
+bool WirelessManager::sendHitPacket(uint8_t targetId, uint8_t &updatedScore) {
+  HitPacket packet = {targetId, "HIT"};
+
+  radio.stopListening();
+  bool success = radio.write(&packet, sizeof(packet));
+
+  if (success) {
+    radio.startListening();
+    unsigned long startTime = millis();
+    while (!radio.available()) {
+      if (millis() - startTime > 200) {
+        Serial.println("⚠️ No response from hub.");
+        return false;
+      }
+    }
+
+    radio.read(&updatedScore, sizeof(updatedScore));
+    Serial.print("🎯 Updated score: ");
+    Serial.println(updatedScore);
+    return true;
+  } else {
+    Serial.println("❌ Failed to send hit packet.");
+    return false;
+  }
+}
+
 void WirelessManager::sendPairingRequest(uint32_t token) {
   Serial.print("📨 Sending pairing request with token: ");
   Serial.println(token);
