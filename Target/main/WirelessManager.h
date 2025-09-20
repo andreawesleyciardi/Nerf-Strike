@@ -7,7 +7,7 @@
 class WirelessManager {
 public:
   WirelessManager();
-  void initialize();
+  void setup();
   void sendPairingRequest(uint32_t token);
   bool receivePairingResponse(uint8_t &assignedID);
   void sendVerificationRequest(uint8_t id);

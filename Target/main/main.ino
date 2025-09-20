@@ -1,21 +1,29 @@
 #include <EEPROM.h>
+#include <Color.h>
 #include "TargetConfig.h"
 #include "WirelessManager.h"
 #include "PairingManager.h"
+#include "Piezo.h"
+#include <RGBLed.h>
+#include "RGBRing.h"
 
+// Components
 WirelessManager wireless;
 PairingManager pairingManager(wireless);
+RGBLed rgbLed(redLEDPin, greenLEDPin, blueLEDPin);
+RGBRing rgbRing(ledRingPin, 24);
+Piezo piezo(piezoSensorPin);
 
 void setup() {
   Serial.begin(9600);
   Serial.println("Target starting...");
 
   pinMode(pairingResetPin, INPUT_PULLUP);
-  pinMode(redLEDPin, OUTPUT);
-  pinMode(greenLEDPin, OUTPUT);
-  pinMode(blueLEDPin, OUTPUT);
+  piezo.setup();
+  rgbLed.setup();
+  rgbRing.setup();
 
-  wireless.initialize();
+  wireless.setup();
 
   Serial.println("✅ Radio initialized and chip connected.");
   Serial.println("Radio listening on pairing pipe.");
@@ -66,24 +74,17 @@ void loop() {
 
     if (packet[0] == 0x05) { // Blink command
       Serial.println("🔦 Blink command received.");
-      blinkRGB(3);
+      rgbLed.blink("Green");
     }
   }
 
-  // Add any runtime logic here (e.g., hit detection, LED updates)
-}
-
-void blinkRGB(uint8_t times) {
-  for (uint8_t i = 0; i < times; i++) {
-    setRGB(255, 255, 255); // white
-    delay(200);
-    setRGB(0, 0, 0);       // off
-    delay(200);
+  if (pairingManager.isPaired()) {
+    if (piezo.isHit()) {
+      // ✅ Trigger feedback
+      Serial.println("✅ Target got hit.");
+      rgbRing.chase("Green", 30);          // Animate LED ring
+      // sendHitPacket();                // Optional: notify hub via NRF24L01
+    }
+    // Add any runtime logic here (e.g., hit detection, LED updates)
   }
-}
-
-void setRGB(uint8_t r, uint8_t g, uint8_t b) {
-  analogWrite(redLEDPin, r);
-  analogWrite(greenLEDPin, g);
-  analogWrite(blueLEDPin, b);
 }

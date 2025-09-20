@@ -20,8 +20,10 @@ const uint8_t latchPin = 4;  // LOAD
 const uint8_t clockPin = 3;  // SCLK
 const uint8_t dataPin  = 2;  // SDI
 
-// New additions
-const uint8_t ledRingPin   = 5;  // LED Ring
+// RGB Ring
+const uint8_t ledRingPin = 5;  // LED Ring
+
+// Piezo sensor
 const uint8_t piezoSensorPin = A0; // Piezo Sensor
 
 const uint64_t pairingPipe = 0xF0F0F0F0E1LL;

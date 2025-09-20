@@ -5,7 +5,7 @@
 
 WirelessManager::WirelessManager() : radio(CE_PIN, CSN_PIN) {}
 
-void WirelessManager::initialize() {
+void WirelessManager::setup() {
   Serial.println("🔧 Initializing radio...");
 
   if (!radio.begin()) {
