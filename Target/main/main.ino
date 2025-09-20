@@ -7,6 +7,7 @@
 #include <RGBLed.h>
 #include "RGBRing.h"
 #include "SevenSegmentDisplay.h"
+#include <Button.h>
 
 // Components
 WirelessManager wireless;
@@ -15,13 +16,13 @@ RGBLed rgbLed(redLEDPin, greenLEDPin, blueLEDPin);
 RGBRing rgbRing(ledRingPin, 24);
 Piezo piezo(piezoSensorPin);
 SevenSegmentDisplay scoreDisplay(displayDataPin, displayClockPin, displayLatchPin);
+Button pairingResetButton(pairingResetPin);
 
 void setup() {
   Serial.begin(9600);
   Serial.println("Target starting...");
 
-  // ToDo: Create a button module/library
-  pinMode(pairingResetPin, INPUT_PULLUP);
+  pairingResetButton.setup();
   piezo.setup();
   rgbLed.setup();
   rgbRing.setup();
@@ -32,8 +33,8 @@ void setup() {
   Serial.println("✅ Radio initialized and chip connected.");
   Serial.println("Radio listening on pairing pipe.");
 
-  uint8_t pairingFlag = EEPROM.read(0);
-  uint8_t assignedID = EEPROM.read(1);
+  uint8_t pairingFlag = pairingManager.readFlag();
+  uint8_t assignedID = pairingManager.readId();
 
   if (pairingFlag == 1 && assignedID != 0xFF) {
     Serial.print("✅ Found stored ID: ");
@@ -53,9 +54,8 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(pairingResetPin) == LOW) {
-    EEPROM.write(0, 0); // Clear pairing flag
-    EEPROM.write(1, 0); // Clear assigned ID
+  if (pairingResetButton.wasPressed()) {
+    pairingManager.clear();
     Serial.println("🔄 EEPROM reset. Re-pairing...");
 
     // Blink green LED 3 times
@@ -88,7 +88,7 @@ void loop() {
       Serial.println("✅ Target got hit.");
       rgbRing.chase("Green", 30);
       // To-Do: Emit Sound                                      <-------------
-      uint8_t targetId = EEPROM.read(1);
+      uint8_t targetId = pairingManager.readId();
       uint8_t score;
       if (wireless.sendHitPacket(targetId, score)) {
         Serial.print("✅ Score: ");

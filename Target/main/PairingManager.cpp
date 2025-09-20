@@ -85,3 +85,16 @@ bool PairingManager::verifyPairing(uint8_t id) {
   Serial.println("❌ ID not recognized by hub after retries.");
   return false;
 }
+
+uint8_t PairingManager::readFlag() {
+  return EEPROM.read(0);
+}
+
+uint8_t PairingManager::readId() {
+  return EEPROM.read(1);
+}
+
+void PairingManager::clear() {
+  EEPROM.write(0, 0); // Clear pairing flag
+  EEPROM.write(1, 0); // Clear assigned ID
+}
