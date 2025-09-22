@@ -1,32 +1,23 @@
 #ifndef PAIRING_MANAGER_H
 #define PAIRING_MANAGER_H
 
-#include <stdint.h>
+#include <Arduino.h>
 #include "WirelessManager.h"
 
 class PairingManager {
 public:
-  PairingManager(WirelessManager &wm);
-
-  // ✅ Stateless methods
-  bool pair();
+  PairingManager(WirelessManager& wm);
+  void pair();
   uint8_t getAssignedID();
-
-  // ✅ Manual reset (clears in-memory ID)
-  void clear();
-
-  // ❌ EEPROM-based methods (commented out)
-  /*
-  bool isPaired();
-  uint8_t readFlag();
-  uint8_t readId();
-  void storeAssignedID(uint8_t id);
-  bool verifyPairing(uint8_t id);
-  */
+  void resetToken();
 
 private:
-  WirelessManager &wireless;
-  uint32_t generateToken();
+  WirelessManager& wireless;
+  uint8_t assignedID;
+  uint32_t token;
+
+  uint32_t loadTokenFromEEPROM();
+  void saveTokenToEEPROM(uint32_t newToken);
 };
 
 #endif
