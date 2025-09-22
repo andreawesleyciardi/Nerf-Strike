@@ -53,9 +53,11 @@ void loop() {
   static bool awaitingAck = false;
   static bool heartbeatLost = false;
 
-  if (pairingResetButton.wasPressed()) {
-    Serial.println(F("🔄 Manual re-pair triggered..."));
-    rgbLed.blink("Red");
+  // 🛠 Manual token reset if button held > 3s
+  if (pairingResetButton.wasLongPressed(feedback)) {
+    Serial.println(F("🧹 Token reset triggered..."));
+    pairingManager.resetToken();
+    rgbLed.blink("Green", 3);
     delay(500);
     pairingManager.pair();
     awaitingAck = false;
@@ -70,13 +72,14 @@ void loop() {
     }
   }
 
+  // 📥 Handle incoming packets
   if (wireless.available()) {
-    // Serial.println("📥 Target received a packet.");
+    // Serial.println(F("📥 Target received a packet."));
 
     byte packet[32];
     wireless.read(packet, sizeof(packet));
 
-    if (packet[0] == 0x04) { // 💓 Heartbeat ping
+    if (packet[0] == 0x04) { // 💓 Heartbeat
       lastHeartbeat = millis();
       heartbeatLost = false;
       Serial.println(F("💓 Heartbeat received from hub."));
@@ -100,6 +103,7 @@ void loop() {
     }
   }
 
+  // 🎯 Hit detection
   uint8_t targetId = pairingManager.getAssignedID();
   if (targetId != 0xFF) {
     if (piezo.isHit()) {
@@ -147,4 +151,8 @@ void loop() {
       }
     }
   }
+}
+
+void feedback() {
+  rgbLed.blink("Red");
 }

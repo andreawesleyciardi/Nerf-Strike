@@ -1,32 +1,33 @@
 #ifndef PAIRING_REGISTRY_H
 #define PAIRING_REGISTRY_H
 
-#include <stdint.h>
-#include "HubConfig.h"
-// #include <EEPROM.h>  // ❌ Uncomment if using EEPROM
+#include <Arduino.h>
+
+#define MAX_TARGETS 10
 
 class PairingRegistry {
 public:
   PairingRegistry();
 
-  // Pairing logic
   uint8_t assignID(uint32_t token);
   void storePipeForID(uint8_t id, const uint8_t* pipe);
   const uint8_t* getPipeForID(uint8_t id);
   uint8_t getIDAt(uint8_t index);
-
-  // 🔧 Hub command support
-  void clearAll();  // 🧹 Clears all pairings
-
-  // ❌ EEPROM-based logic (commented out)
-  /*
-  void saveToEEPROM();
-  void loadFromEEPROM();
-  */
+  void clearAll();
 
 private:
-  uint8_t idMap[MAX_TARGETS];           // Stores assigned IDs
-  uint8_t pipeMap[MAX_TARGETS][5];      // Stores pipe names
+  struct Entry {
+    uint8_t id;
+    uint32_t token;
+    uint8_t pipe[6];
+    bool active;
+  };
+
+  Entry entries[MAX_TARGETS];
+  uint8_t nextID;
+
+  int findEntryByToken(uint32_t token);
+  int findEntryByID(uint8_t id);
 };
 
 #endif
