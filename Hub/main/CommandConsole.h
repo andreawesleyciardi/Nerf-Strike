@@ -16,20 +16,33 @@ private:
   bool verbose = true;
   unsigned long startTime;
 
-  void dumpRegistry();
-  void clearRegistry();
+  // ✅ Active commands
+  void dumpRegistry();             // 'list'
+  void clearRegistry();           // 'clear'
+  void testTargets();             // 'test'
+
+  // ✅ Messaging and diagnostics
   void sendMessage(String idStr, String msgStr);
   void pingTarget(String idStr);
   void broadcastMessage(String msgStr);
+  void showTargetInfo(String idStr);
+
+  // ✅ System status and control
   void showStatus();
   void toggleLogging(String arg);
   void rebootHub();
   void factoryReset();
   void showVersion();
   void showUptime();
-  void showTargetInfo(String idStr);
-  void simulateEvent(String eventStr);
   void showHelp();
+
+  // ❌ Legacy or unused logic (commented out)
+  /*
+  void simulateEvent(String eventStr);
+  void resetEEPROM();
+  void loadRegistryFromEEPROM();
+  void saveRegistryToEEPROM();
+  */
 };
 
 #endif

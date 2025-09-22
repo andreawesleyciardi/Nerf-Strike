@@ -16,7 +16,7 @@ public:
   void sendToHub(const byte* data, uint8_t length);
   bool available();
   void read(byte* buffer, uint8_t length);
-  bool sendHitPacket(uint8_t targetId, uint8_t &updatedScore);
+  bool sendHitPacket(uint8_t targetId);
 
 private:
   RF24 radio;

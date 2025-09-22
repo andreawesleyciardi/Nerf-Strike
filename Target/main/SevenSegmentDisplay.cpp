@@ -18,7 +18,7 @@ SevenSegmentDisplay::SevenSegmentDisplay(uint8_t dataPin, uint8_t clockPin, uint
   : display(dataPin, clockPin, latchPin) {}
 
 void SevenSegmentDisplay::setup() {
-  display.setAll(0); // Clear display
+  clear(); // Clear display
 }
 
 void SevenSegmentDisplay::showDigit(uint8_t digit, uint8_t position) {
@@ -27,7 +27,7 @@ void SevenSegmentDisplay::showDigit(uint8_t digit, uint8_t position) {
 }
 
 void SevenSegmentDisplay::showScore(uint8_t score) {
-  display.setAll(0); // Clear before update
+  clear(); // Clear before update
 
   uint8_t hundreds = score / 100;
   uint8_t tens = (score / 10) % 10;
@@ -36,4 +36,22 @@ void SevenSegmentDisplay::showScore(uint8_t score) {
   if (hundreds > 0) showDigit(hundreds, 0);
   if (hundreds > 0 || tens > 0) showDigit(tens, 1);
   showDigit(ones, 2);
+}
+
+void SevenSegmentDisplay::updateScore(uint8_t score, bool withAnimation) {
+  if (withAnimation == true) {
+    // Flash score digits before stabilizing
+    for (int i = 0; i < 3; i++) {
+      showScore(score);
+      delay(200);
+      clear();
+      delay(200);
+    }
+  }
+
+  showScore(score); // Final stable display
+}
+
+void SevenSegmentDisplay::clear() {
+  display.setAll(0);
 }

@@ -7,6 +7,9 @@
 const uint8_t transmitterCEPin = 9;
 const uint8_t transmitterCSNPin = 10;
 
+// Piezo sensor
+const uint8_t piezoSensorPin = A0; // Piezo Sensor
+
 // Pairing reset button
 const uint8_t pairingResetPin = A1;
 
@@ -22,9 +25,6 @@ const uint8_t displayDataPin  = 2;  // SDI
 
 // RGB Ring
 const uint8_t ledRingPin = 5;  // LED Ring
-
-// Piezo sensor
-const uint8_t piezoSensorPin = A0; // Piezo Sensor
 
 const uint64_t pairingPipe = 0xF0F0F0F0E1LL;
 

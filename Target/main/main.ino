@@ -1,4 +1,3 @@
-#include <EEPROM.h>
 #include <Color.h>
 #include "TargetConfig.h"
 #include "WirelessManager.h"
@@ -19,83 +18,133 @@ SevenSegmentDisplay scoreDisplay(displayDataPin, displayClockPin, displayLatchPi
 Button pairingResetButton(pairingResetPin);
 
 void setup() {
+  delay(1000);
   Serial.begin(9600);
-  Serial.println("Target starting...");
+  Serial.println(F("🔧 Target booting..."));
+
+  randomSeed(analogRead(0));  // ✅ Better token randomness
 
   pairingResetButton.setup();
   piezo.setup();
   rgbLed.setup();
   rgbRing.setup();
   scoreDisplay.setup();
-
   wireless.setup();
 
-  Serial.println("✅ Radio initialized and chip connected.");
-  Serial.println("Radio listening on pairing pipe.");
+  Serial.println(F("✅ Radio initialized and chip connected."));
+  Serial.println(F("Radio listening on pairing pipe."));
 
-  uint8_t pairingFlag = pairingManager.readFlag();
-  uint8_t assignedID = pairingManager.readId();
+  pairingManager.pair();  // Stateless pairing
 
-  if (pairingFlag == 1 && assignedID != 0xFF) {
-    Serial.print("✅ Found stored ID: ");
-    Serial.println(assignedID);
-    if (pairingManager.verifyPairing(assignedID)) {
-      Serial.println("✅ Verified with hub.");
-    } else {
-      Serial.println("⚠️ Hub did not recognize ID. Re-pairing...");
-      pairingManager.pair();
-    }
-  } else {
-    Serial.println("🔍 No valid pairing found. Attempting to pair...");
-    pairingManager.pair();
+  // 🧠 Show pairing status on display
+  uint8_t id = pairingManager.getAssignedID();
+  if (id != 0xFF) {
+    scoreDisplay.showScore(id);
+    delay(1000);
+    scoreDisplay.clear();
   }
 
   Serial.println("Setup complete.");
 }
 
 void loop() {
+  static unsigned long lastHitTime = 0;
+  static unsigned long lastHeartbeat = millis();
+  static bool awaitingAck = false;
+  static bool heartbeatLost = false;
+
   if (pairingResetButton.wasPressed()) {
-    pairingManager.clear();
-    Serial.println("🔄 EEPROM reset. Re-pairing...");
+    Serial.println(F("🔄 Manual re-pair triggered..."));
+    rgbLed.blink("Red");
+    delay(500);
+    pairingManager.pair();
+    awaitingAck = false;
+    lastHeartbeat = millis();
+    heartbeatLost = false;
 
-    // Blink green LED 3 times
-    for (int i = 0; i < 3; i++) {
-      digitalWrite(greenLEDPin, HIGH);
-      delay(200);
-      digitalWrite(greenLEDPin, LOW);
-      delay(200);
+    uint8_t id = pairingManager.getAssignedID();
+    if (id != 0xFF) {
+      scoreDisplay.showScore(id);
+      delay(1000);
+      scoreDisplay.clear();
     }
-
-    delay(500); // Debounce
-
-    pairingManager.pair(); // Re-pair immediately
   }
 
-  // ✅ Listen for blink command from hub
   if (wireless.available()) {
+    // Serial.println("📥 Target received a packet.");
+
     byte packet[32];
     wireless.read(packet, sizeof(packet));
 
-    if (packet[0] == 0x05) { // Blink command
-      Serial.println("🔦 Blink command received.");
-      rgbLed.blink("Green");
+    if (packet[0] == 0x04) { // 💓 Heartbeat ping
+      lastHeartbeat = millis();
+      heartbeatLost = false;
+      Serial.println(F("💓 Heartbeat received from hub."));
+    }
+
+    if (packet[0] == 0x05) { // 🔦 Blink command
+      Serial.println(F("🔦 Blink command received."));
+      uint8_t assignedID = pairingManager.getAssignedID();
+      scoreDisplay.showScore(assignedID);
+      rgbLed.blink("Blue");
+      rgbRing.chase("Blue", 30);
+      delay(1000);
+      scoreDisplay.clear();
+    }
+
+    if (packet[0] == 0x06) { // 🎯 Score update
+      uint8_t newScore = packet[1];
+      Serial.print(F("🎯 New score received: "));
+      Serial.println(newScore);
+      scoreDisplay.updateScore(newScore);
     }
   }
 
-  if (pairingManager.isPaired()) {
+  uint8_t targetId = pairingManager.getAssignedID();
+  if (targetId != 0xFF) {
     if (piezo.isHit()) {
-      // ✅ Trigger feedback
-      Serial.println("✅ Target got hit.");
+      Serial.println(F("✅ Target got hit."));
       rgbRing.chase("Green", 30);
-      // To-Do: Emit Sound                                      <-------------
-      uint8_t targetId = pairingManager.readId();
-      uint8_t score;
-      if (wireless.sendHitPacket(targetId, score)) {
-        Serial.print("✅ Score: ");
-        Serial.println(score);
-        scoreDisplay.showScore(score);
+
+      if (wireless.sendHitPacket(targetId)) {
+        Serial.println(F("📡 Hit packet sent to hub."));
+        lastHitTime = millis();
+        awaitingAck = false;
+      } else {
+        Serial.println(F("⚠️ No response from hub. Will retry pairing."));
+        awaitingAck = true;
+        lastHitTime = millis();
       }
     }
-    // Add any runtime logic here (e.g., hit detection, LED updates)
+
+    if (awaitingAck && millis() - lastHitTime > 5000) {
+      Serial.println(F("🔄 Signal lost after hit. Re-pairing..."));
+      pairingManager.pair();
+      awaitingAck = false;
+      lastHeartbeat = millis();
+      heartbeatLost = false;
+
+      uint8_t id = pairingManager.getAssignedID();
+      if (id != 0xFF) {
+        scoreDisplay.showScore(id);
+        delay(1000);
+        scoreDisplay.clear();
+      }
+    }
+
+    if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {
+      Serial.println(F("💔 No heartbeat. Re-pairing..."));
+      heartbeatLost = true;
+      rgbLed.blink("Red");
+      pairingManager.pair();
+      lastHeartbeat = millis();
+
+      uint8_t id = pairingManager.getAssignedID();
+      if (id != 0xFF) {
+        scoreDisplay.showScore(id);
+        delay(1000);
+        scoreDisplay.clear();
+      }
+    }
   }
 }

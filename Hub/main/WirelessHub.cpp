@@ -17,10 +17,15 @@ void WirelessHub::initialize() {
 
   Serial.println("✅ Hub radio initialized.");
 
+  radio.setAutoAck(true);         // ✅ Enable auto-ack
+  radio.enableAckPayload();       // ✅ Optional: allow ACK payloads
+  radio.setRetries(5, 15);        // ✅ Retry settings
+
   radio.setPALevel(RF24_PA_LOW);
   radio.setDataRate(RF24_1MBPS);
   radio.setChannel(100);
-  radio.openReadingPipe(1, pairingPipe);
+
+  radio.openReadingPipe(0, pairingPipe);
   radio.startListening();
 
   Serial.println("📡 Hub listening on pairing pipe.");
@@ -35,17 +40,21 @@ void WirelessHub::read(byte* buffer, uint8_t length) {
 }
 
 void WirelessHub::sendPairingResponse(uint8_t assignedID) {
+  byte response[2] = {0x01, assignedID};
+
+  Serial.println("📡 Hub sending pairing response on pairing pipe...");
   radio.stopListening();
-  PairingResponse response = { assignedID };
   radio.openWritingPipe(pairingPipe);
+
   bool success = radio.write(&response, sizeof(response));
+  delay(100);  // ✅ Give target time to switch pipes
   radio.startListening();
 
   if (success) {
-    Serial.print("✅ Sent pairing response with ID: ");
+    Serial.print(F("✅ Sent pairing response with ID: "));
     Serial.println(assignedID);
   } else {
-    Serial.println("❌ Failed to send pairing response.");
+    Serial.println(F("❌ Failed to send pairing response."));
   }
 }
 
@@ -67,6 +76,8 @@ void WirelessHub::sendVerificationAck(uint8_t id) {
 void WirelessHub::sendToTargetPipe(uint8_t id, const uint8_t* pipe, const byte* data, uint8_t length) {
   radio.stopListening();
   radio.openWritingPipe(pipe);
+  delay(5);  // ✅ Give target time to listen
+
   bool success = radio.write(data, length);
   radio.startListening();
 

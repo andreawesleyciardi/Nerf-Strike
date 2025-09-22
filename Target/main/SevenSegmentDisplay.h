@@ -9,6 +9,8 @@ class SevenSegmentDisplay {
     SevenSegmentDisplay(uint8_t dataPin, uint8_t clockPin, uint8_t latchPin);
     void setup();
     void showScore(uint8_t score);
+    void updateScore(uint8_t score, bool withAnimation = true);
+    void clear();
 
   private:
     ShiftRegister74HC595<3> display;
