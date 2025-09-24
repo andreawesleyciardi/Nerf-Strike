@@ -6,16 +6,25 @@
 #include <RGBLed.h>
 #include "RGBRing.h"
 #include "SevenSegmentDisplay.h"
+#include "Buzzer.h"
 #include <Button.h>
 
 // Components
 WirelessManager wireless;
 PairingManager pairingManager(wireless);
-RGBLed rgbLed(redLEDPin, greenLEDPin, blueLEDPin);
+// Leds
+RGBLed statusRgbLed(statusRedLedPin, statusGreenLedPin, statusBlueLedPin);
+RGBLed batteryRgbLed(batteryRedLedPin, batteryGreenLedPin, batteryBlueLedPin);
 RGBRing rgbRing(ledRingPin, 24);
+// Sensor
 Piezo piezo(piezoSensorPin);
+// Hardware
 SevenSegmentDisplay scoreDisplay(displayDataPin, displayClockPin, displayLatchPin);
-Button pairingResetButton(pairingResetPin);
+// Buttons
+Button pairingResetButton(pairingResetButtonPin);
+Button batteryButton(batteryButtonPin);
+// Buzzer
+Buzzer buzzer(buzzerPin);
 
 void setup() {
   delay(1000);
@@ -25,9 +34,12 @@ void setup() {
   randomSeed(analogRead(0));  // ✅ Better token randomness
 
   pairingResetButton.setup();
+  batteryButton.setup();
   piezo.setup();
-  rgbLed.setup();
+  statusRgbLed.setup();
+  batteryRgbLed.setup();
   rgbRing.setup();
+  buzzer.setup();
   scoreDisplay.setup();
   wireless.setup();
 
@@ -53,11 +65,13 @@ void loop() {
   static bool awaitingAck = false;
   static bool heartbeatLost = false;
 
+  // buzzer.beep(200);  // Simple 200ms beep
+
   // 🛠 Manual token reset if button held > 3s
   if (pairingResetButton.wasLongPressed(feedback)) {
     Serial.println(F("🧹 Token reset triggered..."));
     pairingManager.resetToken();
-    rgbLed.blink("Green", 3);
+    statusRgbLed.blink("Green", 3);
     delay(500);
     pairingManager.pair();
     awaitingAck = false;
@@ -89,7 +103,7 @@ void loop() {
       Serial.println(F("🔦 Blink command received."));
       uint8_t assignedID = pairingManager.getAssignedID();
       scoreDisplay.showScore(assignedID);
-      rgbLed.blink("Blue");
+      statusRgbLed.blink("Blue");
       rgbRing.chase("Blue", 30);
       delay(1000);
       scoreDisplay.clear();
@@ -139,7 +153,7 @@ void loop() {
     if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {
       Serial.println(F("💔 No heartbeat. Re-pairing..."));
       heartbeatLost = true;
-      rgbLed.blink("Red");
+      statusRgbLed.blink("Red");
       pairingManager.pair();
       lastHeartbeat = millis();
 
@@ -154,5 +168,5 @@ void loop() {
 }
 
 void feedback() {
-  rgbLed.blink("Red");
+  statusRgbLed.blink("Red");
 }
