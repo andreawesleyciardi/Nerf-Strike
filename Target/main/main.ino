@@ -1,13 +1,15 @@
 #include <Color.h>
+#include <RGBLed.h>
+#include <Button.h>
+#include <Battery.h>
+
 #include "TargetConfig.h"
 #include "WirelessManager.h"
 #include "PairingManager.h"
-#include "Piezo.h"
-#include <RGBLed.h>
+#include "Sensor.h"
 #include "RGBRing.h"
 #include "SevenSegmentDisplay.h"
 #include "Buzzer.h"
-#include <Button.h>
 
 // Components
 WirelessManager wireless;
@@ -17,7 +19,7 @@ RGBLed statusRgbLed(statusRedLedPin, statusGreenLedPin, statusBlueLedPin);
 RGBLed batteryRgbLed(batteryRedLedPin, batteryGreenLedPin, batteryBlueLedPin);
 RGBRing rgbRing(ledRingPin, 24);
 // Sensor
-Piezo piezo(piezoSensorPin);
+Sensor sensor(sensorComponentPin);
 // Hardware
 SevenSegmentDisplay scoreDisplay(displayDataPin, displayClockPin, displayLatchPin);
 // Buttons
@@ -25,6 +27,8 @@ Button pairingResetButton(pairingResetButtonPin);
 Button batteryButton(batteryButtonPin);
 // Buzzer
 Buzzer buzzer(buzzerPin);
+// Battery
+Battery battery(true);
 
 void setup() {
   delay(1000);
@@ -33,9 +37,10 @@ void setup() {
 
   randomSeed(analogRead(0));  // ✅ Better token randomness
 
+  battery.setup();
   pairingResetButton.setup();
   batteryButton.setup();
-  piezo.setup();
+  sensor.setup();
   statusRgbLed.setup();
   batteryRgbLed.setup();
   rgbRing.setup();
@@ -56,7 +61,7 @@ void setup() {
     scoreDisplay.clear();
   }
 
-  Serial.println("Setup complete.");
+  Serial.println(F("Setup complete."));
 }
 
 void loop() {
@@ -65,7 +70,11 @@ void loop() {
   static bool awaitingAck = false;
   static bool heartbeatLost = false;
 
-  // buzzer.beep(200);  // Simple 200ms beep
+  // 🔋 Battery
+  if (batteryButton.wasPressed()) {
+    battery.check(batteryVerificationFeedback);      // Manual check via button
+  }
+  battery.autoCheck(batteryVerificationFeedback);  // Automatic check every 5 minutes or 2.5 minutes if battery level is low
 
   // 🛠 Manual token reset if button held > 3s
   if (pairingResetButton.wasLongPressed(feedback)) {
@@ -120,9 +129,10 @@ void loop() {
   // 🎯 Hit detection
   uint8_t targetId = pairingManager.getAssignedID();
   if (targetId != 0xFF) {
-    if (piezo.isHit()) {
+    if (sensor.isHit()) {
       Serial.println(F("✅ Target got hit."));
-      rgbRing.chase("Green", 30);
+      rgbRing.blink("Green");
+      buzzer.beep(10);  // Simple 200ms beep
 
       if (wireless.sendHitPacket(targetId)) {
         Serial.println(F("📡 Hit packet sent to hub."));
@@ -169,4 +179,25 @@ void loop() {
 
 void feedback() {
   statusRgbLed.blink("Red");
+}
+
+void batteryVerificationFeedback(long batteryValue, bool wasAutomaticCheck) {
+  if (batteryValue < 30) {
+    if (batteryValue < 10) {
+      batteryRgbLed.blink("Red", 100, 6);
+    }
+    else {
+      batteryRgbLed.blink("Red");
+    }
+  }
+  else if (batteryValue >= 30 && batteryValue < 60) {
+    if (!wasAutomaticCheck) {
+      batteryRgbLed.blink("Orange");
+    }
+  }
+  else {
+    if (!wasAutomaticCheck) {
+      batteryRgbLed.blink("Green");
+    }
+  }
 }

@@ -54,7 +54,7 @@ void RGBRing::pulse(String colorName, uint8_t steps, uint16_t delayMs) {
   }
 }
 
-void RGBRing::chase(String colorName, uint8_t speed) {
+void RGBRing::chase(String colorName, uint8_t speed, bool holdLast) {
   Color c = getColorByName(colorName);
   for (uint16_t i = 0; i < pixelCount; i++) {
     ring.clear();
@@ -62,4 +62,10 @@ void RGBRing::chase(String colorName, uint8_t speed) {
     ring.show();
     delay(speed);
   }
+
+  if (!holdLast) {
+    ring.clear();
+    ring.show();
+  }
 }
+

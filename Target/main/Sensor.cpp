@@ -1,17 +1,17 @@
-#include "Piezo.h"
+#include "Sensor.h"
 
-Piezo::Piezo(uint8_t pin, uint16_t threshold, uint16_t debounceMs) {
+Sensor::Sensor(uint8_t pin, uint16_t threshold, uint16_t debounceMs) {
   sensorPin = pin;
   hitThreshold = threshold;
   debounceTime = debounceMs;
   lastHitTime = 0;
 }
 
-void Piezo::setup() {
+void Sensor::setup() {
   pinMode(sensorPin, INPUT);
 }
 
-bool Piezo::isHit() {
+bool Sensor::isHit() {
   int value = analogRead(sensorPin);
   unsigned long currentTime = millis();
 

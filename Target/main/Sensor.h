@@ -1,11 +1,11 @@
-#ifndef PIEZO_H
-#define PIEZO_H
+#ifndef SENSOR_H
+#define SENSOR_H
 
 #include <Arduino.h>
 
-class Piezo {
+class Sensor {
   public:
-    Piezo(uint8_t pin, uint16_t threshold = 100, uint16_t debounceMs = 200);
+    Sensor(uint8_t pin, uint16_t threshold = 100, uint16_t debounceMs = 200);
     void setup();
     bool isHit();
 

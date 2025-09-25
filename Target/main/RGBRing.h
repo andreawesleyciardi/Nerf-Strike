@@ -11,9 +11,9 @@ class RGBRing {
     void setup();
     void off();
     void fill(String colorName);
-    void blink(String colorName, uint8_t times, uint16_t delayMs = 200);
+    void blink(String colorName, uint8_t times = 1, uint16_t delayMs = 200);
     void pulse(String colorName, uint8_t steps = 20, uint16_t delayMs = 20);
-    void chase(String colorName, uint8_t speed = 50);
+    void chase(String colorName, uint8_t speed = 50, bool holdLast = false);
 
   private:
     Adafruit_NeoPixel ring;
