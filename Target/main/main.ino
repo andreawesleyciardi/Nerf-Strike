@@ -2,6 +2,7 @@
 #include <RGBLed.h>
 #include <Button.h>
 #include <Battery.h>
+#include <OPCodes.h>
 
 #include "TargetConfig.h"
 #include "WirelessManager.h"
@@ -45,7 +46,7 @@ void setup() {
   batteryRgbLed.setup();
   rgbRing.setup();
   buzzer.setup();
-  scoreDisplay.setup();
+  scoreDisplay.setup(3);
   wireless.setup();
 
   Serial.println(F("✅ Radio initialized and chip connected."));
@@ -76,6 +77,24 @@ void loop() {
   }
   battery.autoCheck(batteryVerificationFeedback);  // Automatic check every 5 minutes or 2.5 minutes if battery level is low
 
+  if (pairingResetButton.wasPressed()) {
+    Serial.println(F("🔍 Verifying connection with hub..."));
+    bool verified = pairingManager.verify();
+    if (verified) {
+      Serial.println(F("✅ Connection verified."));
+      statusRgbLed.blink("Green");
+    } else {
+      Serial.println(F("❌ Verification failed. Re-pairing..."));
+      statusRgbLed.blink("Red");
+      pairingManager.pair();
+    }
+    uint8_t id = pairingManager.getAssignedID();
+    if (id != 0xFF) {
+      scoreDisplay.showScore(id);
+      delay(2000);
+      scoreDisplay.clear();
+    }
+  }
   // 🛠 Manual token reset if button held > 3s
   if (pairingResetButton.wasLongPressed(feedback)) {
     Serial.println(F("🧹 Token reset triggered..."));
@@ -102,13 +121,13 @@ void loop() {
     byte packet[32];
     wireless.read(packet, sizeof(packet));
 
-    if (packet[0] == 0x04) { // 💓 Heartbeat
+    if (packet[0] == OPCODE_HEARTBEAT) { // 💓 Heartbeat
       lastHeartbeat = millis();
       heartbeatLost = false;
       Serial.println(F("💓 Heartbeat received from hub."));
     }
 
-    if (packet[0] == 0x05) { // 🔦 Blink command
+    if (packet[0] == OPCODE_BLINK_COMMAND) { // 🔦 Blink command
       Serial.println(F("🔦 Blink command received."));
       uint8_t assignedID = pairingManager.getAssignedID();
       scoreDisplay.showScore(assignedID);

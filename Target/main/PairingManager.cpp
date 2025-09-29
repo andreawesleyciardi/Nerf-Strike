@@ -45,6 +45,16 @@ uint8_t PairingManager::getAssignedID() {
   return assignedID;
 }
 
+bool PairingManager::verify() {
+  if (assignedID == 0xFF) {
+    Serial.println(F("⚠️ Cannot verify — no assigned ID."));
+    return false;
+  }
+
+  wireless.sendVerificationRequest(assignedID);
+  return wireless.waitForVerificationAck(assignedID);
+}
+
 uint32_t PairingManager::loadTokenFromEEPROM() {
   uint32_t storedToken;
   EEPROM.get(EEPROM_TOKEN_ADDR, storedToken);

@@ -10,6 +10,7 @@ public:
   void pair();
   uint8_t getAssignedID();
   void resetToken();
+  bool verify();
 
 private:
   WirelessManager& wireless;

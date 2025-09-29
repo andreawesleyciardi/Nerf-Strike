@@ -24,9 +24,9 @@ const uint8_t transmitterCSNPin = 10;
 const uint8_t batteryButtonPin = A0;
 
 // 7-Segment Display via Shift Register
-const uint8_t displayDataPin  = A1;  // SDI
+const uint8_t displayLatchPin = A1;  // LOAD
 const uint8_t displayClockPin = A2;  // SCLK
-const uint8_t displayLatchPin = A3;  // LOAD
+const uint8_t displayDataPin  = A3;  // SDI
 
 // Buzzer
 const uint8_t buzzerPin = A4;

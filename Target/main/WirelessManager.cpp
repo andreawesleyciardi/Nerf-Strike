@@ -86,7 +86,7 @@ bool WirelessManager::receivePairingResponse(uint8_t &assignedID) {
     if (radio.available()) {
       byte response[2];
       radio.read(&response, sizeof(response));
-      if (response[0] == 0x01) {
+      if (response[0] == OPCODE_PAIRING_REQUEST) {
         assignedID = response[1];
         Serial.print(F("✅ Received pairing response. Assigned ID: "));
         Serial.println(assignedID);
@@ -104,7 +104,7 @@ void WirelessManager::sendVerificationRequest(uint8_t id) {
   Serial.println(id);
 
   radio.stopListening();
-  byte packet[2] = {0x02, id};
+  byte packet[2] = {OPCODE_VERIFICATION_REQUEST, id};
   radio.openWritingPipe(pairingPipe);
   bool success = radio.write(packet, sizeof(packet));
   radio.startListening();
@@ -123,7 +123,7 @@ bool WirelessManager::waitForVerificationAck(uint8_t id) {
     if (radio.available()) {
       byte response[2];
       radio.read(&response, sizeof(response));
-      if (response[0] == 0x03 && response[1] == id) {
+      if (response[0] == OPCODE_VERIFICATION_ACK && response[1] == id) {
         Serial.println(F("✅ Verification acknowledged by hub."));
         return true;
       }
