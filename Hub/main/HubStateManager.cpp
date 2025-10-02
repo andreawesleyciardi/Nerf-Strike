@@ -6,11 +6,11 @@ void HubStateManager::begin() {
   menuIndex = 0;
 }
 
-void HubStateManager::setGameMode(GameMode mode) {
+void HubStateManager::setGameMode(HubGameState mode) {
   currentMode = mode;
 }
 
-GameMode HubStateManager::getGameMode() {
+HubGameState HubStateManager::getGameMode() {
   return currentMode;
 }
 

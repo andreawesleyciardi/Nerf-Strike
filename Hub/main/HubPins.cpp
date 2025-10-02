@@ -2,39 +2,47 @@
 #include "HubConfig.h"
 #include <Arduino.h>
 
+// 📟 7-Segment Display Instance
+SevenSegmentDisplay timeDisplay(displayDataPin, displayClockPin, displayLatchPin);
+
 // 🟢 Button Instances
-Button buttonCancel(buttonCancelPin, 50, 1000);
-Button buttonSave(buttonSavePin, 50, 1000);
+Button leftButton(leftButtonPin, 50, 1000);
+Button rightButton(rightButtonPin, 50, 1000);
 Button batteryButton(batteryButtonPin, 50, 1000);
-Button pairingButton(pairingResetButtonPin, 50, 1000);
+Button statusButton(pairingResetButtonPin, 50, 1000);
 
 // 🌈 RGB LED Instances
-RGBLed pairingLed(pairingLedRedPin, pairingLedGreenPin, pairingLedBluePin);
-RGBLed batteryLed(batteryLedRedPin, batteryLedGreenPin, batteryLedBluePin);
+RGBLed statusRgbLed(statusRgbLedRedPin, statusRgbLedGreenPin, statusRgbLedBluePin);
+RGBLed batteryRgbLed(batteryRgbLedRedPin, batteryRgbLedGreenPin, batteryRgbLedBluePin);
+
+// 🔋 Battery Instance
+Battery battery(true);
+
+// 🎛️ Rotary Encoder Instance
+RotaryEncoder encoder(encoderCLKPin, encoderDTPin, encoderSWPin);
 
 void initializeHubPins() {
+  // Battery
+  battery.setup();
+
   // Buttons
-  buttonCancel.setup();
-  buttonSave.setup();
+  leftButton.setup();
+  rightButton.setup();
+  statusButton.setup();
   batteryButton.setup();
-  pairingButton.setup();
 
   // RGB LEDs
-  pairingLed.setup(false);
-  batteryLed.setup(false);
+  statusRgbLed.setup(false);
+  batteryRgbLed.setup(false);
 
   // Rotary Encoder
-  pinMode(encoderCLKPin, INPUT);
-  pinMode(encoderDTPin, INPUT);
-  pinMode(encoderSWPin, INPUT_PULLUP);
+  encoder.setup();
 
   // LED Strip
   pinMode(ledStripPin, OUTPUT);
 
   // 7-Segment Display
-  pinMode(segmentSDIPin, OUTPUT);
-  pinMode(segmentSCLKPin, OUTPUT);
-  pinMode(segmentLOADPin, OUTPUT);
+  timeDisplay.setup(4);
 
   // Serial Devices
   Serial1.begin(9600); // ESP8266

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-enum GameMode {
+enum HubGameState {
   MODE_IDLE,
   MODE_PAIRING,
   MODE_RUNNING,
@@ -14,8 +14,8 @@ enum GameMode {
 class HubStateManager {
 public:
   void begin();
-  void setGameMode(GameMode mode);
-  GameMode getGameMode();
+  void setGameMode(HubGameState mode);
+  HubGameState getGameMode();
 
   void setSelectedTarget(uint8_t id);
   uint8_t getSelectedTarget();
@@ -25,7 +25,7 @@ public:
   uint8_t getCurrentMenuIndex();
 
 private:
-  GameMode currentMode;
+  HubGameState currentMode;
   uint8_t selectedTargetID;
   uint8_t menuIndex;
 };

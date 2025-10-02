@@ -5,19 +5,20 @@
 
 #define MAX_TARGETS 10
 
-// 📡 Wireless Communication
+// 📡 Wireless Communication - NRF24L01
 const uint8_t transmitterCEPin = 9;
 const uint8_t transmitterCSNPin = 10;
 const uint64_t pairingPipe = 0xF0F0F0F0E1LL;
 
 // 📟 7-Segment Display (Shift Register Interface)
-const uint8_t segmentSDIPin   = 26;
-const uint8_t segmentSCLKPin  = 27;
-const uint8_t segmentLOADPin  = 28;
+const uint8_t displayDataPin   = 26;
+const uint8_t displayClockPin  = 27;
+const uint8_t displayLatchPin  = 28;
 
 // 🖥️ 20x4 LCD (I2C)
 const uint8_t lcdSDAPin = SDA;   // Communication pin SDA (pin 20)
 const uint8_t lcdSCLPin = SCL;   // Communication pin SCL (pin 21)
+const uint8_t lcdI2CAddress = 0x3F;
 
 // 🎛️ Rotary Encoder
 const uint8_t encoderCLKPin = 2;
@@ -25,22 +26,22 @@ const uint8_t encoderDTPin  = 3;
 const uint8_t encoderSWPin  = 4;
 
 // 🔘 Navigation Buttons
-const uint8_t buttonCancelPin = 7;  // Left of encoder
-const uint8_t buttonSavePin   = 8;  // Right of encoder
+const uint8_t leftButtonPin = 7;  // Left of encoder
+const uint8_t rightButtonPin   = 8;  // Right of encoder
 
 // 🔋 Functional Buttons
 const uint8_t batteryButtonPin = 6;
 const uint8_t pairingResetButtonPin = 5;
 
-// 🌈 RGB LED – Pairing Status
-const uint8_t pairingLedRedPin   = 25;
-const uint8_t pairingLedGreenPin = 21;
-const uint8_t pairingLedBluePin  = 23;
+// 🌈 RGB LED – Status
+const uint8_t statusRgbLedRedPin   = 25;
+const uint8_t statusRgbLedGreenPin = 21;
+const uint8_t statusRgbLedBluePin  = 23;
 
-// 🌈 RGB LED – Battery Status
-const uint8_t batteryLedRedPin   = 24;
-const uint8_t batteryLedGreenPin = 20;
-const uint8_t batteryLedBluePin  = 22;
+// 🌈 RGB LED – Battery
+const uint8_t batteryRgbLedRedPin   = 24;
+const uint8_t batteryRgbLedGreenPin = 20;
+const uint8_t batteryRgbLedBluePin  = 22;
 
 // 🌈 LED Strip
 const uint8_t ledStripPin = 45;

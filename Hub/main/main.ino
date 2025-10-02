@@ -1,3 +1,4 @@
+#include <DisplayFeedback.h>
 #include "HubConfig.h"
 #include "HubPins.h"
 #include "HubStateManager.h"
@@ -5,12 +6,23 @@
 #include "PairingRegistry.h"
 #include "CommandConsole.h"
 #include "OPCodes.h"
+#include "DisplayManager.h"
+#include "ScreenManager.h"
+#include "ScreenRenderer.h"
+#include "ScreenController.h"
+#include "GameModeRegistry.h"
+#include "ScreenTypes.h"
 
 // 🧠 Core Managers
 HubStateManager hubState;
 WirelessHub wireless;
 PairingRegistry registry;
-CommandConsole console(registry, wireless);
+GameModeRegistry gameModeRegistry;
+DisplayManager display(lcdI2CAddress, 20, 4);
+ScreenManager screenManager;
+ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
+ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
+CommandConsole console(registry, wireless, encoder, leftButton, rightButton);
 
 // ⏱️ Timing
 unsigned long lastHeartbeat = 0;
@@ -21,36 +33,51 @@ void setup() {
   initializeHubPins();
   wireless.initialize();
 
-  pairingLed.on("Blue");  // Startup indicator
+  showStatus(statusRgbLed, STATUS_PAIRING);  // Startup indicator
   delay(500);
-  pairingLed.off();
+  statusRgbLed.off();
+
+  display.setup();
+  screenManager.setup();
+  // registry.setup();
+  // hubState.setup();
+  // console.setup();
 }
 
 void loop() {
+  // encoder.update();
+  // leftButton.update();
+  // rightButton.update();
+
+  // 🖥️ 20x4 LCD (I2C)
+  screenController.update();  // 🧭 Screen-aware input routing
+  screenRenderer.render();    // 🎨 Draw current screen
+
   // 🧵 Serial Command Console
   console.processSerial();
 
-  // 🔘 Long press on pairing button triggers blink
-  if (pairingButton.isLongPressed()) {
+  // 🔘 Long press on status button triggers blink
+  if (statusButton.isLongPressed()) {
     triggerBlinkOnTargets();
-    pairingLed.blink("Green", 100, 3);
+    showStatus(statusRgbLed, STATUS_OK, 3);
   }
 
   // 🔋 Battery button triggers battery LED pulse
   if (batteryButton.wasPressed()) {
     Serial.println(F("🔋 Battery check triggered"));
-    batteryLed.pulse("Yellow", 10, 20);
+    showStatus(batteryRgbLed, STATUS_OK);
+    batteryRgbLed.pulse("Yellow", 10, 20);
   }
 
-  // 🧭 Navigation buttons
-  if (buttonCancel.wasPressed()) {
+  // 🧭 Navigation buttons (global feedback only)
+  if (leftButton.wasPressed()) {
     Serial.println(F("↩️ Cancel pressed"));
-    pairingLed.blink("Red", 100, 2);
+    showStatus(statusRgbLed, STATUS_ERROR, 2);
   }
 
-  if (buttonSave.wasLongPressed()) {
+  if (rightButton.wasLongPressed()) {
     Serial.println(F("✅ Save long-pressed"));
-    pairingLed.pulse("Purple", 10, 20);
+    statusRgbLed.pulse("Purple", 10, 20);
   }
 
   // 💓 Heartbeat to targets
@@ -76,6 +103,7 @@ void loop() {
       wireless.sendVerificationAck(id);
     } else {
       Serial.println(F("❌ No pipe found for ID."));
+      showStatus(statusRgbLed, STATUS_ERROR);
     }
   }
 
@@ -96,11 +124,11 @@ void loop() {
       Serial.println(pipeName);
 
       wireless.sendPairingResponse(assignedID);
-      pairingLed.blink("Cyan", 100, 2);
+      showStatus(statusRgbLed, STATUS_PAIRING, 2);
       delay(100);
     } else {
       Serial.println(F("❌ Failed to assign ID."));
-      pairingLed.blink("Red", 100, 2);
+      showStatus(statusRgbLed, STATUS_ERROR, 2);
     }
   }
 }

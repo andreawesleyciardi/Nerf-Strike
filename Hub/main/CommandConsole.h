@@ -4,17 +4,27 @@
 #include <Arduino.h>
 #include "PairingRegistry.h"
 #include "WirelessHub.h"
+#include <RotaryEncoder.h>
+#include <Button.h>
 
 class CommandConsole {
 public:
-  CommandConsole(PairingRegistry& registry, WirelessHub& wireless);
+  CommandConsole(PairingRegistry& registry, WirelessHub& wireless, RotaryEncoder& encoder, Button& leftButton, Button& rightButton);
   void processSerial();
+  void processInput();  // 🧠 Unified input handler
 
 private:
   PairingRegistry& registry;
   WirelessHub& wireless;
+  RotaryEncoder& encoder;
+  Button& leftButton;
+  Button& rightButton;
+
   bool verbose = true;
   unsigned long startTime;
+
+  int menuIndex = 0;
+  const int maxMenuItems = 3;
 
   // ✅ Active commands
   void dumpRegistry();             // 'list'
@@ -36,13 +46,11 @@ private:
   void showUptime();
   void showHelp();
 
-  // ❌ Legacy or unused logic (commented out)
-  /*
-  void simulateEvent(String eventStr);
-  void resetEEPROM();
-  void loadRegistryFromEEPROM();
-  void saveRegistryToEEPROM();
-  */
+  // ✅ Menu interaction
+  void showMenu();
+  void selectMenuItem(int index);
+  void cancelMenu();
+  void confirmMenu();
 };
 
 #endif

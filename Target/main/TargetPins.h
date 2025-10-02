@@ -10,15 +10,25 @@
 #include "SevenSegmentDisplay.h"
 #include "Buzzer.h"
 
-// Shared instances
+// 📟 7-Segment Display Instance
+extern SevenSegmentDisplay scoreDisplay;
+
+// 🌈 RGB LED Instances
 extern RGBLed statusRgbLed;
 extern RGBLed batteryRgbLed;
 extern RGBRing rgbRing;
+
+// Sensor Instance
 extern Sensor sensor;
-extern SevenSegmentDisplay scoreDisplay;
-extern Button pairingResetButton;
+
+// 🟢 Button Instances
+extern Button statusButton;
 extern Button batteryButton;
+
+// 🔊 Buzzer Instance
 extern Buzzer buzzer;
+
+// 🔋 Battery Instance
 extern Battery battery;
 
 // Setup function

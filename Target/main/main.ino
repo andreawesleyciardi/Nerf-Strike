@@ -1,5 +1,6 @@
 #include <Color.h>
 #include <OPCodes.h>
+#include <DisplayFeedback.h>
 #include "TargetConfig.h"
 #include "TargetPins.h"
 #include "WirelessManager.h"
@@ -40,30 +41,29 @@ void loop() {
     battery.check(batteryVerificationFeedback);
   }
 
-  if (pairingResetButton.wasPressed()) {
+  if (statusButton.wasPressed()) {
     Serial.println(F("🔍 Verifying connection with hub..."));
     bool verified = pairingManager.verify();
     if (verified) {
       Serial.println(F("✅ Connection verified."));
-      statusRgbLed.blink("Green");
+      showStatus(statusRgbLed, STATUS_CONNECTED);
     } else {
       Serial.println(F("❌ Verification failed. Re-pairing..."));
-      statusRgbLed.blink("Red");
+      showStatus(statusRgbLed, STATUS_ERROR);
       pairingManager.pair();
     }
     showAssignedIDBriefly(pairingManager.getAssignedID());
   }
 
-  if (pairingResetButton.wasLongPressed(feedback)) {
+  if (statusButton.wasLongPressed(feedback)) {
     Serial.println(F("🧹 Token reset triggered..."));
     pairingManager.resetToken();
-    statusRgbLed.blink("Green", 3);
+    showStatus(statusRgbLed, STATUS_OK, 3);
     delay(500);
     pairingManager.pair();
     awaitingAck = false;
     lastHeartbeat = millis();
     heartbeatLost = false;
-
     showAssignedIDBriefly(pairingManager.getAssignedID());
   }
 
@@ -81,7 +81,7 @@ void loop() {
       Serial.println(F("🔦 Blink command received."));
       uint8_t assignedID = pairingManager.getAssignedID();
       scoreDisplay.showScore(assignedID);
-      statusRgbLed.blink("Blue");
+      showStatus(statusRgbLed, STATUS_PAIRING);
       rgbRing.chase("Blue", 30);
       delay(1000);
       scoreDisplay.clear();
@@ -104,13 +104,12 @@ void loop() {
 
       if (wireless.sendHitPacket(targetId)) {
         Serial.println(F("📡 Hit packet sent to hub."));
-        lastHitTime = millis();
         awaitingAck = false;
       } else {
         Serial.println(F("⚠️ No response from hub. Will retry pairing."));
         awaitingAck = true;
-        lastHitTime = millis();
       }
+      lastHitTime = millis();
     }
 
     if (awaitingAck && millis() - lastHitTime > 5000) {
@@ -126,7 +125,7 @@ void loop() {
     if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {
       Serial.println(F("💔 No heartbeat. Re-pairing..."));
       heartbeatLost = true;
-      statusRgbLed.blink("Red");
+      showStatus(statusRgbLed, STATUS_DISCONNECTED);
       pairingManager.pair();
       lastHeartbeat = millis();
 
@@ -136,19 +135,19 @@ void loop() {
 }
 
 void feedback() {
-  statusRgbLed.blink("Red");
+  showStatus(statusRgbLed, STATUS_ERROR);
 }
 
 void batteryVerificationFeedback(long batteryValue, bool wasAutomaticCheck) {
   if (batteryValue < 30) {
     if (batteryValue < 10) {
-      batteryRgbLed.blink("Red", 100, 6);
+      showStatus(batteryRgbLed, STATUS_CRITICAL_BATTERY);
     } else {
-      batteryRgbLed.blink("Red");
+      showStatus(batteryRgbLed, STATUS_LOW_BATTERY);
     }
   } else if (batteryValue < 60) {
-    if (!wasAutomaticCheck) batteryRgbLed.blink("Orange");
+    if (!wasAutomaticCheck) showStatus(batteryRgbLed, STATUS_LOW_BATTERY);
   } else {
-    if (!wasAutomaticCheck) batteryRgbLed.blink("Green");
+    if (!wasAutomaticCheck) showStatus(batteryRgbLed, STATUS_OK);
   }
 }

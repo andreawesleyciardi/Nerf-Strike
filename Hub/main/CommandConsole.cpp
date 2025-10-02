@@ -1,9 +1,8 @@
 #include "CommandConsole.h"
 #include "HubConfig.h"
-#include <Arduino.h>
 
-CommandConsole::CommandConsole(PairingRegistry& registry, WirelessHub& wireless)
-  : registry(registry), wireless(wireless) {}
+CommandConsole::CommandConsole(PairingRegistry& registry, WirelessHub& wireless, RotaryEncoder& encoder, Button& leftButton, Button& rightButton)
+  : registry(registry), wireless(wireless), encoder(encoder), leftButton(leftButton), rightButton(rightButton) {}
 
 void CommandConsole::processSerial() {
   if (Serial.available()) {
@@ -20,6 +19,58 @@ void CommandConsole::processSerial() {
       Serial.println("❓ Unknown command. Try 'list', 'test', or 'clear'.");
     }
   }
+}
+
+void CommandConsole::processInput() {
+  int dir = encoder.getDirection();
+  if (dir != 0) {
+    menuIndex -= dir;  // Encoder up = decrease index
+    if (menuIndex < 0) menuIndex = 0;
+    if (menuIndex >= maxMenuItems) menuIndex = maxMenuItems - 1;
+    showMenu();
+  }
+
+  if (encoder.wasPressed()) {
+    selectMenuItem(menuIndex);
+  }
+
+  if (leftButton.wasPressed()) {
+    cancelMenu();
+  }
+
+  if (rightButton.wasPressed()) {
+    confirmMenu();
+  }
+}
+
+void CommandConsole::showMenu() {
+  Serial.print(F("📜 Menu item: "));
+  switch (menuIndex) {
+    case 0: Serial.println(F("List Targets")); break;
+    case 1: Serial.println(F("Test Targets")); break;
+    case 2: Serial.println(F("Clear Registry")); break;
+    default: Serial.println(F("Unknown")); break;
+  }
+}
+
+void CommandConsole::selectMenuItem(int index) {
+  Serial.print(F("✅ Selected: "));
+  switch (index) {
+    case 0: Serial.println(F("List Targets")); dumpRegistry(); break;
+    case 1: Serial.println(F("Test Targets")); testTargets(); break;
+    case 2: Serial.println(F("Clear Registry")); clearRegistry(); break;
+    default: Serial.println(F("Unknown")); break;
+  }
+}
+
+void CommandConsole::cancelMenu() {
+  Serial.println(F("↩️ Cancel/back triggered"));
+  // Optional: reset menuIndex or exit submenu
+}
+
+void CommandConsole::confirmMenu() {
+  Serial.println(F("➡️ Confirm/next triggered"));
+  selectMenuItem(menuIndex);
 }
 
 void CommandConsole::dumpRegistry() {
