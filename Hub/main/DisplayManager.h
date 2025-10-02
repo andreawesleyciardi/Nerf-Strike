@@ -11,6 +11,9 @@ public:
   uint8_t getRowCount() const;
 
   // Text rendering
+  void clear();
+  void clearRow(uint8_t row);
+  void showLine(uint8_t row, const String& text);
   void showText(const String& text, bool scroll = false, uint16_t scrollDelay = 300);
   void showMenuItem(const String& label, uint8_t index, uint8_t total);
   void showButtonLabels(const String& leftLabel, const String& rightLabel);
@@ -28,8 +31,6 @@ private:
   LiquidCrystal_I2C lcd;
   uint8_t cols;
   uint8_t rows;
-
-  void clearRow(uint8_t row);
 };
 
 #endif

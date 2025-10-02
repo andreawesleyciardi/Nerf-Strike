@@ -1,10 +1,10 @@
 #include "WirelessManager.h"
+#include <TargetType.h>
+#include <OPCodes.h>
 #include <string.h>
+#include "TargetConfig.h"
 
-#define CE_PIN 9
-#define CSN_PIN 10
-
-WirelessManager::WirelessManager() : radio(CE_PIN, CSN_PIN) {}
+WirelessManager::WirelessManager() : radio(transmitterCEPin, transmitterCSNPin) {}
 
 void WirelessManager::setup() {
   Serial.println(F("🔧 Initializing radio..."));
@@ -21,10 +21,9 @@ void WirelessManager::setup() {
 
   Serial.println(F("✅ Radio initialized and chip connected."));
 
-  radio.setAutoAck(true);         // ✅ Enable auto-ack
-  radio.enableAckPayload();       // ✅ Optional: allow ACK payloads
-  radio.setRetries(5, 15);        // ✅ Retry settings
-
+  radio.setAutoAck(true);
+  radio.enableAckPayload();
+  radio.setRetries(5, 15);
   radio.setPALevel(RF24_PA_LOW);
   radio.setDataRate(RF24_1MBPS);
   radio.setChannel(100);
@@ -34,11 +33,6 @@ void WirelessManager::setup() {
 
   Serial.println(F("📡 Radio listening on pairing pipe."));
 }
-
-struct HitPacket {
-  uint8_t targetId;
-  char type[4]; // "HIT"
-};
 
 bool WirelessManager::sendHitPacket(uint8_t targetId) {
   HitPacket packet = {targetId, "HIT"};
@@ -62,7 +56,7 @@ void WirelessManager::sendPairingRequest(uint32_t token) {
 
   radio.stopListening();
   byte packet[5];
-  packet[0] = 1;
+  packet[0] = OPCODE_PAIRING_REQUEST;
   memcpy(&packet[1], &token, sizeof(token));
 
   radio.openWritingPipe(pairingPipe);
@@ -77,6 +71,11 @@ void WirelessManager::sendPairingRequest(uint32_t token) {
 }
 
 bool WirelessManager::receivePairingResponse(uint8_t &assignedID) {
+  TargetType dummyType;
+  return receivePairingResponse(assignedID, dummyType);
+}
+
+bool WirelessManager::receivePairingResponse(uint8_t &assignedID, TargetType &typeOut) {
   radio.openReadingPipe(1, pairingPipe);
   radio.startListening();
 
@@ -84,12 +83,17 @@ bool WirelessManager::receivePairingResponse(uint8_t &assignedID) {
   unsigned long startTime = millis();
   while (millis() - startTime < 1000) {
     if (radio.available()) {
-      byte response[2];
+      PairingResponse response;
       radio.read(&response, sizeof(response));
-      if (response[0] == OPCODE_PAIRING_REQUEST) {
-        assignedID = response[1];
+
+      if (response.opcode == OPCODE_PAIRING_RESPONSE) {
+        assignedID = response.assignedId;
+        typeOut = response.type;
+
         Serial.print(F("✅ Received pairing response. Assigned ID: "));
-        Serial.println(assignedID);
+        Serial.print(assignedID);
+        Serial.print(F(" | Type: "));
+        Serial.println(targetTypeToString(typeOut));
         return true;
       }
     }
@@ -135,9 +139,9 @@ bool WirelessManager::waitForVerificationAck(uint8_t id) {
 
 void WirelessManager::switchToTargetPipe(uint8_t id) {
   sprintf((char*)targetPipe, "TGT%d", id);
-  radio.stopListening();  // ✅ Stop before switching
+  radio.stopListening();
   radio.openReadingPipe(1, targetPipe);
-  radio.startListening(); // ✅ Start after switching
+  radio.startListening();
 
   Serial.print(F("🔀 Switched to target pipe: "));
   Serial.println((char*)targetPipe);

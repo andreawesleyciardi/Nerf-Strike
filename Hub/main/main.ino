@@ -12,17 +12,20 @@
 #include "ScreenController.h"
 #include "GameModeRegistry.h"
 #include "ScreenTypes.h"
+#include <TargetType.h>
+#include "TargetTypeManager.h"
 
 // 🧠 Core Managers
 HubStateManager hubState;
 WirelessHub wireless;
 PairingRegistry registry;
 GameModeRegistry gameModeRegistry;
+TargetTypeManager targetTypeManager;
 DisplayManager display(lcdI2CAddress, 20, 4);
 ScreenManager screenManager;
 ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
 ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
-CommandConsole console(registry, wireless, encoder, leftButton, rightButton);
+CommandConsole console(registry, wireless, encoder, leftButton, rightButton, targetTypeManager);
 
 // ⏱️ Timing
 unsigned long lastHeartbeat = 0;
@@ -33,60 +36,49 @@ void setup() {
   initializeHubPins();
   wireless.initialize();
 
-  showStatus(statusRgbLed, STATUS_PAIRING);  // Startup indicator
+  showStatus(statusRgbLed, STATUS_PAIRING);
   delay(500);
   statusRgbLed.off();
 
+  targetTypeManager.loadFromEEPROM();
+  Serial.print(F("📦 Allowed target type: "));
+  Serial.println(targetTypeToString(targetTypeManager.getAllowedType()));
+
   display.setup();
   screenManager.setup();
-  // registry.setup();
-  // hubState.setup();
-  // console.setup();
 }
 
 void loop() {
-  // encoder.update();
-  // leftButton.update();
-  // rightButton.update();
-
-  // 🖥️ 20x4 LCD (I2C)
-  screenController.update();  // 🧭 Screen-aware input routing
-  screenRenderer.render();    // 🎨 Draw current screen
-
-  // 🧵 Serial Command Console
+  screenController.update();
+  screenRenderer.render();
   console.processSerial();
 
-  // 🔘 Long press on status button triggers blink
   if (statusButton.isLongPressed()) {
     triggerBlinkOnTargets();
     showStatus(statusRgbLed, STATUS_OK, 3);
   }
 
-  // 🔋 Battery button triggers battery LED pulse
   if (batteryButton.wasPressed()) {
     Serial.println(F("🔋 Battery check triggered"));
     showStatus(batteryRgbLed, STATUS_OK);
     batteryRgbLed.pulse("Yellow", 10, 20);
   }
 
-  // 🧭 Navigation buttons (global feedback only)
   if (leftButton.wasPressed()) {
-    Serial.println(F("↩️ Cancel pressed"));
+    Serial.println(F("Left Button pressed"));
     showStatus(statusRgbLed, STATUS_ERROR, 2);
   }
 
-  if (rightButton.wasLongPressed()) {
-    Serial.println(F("✅ Save long-pressed"));
+  if (rightButton.wasPressed()) {
+    Serial.println(F("Right Button pressed"));
     statusRgbLed.pulse("Purple", 10, 20);
   }
 
-  // 💓 Heartbeat to targets
   if (millis() - lastHeartbeat > 3000) {
     sendHeartbeatToTargets();
     lastHeartbeat = millis();
   }
 
-  // 📡 Incoming wireless packet
   if (!wireless.available()) return;
 
   byte buffer[8];
@@ -110,8 +102,21 @@ void loop() {
   else if (buffer[0] == OPCODE_PAIRING_REQUEST) {
     uint32_t token;
     memcpy(&token, &buffer[1], sizeof(token));
+    TargetType incomingType = static_cast<TargetType>(buffer[5]);
+
     Serial.print(F("🔐 Pairing request received with token: "));
     Serial.println(token);
+    Serial.print(F("📦 Incoming target type: "));
+    Serial.println(targetTypeToString(incomingType));
+
+    if (!targetTypeManager.isCompatible(incomingType)) {
+      Serial.print(F("❌ Target type mismatch. Expected "));
+      Serial.print(targetTypeToString(targetTypeManager.getAllowedType()));
+      Serial.print(F(", but got "));
+      Serial.println(targetTypeToString(incomingType));
+      showStatus(statusRgbLed, STATUS_ERROR, 2);
+      return;
+    }
 
     uint8_t assignedID = registry.assignID(token);
     if (assignedID != 0xFF) {
@@ -123,7 +128,7 @@ void loop() {
       Serial.print(F(": "));
       Serial.println(pipeName);
 
-      wireless.sendPairingResponse(assignedID);
+      wireless.sendPairingResponse(assignedID, TargetType::StrikeLite);
       showStatus(statusRgbLed, STATUS_PAIRING, 2);
       delay(100);
     } else {

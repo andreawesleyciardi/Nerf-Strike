@@ -3,9 +3,10 @@
 
 #include <Arduino.h>
 
-enum class ScreenID {
+enum class ScreenType {
   Home,
   Help,
+  Settings,
   Pairing,
   TargetList,
   GameModeList,
@@ -15,19 +16,6 @@ enum class ScreenID {
   Confirmation,
   Error,
   WinLost
-};
-
-enum class EncoderMode {
-  ScrollList,
-  SelectItem,
-  AdjustField,
-  None
-};
-
-struct ButtonLabels {
-  String left;
-  String center;  // e.g. "<>" when encoder is active
-  String right;
 };
 
 #endif

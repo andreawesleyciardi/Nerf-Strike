@@ -2,6 +2,7 @@
 #define HUB_CONFIG_H
 
 #include <stdint.h>
+#include <TargetType.h>
 
 #define MAX_TARGETS 10
 
@@ -64,7 +65,9 @@ struct PairingRequest {
 };
 
 struct PairingResponse {
+  uint8_t opcode;
   uint8_t assignedID;
+  TargetType type;
 };
 
 #endif

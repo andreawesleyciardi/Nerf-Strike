@@ -1,5 +1,8 @@
 #include "TargetPins.h"
 #include <Arduino.h>
+#include "TargetConfig.h"
+
+TargetType targetType = TargetType::StrikeLite;
 
 // 📟 7-Segment Display Instance
 SevenSegmentDisplay scoreDisplay(displayDataPin, displayClockPin, displayLatchPin);

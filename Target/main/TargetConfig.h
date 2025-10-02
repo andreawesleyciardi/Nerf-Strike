@@ -2,6 +2,9 @@
 #define TARGET_CONFIG_H
 
 #include <stdint.h>
+#include <TargetType.h>
+
+extern TargetType targetType;
 
 // 📡 Wireless Communication - NRF24L01
 const uint8_t transmitterCEPin = 9;
@@ -44,7 +47,9 @@ struct PairingRequest {
 };
 
 struct PairingResponse {
+  uint8_t opcode;
   uint8_t assignedID;
+  TargetType type;
 };
 
 #endif

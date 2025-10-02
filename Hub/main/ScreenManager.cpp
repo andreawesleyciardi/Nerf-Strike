@@ -1,11 +1,41 @@
 #include "ScreenManager.h"
 
+// Include all screen headers
+#include "screens/HomeScreen.h"
+#include "screens/HelpScreen.h"
+#include "screens/SettingsScreen.h"
+#include "screens/PairingScreen.h"
+#include "screens/TargetListScreen.h"
+#include "screens/GameModeListScreen.h"
+#include "screens/GameModeOptionsScreen.h"
+#include "screens/GameModeDetailsScreen.h"
+#include "screens/PlayingScreen.h"
+#include "screens/ConfirmationScreen.h"
+#include "screens/ErrorScreen.h"
+#include "screens/WinLostScreen.h"
+
 void ScreenManager::setup() {
-  stackSize = 0;
-  push(ScreenID::Home);
+  // Register all screens
+  screens[(int)ScreenType::Home] = new HomeScreen();
+  screens[(int)ScreenType::Help] = new HelpScreen();
+  screens[(int)ScreenType::Settings] = new SettingsScreen();
+  screens[(int)ScreenType::Pairing] = new PairingScreen();
+  screens[(int)ScreenType::TargetList] = new TargetListScreen();
+  screens[(int)ScreenType::GameModeList] = new GameModeListScreen();
+  screens[(int)ScreenType::GameModeOptions] = new GameModeOptionsScreen();
+  screens[(int)ScreenType::GameModeDetails] = new GameModeDetailsScreen();
+  screens[(int)ScreenType::Playing] = new PlayingScreen();
+  screens[(int)ScreenType::Confirmation] = new ConfirmationScreen();
+  screens[(int)ScreenType::Error] = new ErrorScreen();
+  screens[(int)ScreenType::WinLost] = new WinLostScreen();
+
+  // Start with Home screen
+  stackSize = 1;
+  stack[0] = ScreenType::Home;
+  updateContext(ScreenType::Home);
 }
 
-void ScreenManager::push(ScreenID screen) {
+void ScreenManager::push(ScreenType screen) {
   if (stackSize < maxStackDepth) {
     stack[stackSize++] = screen;
     updateContext(screen);
@@ -19,17 +49,20 @@ void ScreenManager::pop() {
   }
 }
 
-void ScreenManager::replace(ScreenID screen) {
+void ScreenManager::replace(ScreenType screen) {
   if (stackSize > 0) {
     stack[stackSize - 1] = screen;
     updateContext(screen);
-  } else {
-    push(screen);
   }
 }
 
-ScreenID ScreenManager::current() {
-  return stackSize > 0 ? stack[stackSize - 1] : ScreenID::Home;
+ScreenType ScreenManager::current() {
+  return stackSize > 0 ? stack[stackSize - 1] : ScreenType::Home;
+}
+
+Screen* ScreenManager::getActive() {
+  ScreenType type = current();
+  return screens[(int)type];
 }
 
 EncoderMode ScreenManager::getEncoderMode() {
@@ -40,51 +73,13 @@ ButtonLabels ScreenManager::getButtonLabels() {
   return labels;
 }
 
-void ScreenManager::updateContext(ScreenID screen) {
-  switch (screen) {
-    case ScreenID::Home:
-      encoderMode = EncoderMode::None;
-      labels = {"Help", "", "Start"};
-      break;
-    case ScreenID::Help:
-      encoderMode = EncoderMode::None;
-      labels = {"", "", "Home"};
-      break;
-    case ScreenID::Pairing:
-      encoderMode = EncoderMode::None;
-      labels = {"Targets", "", "Play"};
-      break;
-    case ScreenID::TargetList:
-      encoderMode = EncoderMode::ScrollList;
-      labels = {"Re-Pair", "<>", "Play"};
-      break;
-    case ScreenID::GameModeList:
-      encoderMode = EncoderMode::ScrollList;
-      labels = {"Exit", "<>", "Select"};
-      break;
-    case ScreenID::GameModeOptions:
-      encoderMode = EncoderMode::AdjustField;
-      labels = {"Back", "<>", "Select"};
-      break;
-    case ScreenID::GameModeDetails:
-      encoderMode = EncoderMode::None;
-      labels = {"Back", "", "Start"};
-      break;
-    case ScreenID::Playing:
-      encoderMode = EncoderMode::None;
-      labels = {"Stop", "<>", "Restart"};
-      break;
-    case ScreenID::Confirmation:
-      encoderMode = EncoderMode::None;
-      labels = {"Cancel", "", "Confirm"};
-      break;
-    case ScreenID::Error:
-      encoderMode = EncoderMode::None;
-      labels = {"Back", "", "Retry"};
-      break;
-    case ScreenID::WinLost:
-      encoderMode = EncoderMode::None;
-      labels = {"Home", "", "Restart"};
-      break;
+void ScreenManager::updateContext(ScreenType screen) {
+  Screen* active = getActive();
+  if (active) {
+    encoderMode = active->getEncoderMode();
+    labels = active->getButtonLabels();
+  } else {
+    encoderMode = EncoderMode::None;
+    labels = {"", "", ""};
   }
 }

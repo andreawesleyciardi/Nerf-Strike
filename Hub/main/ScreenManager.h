@@ -2,28 +2,33 @@
 #define SCREEN_MANAGER_H
 
 #include "ScreenTypes.h"
+#include "EncoderMode.h"
+#include "ButtonLabels.h"
+#include "screens/Screen.h"
 #include <Arduino.h>
 
 class ScreenManager {
 public:
   void setup();
-  void push(ScreenID screen);
+  void push(ScreenType screen);
   void pop();
-  void replace(ScreenID screen);
+  void replace(ScreenType screen);
 
-  ScreenID current();
+  ScreenType current();
+  Screen* getActive();
   EncoderMode getEncoderMode();
   ButtonLabels getButtonLabels();
 
 private:
   static const uint8_t maxStackDepth = 5;
-  ScreenID stack[maxStackDepth];
+  ScreenType stack[maxStackDepth];
   uint8_t stackSize = 0;
 
+  Screen* screens[12];  // One for each ScreenType enum value
   EncoderMode encoderMode = EncoderMode::None;
   ButtonLabels labels = {"", "", ""};
 
-  void updateContext(ScreenID screen);
+  void updateContext(ScreenType screen);
 };
 
 #endif

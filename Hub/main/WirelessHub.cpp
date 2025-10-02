@@ -1,4 +1,5 @@
 #include "WirelessHub.h"
+#include <OPCodes.h>
 
 WirelessHub::WirelessHub() : radio(transmitterCEPin, transmitterCSNPin) {}
 
@@ -17,10 +18,9 @@ void WirelessHub::initialize() {
 
   Serial.println("✅ Hub radio initialized.");
 
-  radio.setAutoAck(true);         // ✅ Enable auto-ack
-  radio.enableAckPayload();       // ✅ Optional: allow ACK payloads
-  radio.setRetries(5, 15);        // ✅ Retry settings
-
+  radio.setAutoAck(true);
+  radio.enableAckPayload();
+  radio.setRetries(5, 15);
   radio.setPALevel(RF24_PA_LOW);
   radio.setDataRate(RF24_1MBPS);
   radio.setChannel(100);
@@ -39,8 +39,12 @@ void WirelessHub::read(byte* buffer, uint8_t length) {
   radio.read(buffer, length);
 }
 
-void WirelessHub::sendPairingResponse(uint8_t assignedID) {
-  byte response[2] = {0x01, assignedID};
+void WirelessHub::sendPairingResponse(uint8_t assignedID, TargetType type) {
+  PairingResponse response = {
+    OPCODE_PAIRING_RESPONSE,
+    assignedID,
+    type
+  };
 
   Serial.println("📡 Hub sending pairing response on pairing pipe...");
   radio.stopListening();
@@ -52,7 +56,9 @@ void WirelessHub::sendPairingResponse(uint8_t assignedID) {
 
   if (success) {
     Serial.print(F("✅ Sent pairing response with ID: "));
-    Serial.println(assignedID);
+    Serial.print(assignedID);
+    Serial.print(F(" | Type: "));
+    Serial.println(targetTypeToString(type));
   } else {
     Serial.println(F("❌ Failed to send pairing response."));
   }
@@ -60,7 +66,7 @@ void WirelessHub::sendPairingResponse(uint8_t assignedID) {
 
 void WirelessHub::sendVerificationAck(uint8_t id) {
   radio.stopListening();
-  byte ack[2] = { 0x03, id };
+  byte ack[2] = { OPCODE_VERIFICATION_ACK, id };
   radio.openWritingPipe(pairingPipe);
   bool success = radio.write(ack, sizeof(ack));
   radio.startListening();

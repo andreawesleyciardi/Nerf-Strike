@@ -13,6 +13,20 @@ uint8_t DisplayManager::getRowCount() const {
   return rows;
 }
 
+void DisplayManager::clear() {
+  lcd.clear();
+}
+
+void DisplayManager::clearRow(uint8_t row) {
+  lcd.setCursor(0, row);
+  lcd.print(String(' ', cols));
+}
+
+void DisplayManager::showLine(uint8_t row, const String& text) {
+  lcd.setCursor(0, row);
+  lcd.print(text.substring(0, cols));
+}
+
 void DisplayManager::showText(const String& text, bool scroll, uint16_t scrollDelay) {
   lcd.clear();
   if (!scroll || text.length() <= cols) {
@@ -94,9 +108,4 @@ void DisplayManager::fadeIn(const String& text, uint8_t row, uint8_t delayMs) {
 
   lcd.backlight();
   printAligned(text, row);
-}
-
-void DisplayManager::clearRow(uint8_t row) {
-  lcd.setCursor(0, row);
-  lcd.print(String(' ', cols));
 }
