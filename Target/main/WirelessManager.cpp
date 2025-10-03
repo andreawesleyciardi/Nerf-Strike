@@ -1,7 +1,7 @@
 #include "WirelessManager.h"
 #include <TargetType.h>
 #include <OPCodes.h>
-#include <string.h>
+#include <Protocol.h>
 #include "TargetConfig.h"
 
 WirelessManager::WirelessManager() : radio(transmitterCEPin, transmitterCSNPin) {}
@@ -34,33 +34,19 @@ void WirelessManager::setup() {
   Serial.println(F("📡 Radio listening on pairing pipe."));
 }
 
-bool WirelessManager::sendHitPacket(uint8_t targetId) {
-  HitPacket packet = {targetId, "HIT"};
-
-  radio.stopListening();
-  bool success = radio.write(&packet, sizeof(packet));
-  radio.startListening();
-
-  if (success) {
-    Serial.println(F("📡 Hit packet sent successfully."));
-    return true;
-  } else {
-    Serial.println(F("❌ Failed to send hit packet."));
-    return false;
-  }
-}
-
 void WirelessManager::sendPairingRequest(uint32_t token) {
+  PairingRequest request = {
+    OPCODE_PAIRING_REQUEST,
+    token,
+    targetType  // from TargetConfig.h
+  };
+
   Serial.print(F("📨 Sending pairing request with token: "));
   Serial.println(token);
 
   radio.stopListening();
-  byte packet[5];
-  packet[0] = OPCODE_PAIRING_REQUEST;
-  memcpy(&packet[1], &token, sizeof(token));
-
   radio.openWritingPipe(pairingPipe);
-  bool success = radio.write(packet, sizeof(packet));
+  bool success = radio.write(&request, sizeof(request));
   radio.startListening();
 
   if (success) {
@@ -87,7 +73,7 @@ bool WirelessManager::receivePairingResponse(uint8_t &assignedID, TargetType &ty
       radio.read(&response, sizeof(response));
 
       if (response.opcode == OPCODE_PAIRING_RESPONSE) {
-        assignedID = response.assignedId;
+        assignedID = response.assignedID;
         typeOut = response.type;
 
         Serial.print(F("✅ Received pairing response. Assigned ID: "));
@@ -104,13 +90,17 @@ bool WirelessManager::receivePairingResponse(uint8_t &assignedID, TargetType &ty
 }
 
 void WirelessManager::sendVerificationRequest(uint8_t id) {
+  VerificationRequest request = {
+    OPCODE_VERIFICATION_REQUEST,
+    id
+  };
+
   Serial.print(F("📨 Sending verification request for ID "));
   Serial.println(id);
 
   radio.stopListening();
-  byte packet[2] = {OPCODE_VERIFICATION_REQUEST, id};
   radio.openWritingPipe(pairingPipe);
-  bool success = radio.write(packet, sizeof(packet));
+  bool success = radio.write(&request, sizeof(request));
   radio.startListening();
 
   if (success) {
@@ -120,22 +110,47 @@ void WirelessManager::sendVerificationRequest(uint8_t id) {
   }
 }
 
-bool WirelessManager::waitForVerificationAck(uint8_t id) {
+bool WirelessManager::waitForVerificationResponse(uint8_t id) {
   Serial.println(F("⏳ Waiting for verification acknowledgment..."));
   unsigned long startTime = millis();
+
   while (millis() - startTime < 1000) {
     if (radio.available()) {
-      byte response[2];
+      VerificationResponse response;
       radio.read(&response, sizeof(response));
-      if (response[0] == OPCODE_VERIFICATION_ACK && response[1] == id) {
-        Serial.println(F("✅ Verification acknowledged by hub."));
+
+      if (response.opcode == OPCODE_VERIFICATION_RESPONSE && response.id == id) {
+        Serial.print(F("✅ Verification acknowledged by hub. ID: "));
+        Serial.println(response.id);
         return true;
       }
     }
   }
+
   Serial.println(F("❌ No verification acknowledgment received."));
   return false;
 }
+
+bool WirelessManager::sendHitPacket(uint8_t targetId) {
+  HitPacket packet = {
+    targetId,
+    "HIT"
+  };
+
+  radio.stopListening();
+  bool success = radio.write(&packet, sizeof(packet));
+  radio.startListening();
+
+  if (success) {
+    Serial.println(F("📡 Hit packet sent successfully."));
+    return true;
+  } else {
+    Serial.println(F("❌ Failed to send hit packet."));
+    return false;
+  }
+}
+
+// Utilities functions ---------------------------------------------------------------------------------
 
 void WirelessManager::switchToTargetPipe(uint8_t id) {
   sprintf((char*)targetPipe, "TGT%d", id);

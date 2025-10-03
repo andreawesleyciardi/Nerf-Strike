@@ -59,15 +59,15 @@ const uint8_t espTxPin = 19;  // RX1
 const uint8_t sdCardCSPin = 53;
 
 // 📦 Pairing Structures
-struct PairingRequest {
-  uint32_t token;
-  bool hello;
-};
+// struct PairingRequest {
+//   uint32_t token;
+//   bool hello;
+// };
 
-struct PairingResponse {
-  uint8_t opcode;
-  uint8_t assignedID;
-  TargetType type;
-};
+// struct PairingResponse {
+//   uint8_t opcode;
+//   uint8_t assignedID;
+//   TargetType type;
+// };
 
 #endif

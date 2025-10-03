@@ -92,7 +92,7 @@ void loop() {
     const uint8_t* pipe = registry.getPipeForID(id);
     if (pipe) {
       Serial.println(F("✅ Pipe found. Sending verification ACK."));
-      wireless.sendVerificationAck(id);
+      wireless.sendVerificationResponse(id);
     } else {
       Serial.println(F("❌ No pipe found for ID."));
       showStatus(statusRgbLed, STATUS_ERROR);

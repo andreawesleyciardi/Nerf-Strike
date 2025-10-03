@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <RF24.h>
+#include <Protocol.h>
 #include <TargetType.h>
 #include <OPCodes.h>
 
@@ -16,7 +17,7 @@ public:
   bool receivePairingResponse(uint8_t &assignedID, TargetType &typeOut); // ✅ Updated version
 
   void sendVerificationRequest(uint8_t id);
-  bool waitForVerificationAck(uint8_t id);
+  bool waitForVerificationResponse(uint8_t id);
 
   void switchToTargetPipe(uint8_t id);
   void sendToHub(const byte* data, uint8_t length);
@@ -28,19 +29,7 @@ public:
 
 private:
   RF24 radio;
-  const uint64_t pairingPipe = 0xF0F0F0F0E1LL;
   uint8_t targetPipe[6];
-
-  struct HitPacket {
-    uint8_t targetId;
-    char type[4]; // "HIT"
-  };
-
-  struct PairingResponse {
-    uint8_t opcode;       // Should be OPCODE_PAIRING_RESPONSE
-    uint8_t assignedId;
-    TargetType type;
-  };
 };
 
 #endif

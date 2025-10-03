@@ -52,7 +52,7 @@ bool PairingManager::verify() {
   }
 
   wireless.sendVerificationRequest(assignedID);
-  return wireless.waitForVerificationAck(assignedID);
+  return wireless.waitForVerificationResponse(assignedID);
 }
 
 uint32_t PairingManager::loadTokenFromEEPROM() {

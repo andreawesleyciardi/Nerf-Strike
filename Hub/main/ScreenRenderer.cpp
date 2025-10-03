@@ -9,7 +9,7 @@ ScreenRenderer::ScreenRenderer(DisplayManager& d, ScreenManager& m, HubStateMana
   : display(d), manager(m), hubState(state), gameModes(registry) {}
 
 void ScreenRenderer::render() {
-  display.fadeOut();  // Optional: smooth transition between screens
+  // display.fadeOut();  // Optional: smooth transition between screens
 
   // Delegate to active screen
   Screen* screen = manager.getActive();

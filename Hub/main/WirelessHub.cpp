@@ -1,22 +1,23 @@
 #include "WirelessHub.h"
 #include <OPCodes.h>
+#include <Protocol.h>
 
 WirelessHub::WirelessHub() : radio(transmitterCEPin, transmitterCSNPin) {}
 
 void WirelessHub::initialize() {
-  Serial.println("🔧 Initializing hub radio...");
+  Serial.println(F("🔧 Initializing hub radio..."));
 
   if (!radio.begin()) {
-    Serial.println("❌ Radio failed to initialize.");
+    Serial.println(F("❌ Radio failed to initialize."));
     return;
   }
 
   if (!radio.isChipConnected()) {
-    Serial.println("❌ Radio chip not connected.");
+    Serial.println(F("❌ Radio chip not connected."));
     return;
   }
 
-  Serial.println("✅ Hub radio initialized.");
+  Serial.println(F("✅ Hub radio initialized."));
 
   radio.setAutoAck(true);
   radio.enableAckPayload();
@@ -28,15 +29,7 @@ void WirelessHub::initialize() {
   radio.openReadingPipe(0, pairingPipe);
   radio.startListening();
 
-  Serial.println("📡 Hub listening on pairing pipe.");
-}
-
-bool WirelessHub::available() {
-  return radio.available();
-}
-
-void WirelessHub::read(byte* buffer, uint8_t length) {
-  radio.read(buffer, length);
+  Serial.println(F("📡 Hub listening on pairing pipe."));
 }
 
 void WirelessHub::sendPairingResponse(uint8_t assignedID, TargetType type) {
@@ -46,10 +39,10 @@ void WirelessHub::sendPairingResponse(uint8_t assignedID, TargetType type) {
     type
   };
 
-  Serial.println("📡 Hub sending pairing response on pairing pipe...");
+  Serial.println(F("📡 Hub sending pairing response on pairing pipe..."));
+
   radio.stopListening();
   radio.openWritingPipe(pairingPipe);
-
   bool success = radio.write(&response, sizeof(response));
   delay(100);  // ✅ Give target time to switch pipes
   radio.startListening();
@@ -64,19 +57,34 @@ void WirelessHub::sendPairingResponse(uint8_t assignedID, TargetType type) {
   }
 }
 
-void WirelessHub::sendVerificationAck(uint8_t id) {
+void WirelessHub::sendVerificationResponse(uint8_t id) {
+  VerificationResponse response = {
+    OPCODE_VERIFICATION_RESPONSE,
+    id
+  };
+
   radio.stopListening();
-  byte ack[2] = { OPCODE_VERIFICATION_ACK, id };
   radio.openWritingPipe(pairingPipe);
-  bool success = radio.write(ack, sizeof(ack));
+  bool success = radio.write(&response, sizeof(response));
   radio.startListening();
 
   if (success) {
-    Serial.print("✅ Sent verification acknowledgment for ID: ");
+    Serial.print(F("✅ Sent verification response for ID: "));
     Serial.println(id);
   } else {
-    Serial.println("❌ Failed to send verification acknowledgment.");
+    Serial.print(F("❌ Failed to send verification response for ID: "));
+    Serial.println(id);
   }
+}
+
+// Utilities functions ---------------------------------------------------------------------------------
+
+bool WirelessHub::available() {
+  return radio.available();
+}
+
+void WirelessHub::read(byte* buffer, uint8_t length) {
+  radio.read(buffer, length);
 }
 
 void WirelessHub::sendToTargetPipe(uint8_t id, const uint8_t* pipe, const byte* data, uint8_t length) {
@@ -93,7 +101,7 @@ void WirelessHub::sendToTargetPipe(uint8_t id, const uint8_t* pipe, const byte* 
     Serial.print(" via pipe ");
     Serial.println((char*)pipe);
   } else {
-    Serial.println("❌ Failed to send data to target.");
+    Serial.println(F("❌ Failed to send data to target."));
   }
 }
 
