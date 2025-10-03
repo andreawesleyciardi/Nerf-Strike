@@ -4,6 +4,7 @@
 #include "HubPins.h"
 #include "HubStateManager.h"
 #include "WirelessHub.h"
+#include "Send.h"
 #include "PairingRegistry.h"
 #include "CommandConsole.h"
 #include "OPCodes.h"
@@ -15,10 +16,12 @@
 #include "ScreenTypes.h"
 #include <TargetType.h>
 #include "TargetTypeManager.h"
+#include "GameLogic.h"
 
 // 🧠 Core Managers
 HubStateManager hubState;
 WirelessHub wireless;
+Send send(wireless.getRadio());
 PairingRegistry registry;
 GameModeRegistry gameModeRegistry;
 TargetTypeManager targetTypeManager;
@@ -26,7 +29,7 @@ DisplayManager display(lcdI2CAddress, 20, 4);
 ScreenManager screenManager;
 ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
 ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
-CommandConsole console(registry, wireless, encoder, leftButton, rightButton, targetTypeManager);
+CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager);
 
 // ⏱️ Timing
 unsigned long lastHeartbeat = 0;
@@ -55,7 +58,7 @@ void loop() {
   console.processSerial();
 
   if (statusButton.isLongPressed()) {
-    wireless.triggerBlinkOnTargets(registry);
+    send.blinkAll(registry);
     showStatus(statusRgbLed, STATUS_OK, 3);
   }
 
@@ -76,7 +79,7 @@ void loop() {
   }
 
   if (millis() - lastHeartbeat > 3000) {
-    wireless.sendHeartbeatToTargets(registry);
+    send.heartbeatAll(registry);
     lastHeartbeat = millis();
   }
 
@@ -95,7 +98,7 @@ void loop() {
         const uint8_t* pipe = registry.getPipeForID(request->id);
         if (pipe) {
           Serial.println(F("✅ Pipe found. Sending verification ACK."));
-          wireless.sendVerificationResponse(request->id);
+          send.verificationResponse(request->id);
         } else {
           Serial.println(F("❌ No pipe found for ID."));
           showStatus(statusRgbLed, STATUS_ERROR);
@@ -133,7 +136,7 @@ void loop() {
           Serial.print(F(": "));
           Serial.println(pipeName);
 
-          wireless.sendPairingResponse(assignedID, incomingType);
+          send.pairingResponse(assignedID, incomingType);
           showStatus(statusRgbLed, STATUS_PAIRING, 2);
           delay(100);
         } else {
@@ -161,7 +164,7 @@ void loop() {
 
         const uint8_t* pipe = registry.getPipeForID(targetId);
         if (pipe) {
-          wireless.sendToTargetPipe(targetId, pipe, reinterpret_cast<const byte*>(&response), sizeof(response));
+          send.toTargetPipe(targetId, pipe, reinterpret_cast<const byte*>(&response), sizeof(response));
           Serial.print(F("📤 Score update sent to target ID "));
           Serial.print(targetId);
           Serial.print(F(": "));
@@ -173,57 +176,4 @@ void loop() {
       break;
     }
   }
-
-  // if (buffer[0] == OPCODE_VERIFICATION_REQUEST) {
-  //   uint8_t id = buffer[1];
-  //   Serial.print(F("🔍 Verification request for ID: "));
-  //   Serial.println(id);
-
-  //   const uint8_t* pipe = registry.getPipeForID(id);
-  //   if (pipe) {
-  //     Serial.println(F("✅ Pipe found. Sending verification ACK."));
-  //     wireless.sendVerificationResponse(id);
-  //   } else {
-  //     Serial.println(F("❌ No pipe found for ID."));
-  //     showStatus(statusRgbLed, STATUS_ERROR);
-  //   }
-  // }
-
-  // else if (buffer[0] == OPCODE_PAIRING_REQUEST) {
-  //   uint32_t token;
-  //   memcpy(&token, &buffer[1], sizeof(token));
-  //   TargetType incomingType = static_cast<TargetType>(buffer[5]);
-
-  //   Serial.print(F("🔐 Pairing request received with token: "));
-  //   Serial.println(token);
-  //   Serial.print(F("📦 Incoming target type: "));
-  //   Serial.println(targetTypeToString(incomingType));
-
-  //   if (!targetTypeManager.isCompatible(incomingType)) {
-  //     Serial.print(F("❌ Target type mismatch. Expected "));
-  //     Serial.print(targetTypeToString(targetTypeManager.getAllowedType()));
-  //     Serial.print(F(", but got "));
-  //     Serial.println(targetTypeToString(incomingType));
-  //     showStatus(statusRgbLed, STATUS_ERROR, 2);
-  //     return;
-  //   }
-
-  //   uint8_t assignedID = registry.assignID(token);
-  //   if (assignedID != 0xFF) {
-  //     char pipeName[6];
-  //     sprintf(pipeName, "TGT%d", assignedID);
-  //     registry.storePipeForID(assignedID, (uint8_t*)pipeName);
-  //     Serial.print(F("📡 Stored pipe for ID "));
-  //     Serial.print(assignedID);
-  //     Serial.print(F(": "));
-  //     Serial.println(pipeName);
-
-  //     wireless.sendPairingResponse(assignedID, TargetType::StrikeLite);
-  //     showStatus(statusRgbLed, STATUS_PAIRING, 2);
-  //     delay(100);
-  //   } else {
-  //     Serial.println(F("❌ Failed to assign ID."));
-  //     showStatus(statusRgbLed, STATUS_ERROR, 2);
-  //   }
-  // }
 }

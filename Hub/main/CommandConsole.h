@@ -3,20 +3,20 @@
 
 #include <Arduino.h>
 #include "PairingRegistry.h"
-#include "WirelessHub.h"
+#include "Send.h"
 #include <RotaryEncoder.h>
 #include <Button.h>
 #include "TargetTypeManager.h"
 
 class CommandConsole {
 public:
-  CommandConsole(PairingRegistry& registry, WirelessHub& wireless, RotaryEncoder& encoder, Button& leftButton, Button& rightButton, TargetTypeManager& typeManager);
+  CommandConsole(PairingRegistry& registry, Send& send, RotaryEncoder& encoder, Button& leftButton, Button& rightButton, TargetTypeManager& typeManager);
   void processSerial();
   void processInput();  // 🧠 Unified input handler
 
 private:
   PairingRegistry& registry;
-  WirelessHub& wireless;
+  Send& send;
   RotaryEncoder& encoder;
   Button& leftButton;
   Button& rightButton;

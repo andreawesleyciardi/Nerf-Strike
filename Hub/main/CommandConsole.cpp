@@ -1,12 +1,12 @@
 #include "CommandConsole.h"
-#include <TargetType.h>
 #include "TargetTypeManager.h"
-#include "OPCodes.h"
+#include <Protocol.h>
+#include <OPCodes.h>
 
-CommandConsole::CommandConsole(PairingRegistry& registry, WirelessHub& wireless,
+CommandConsole::CommandConsole(PairingRegistry& registry, Send& send,
                                RotaryEncoder& encoder, Button& left, Button& right,
                                TargetTypeManager& typeManager)
-  : registry(registry), wireless(wireless),
+  : registry(registry), send(send),
     encoder(encoder), leftButton(left), rightButton(right),
     targetTypeManager(typeManager) {}
 
@@ -26,12 +26,14 @@ void CommandConsole::processSerial() {
 
   if (command == "blink") {
     Serial.println(F("🔦 Triggering blink..."));
-    byte msg[2] = {OPCODE_BLINK_COMMAND, 0x00};
+    BlinkCommandPacket packet = {
+      OPCODE_BLINK_COMMAND
+    };
     for (uint8_t i = 0; i < MAX_TARGETS; i++) {
       uint8_t id = registry.getIDAt(i);
       const uint8_t* pipe = registry.getPipeForID(id);
       if (id != 0xFF && pipe) {
-        wireless.sendToTargetPipe(id, pipe, msg, sizeof(msg));
+        send.toTargetPipe(id, pipe, &packet, sizeof(packet));
       }
     }
     return;
