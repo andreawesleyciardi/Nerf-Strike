@@ -39,17 +39,4 @@ const uint8_t buzzerPin = A4;
 // Sensor (Piezo or Laser reader)
 const uint8_t sensorComponentPin = A7;
 
-
-// 📦 Pairing Structures
-// struct PairingRequest {
-//   uint32_t token;
-//   bool hello;
-// };
-
-// struct PairingResponse {
-//   uint8_t opcode;
-//   uint8_t assignedID;
-//   TargetType type;
-// };
-
 #endif

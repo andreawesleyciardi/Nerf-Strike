@@ -68,30 +68,42 @@ void loop() {
   }
 
   if (wireless.available()) {
-    byte packet[32];
-    wireless.read(packet, sizeof(packet));
+    byte buffer[32];
+    wireless.read(buffer, sizeof(buffer));
+    PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
 
-    if (packet[0] == OPCODE_HEARTBEAT) {
-      lastHeartbeat = millis();
-      heartbeatLost = false;
-      Serial.println(F("💓 Heartbeat received from hub."));
-    }
+    switch (header->opcode) {
+      case OPCODE_HEARTBEAT: {
+          Serial.println(F("💓 Heartbeat received from hub."));
+          lastHeartbeat = millis();
+          heartbeatLost = false;
+        break;
+      }
 
-    if (packet[0] == OPCODE_BLINK_COMMAND) {
-      Serial.println(F("🔦 Blink command received."));
-      uint8_t assignedID = pairingManager.getAssignedID();
-      scoreDisplay.showScore(assignedID);
-      showStatus(statusRgbLed, STATUS_PAIRING);
-      rgbRing.chase("Blue", 30);
-      delay(1000);
-      scoreDisplay.clear();
-    }
+      case OPCODE_BLINK_COMMAND: {
+          Serial.println(F("🔦 Blink command received."));
+          uint8_t assignedID = pairingManager.getAssignedID();
+          scoreDisplay.showScore(assignedID);
+          showStatus(statusRgbLed, STATUS_PAIRING);
+          rgbRing.chase("Blue", 30);
+          delay(1000);
+          scoreDisplay.clear();
+        break;
+      }
 
-    if (packet[0] == OPCODE_SCORE_UPDATE) {
-      uint8_t newScore = packet[1];
-      Serial.print(F("🎯 New score received: "));
-      Serial.println(newScore);
-      scoreDisplay.updateScore(newScore);
+      case OPCODE_SCORE_UPDATE: {
+          ScoreUpdatePacket* packet = reinterpret_cast<ScoreUpdatePacket*>(buffer);
+          uint8_t newScore = packet->score;
+          Serial.print(F("🎯 New score received: "));
+          Serial.println(newScore);
+          scoreDisplay.updateScore(newScore);
+        break;
+      }
+
+      default:
+        Serial.print(F("⚠️ Unknown opcode received: "));
+        Serial.println(header->opcode);
+        break;
     }
   }
 

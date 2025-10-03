@@ -33,7 +33,7 @@ void WirelessHub::initialize() {
 }
 
 void WirelessHub::sendPairingResponse(uint8_t assignedID, TargetType type) {
-  PairingResponse response = {
+  PairingResponsePacket response = {
     OPCODE_PAIRING_RESPONSE,
     assignedID,
     type
@@ -58,7 +58,7 @@ void WirelessHub::sendPairingResponse(uint8_t assignedID, TargetType type) {
 }
 
 void WirelessHub::sendVerificationResponse(uint8_t id) {
-  VerificationResponse response = {
+  VerificationResponsePacket response = {
     OPCODE_VERIFICATION_RESPONSE,
     id
   };
@@ -75,16 +75,6 @@ void WirelessHub::sendVerificationResponse(uint8_t id) {
     Serial.print(F("❌ Failed to send verification response for ID: "));
     Serial.println(id);
   }
-}
-
-// Utilities functions ---------------------------------------------------------------------------------
-
-bool WirelessHub::available() {
-  return radio.available();
-}
-
-void WirelessHub::read(byte* buffer, uint8_t length) {
-  radio.read(buffer, length);
 }
 
 void WirelessHub::sendToTargetPipe(uint8_t id, const uint8_t* pipe, const byte* data, uint8_t length) {
@@ -104,6 +94,48 @@ void WirelessHub::sendToTargetPipe(uint8_t id, const uint8_t* pipe, const byte* 
     Serial.println(F("❌ Failed to send data to target."));
   }
 }
+
+void WirelessHub::triggerBlinkOnTargets(PairingRegistry& registry) {
+  Serial.println(F("🔦 Triggering blink on all paired targets..."));
+
+  BlinkCommandPacket packet;
+  packet.opcode = OPCODE_BLINK_COMMAND;
+
+  for (uint8_t i = 0; i < MAX_TARGETS; i++) {
+    uint8_t id = registry.getIDAt(i);
+    const uint8_t* pipe = registry.getPipeForID(id);
+    if (id != 0xFF && pipe) {
+      Serial.print(F("🔦 Sending blink to ID: "));
+      Serial.println(id);
+      sendToTargetPipe(id, pipe, reinterpret_cast<const byte*>(&packet), sizeof(packet));
+    }
+  }
+}
+
+void WirelessHub::sendHeartbeatToTargets(PairingRegistry& registry) {
+  HeartbeatPacket packet;
+  packet.opcode = OPCODE_HEARTBEAT;
+
+  for (uint8_t i = 0; i < MAX_TARGETS; i++) {
+    uint8_t id = registry.getIDAt(i);
+    const uint8_t* pipe = registry.getPipeForID(id);
+    if (id != 0xFF && pipe) {
+      sendToTargetPipe(id, pipe, reinterpret_cast<const byte*>(&packet), sizeof(packet));
+    }
+  }
+}
+
+// Utilities functions ---------------------------------------------------------------------------------
+
+bool WirelessHub::available() {
+  return radio.available();
+}
+
+void WirelessHub::read(byte* buffer, uint8_t length) {
+  radio.read(buffer, length);
+}
+
+
 
 bool WirelessHub::isConnected() {
   return radio.isChipConnected();

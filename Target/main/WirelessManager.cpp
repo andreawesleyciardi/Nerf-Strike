@@ -35,7 +35,7 @@ void WirelessManager::setup() {
 }
 
 void WirelessManager::sendPairingRequest(uint32_t token) {
-  PairingRequest request = {
+  PairingRequestPacket request = {
     OPCODE_PAIRING_REQUEST,
     token,
     targetType  // from TargetConfig.h
@@ -69,7 +69,7 @@ bool WirelessManager::receivePairingResponse(uint8_t &assignedID, TargetType &ty
   unsigned long startTime = millis();
   while (millis() - startTime < 1000) {
     if (radio.available()) {
-      PairingResponse response;
+      PairingResponsePacket response;
       radio.read(&response, sizeof(response));
 
       if (response.opcode == OPCODE_PAIRING_RESPONSE) {
@@ -90,7 +90,7 @@ bool WirelessManager::receivePairingResponse(uint8_t &assignedID, TargetType &ty
 }
 
 void WirelessManager::sendVerificationRequest(uint8_t id) {
-  VerificationRequest request = {
+  VerificationRequestPacket request = {
     OPCODE_VERIFICATION_REQUEST,
     id
   };
@@ -116,7 +116,7 @@ bool WirelessManager::waitForVerificationResponse(uint8_t id) {
 
   while (millis() - startTime < 1000) {
     if (radio.available()) {
-      VerificationResponse response;
+      VerificationResponsePacket response;
       radio.read(&response, sizeof(response));
 
       if (response.opcode == OPCODE_VERIFICATION_RESPONSE && response.id == id) {
@@ -131,10 +131,10 @@ bool WirelessManager::waitForVerificationResponse(uint8_t id) {
   return false;
 }
 
-bool WirelessManager::sendHitPacket(uint8_t targetId) {
+bool WirelessManager::sendHitPacket(uint8_t id) {
   HitPacket packet = {
-    targetId,
-    "HIT"
+    OPCODE_HIT_PACKET,
+    id
   };
 
   radio.stopListening();
