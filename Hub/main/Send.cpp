@@ -97,3 +97,16 @@ void Send::heartbeatAll(PairingRegistry& registry) {
     }
   }
 }
+
+void Send::scoreUpdate(uint8_t id, const uint8_t* pipe, uint8_t newScore) {
+  ScoreUpdatePacket packet = {
+    OPCODE_SCORE_UPDATE,
+    newScore
+  };
+
+  toTargetPipe(id, pipe, &packet, sizeof(packet));
+  Serial.print(F("📤 Score update sent to target ID "));
+  Serial.print(id);
+  Serial.print(F(": "));
+  Serial.println(newScore);
+}

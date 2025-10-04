@@ -5,6 +5,7 @@
 #include "HubStateManager.h"
 #include "WirelessHub.h"
 #include "Send.h"
+#include "Receive.h"
 #include "PairingRegistry.h"
 #include "CommandConsole.h"
 #include "OPCodes.h"
@@ -21,7 +22,6 @@
 // 🧠 Core Managers
 HubStateManager hubState;
 WirelessHub wireless;
-Send send(wireless.getRadio());
 PairingRegistry registry;
 GameModeRegistry gameModeRegistry;
 TargetTypeManager targetTypeManager;
@@ -30,6 +30,9 @@ ScreenManager screenManager;
 ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
 ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
 CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager);
+
+Send send(wireless.getRadio());
+Receive receive(targetTypeManager, registry);
 
 // ⏱️ Timing
 unsigned long lastHeartbeat = 0;
@@ -91,41 +94,20 @@ void loop() {
 
   switch (header->opcode) {
     case OPCODE_VERIFICATION_REQUEST: {
-        VerificationRequestPacket* request = reinterpret_cast<VerificationRequestPacket*>(buffer);
-
-        Serial.print(F("🔍 Verification request for ID: "));
-        Serial.println(request->id);
-        const uint8_t* pipe = registry.getPipeForID(request->id);
-        if (pipe) {
-          Serial.println(F("✅ Pipe found. Sending verification ACK."));
-          send.verificationResponse(request->id);
-        } else {
+        const uint8_t* pipe = receive.verificationRequest(buffer);
+        if (!pipe) {
           Serial.println(F("❌ No pipe found for ID."));
           showStatus(statusRgbLed, STATUS_ERROR);
+        } else {
+          uint8_t targetId = reinterpret_cast<VerificationRequestPacket*>(buffer)->id;
+          Serial.println(F("✅ Pipe found. Sending verification ACK."));
+          send.verificationResponse(targetId);
         }
       break;
     }
 
     case OPCODE_PAIRING_REQUEST: {
-        const PairingRequestPacket* request = reinterpret_cast<const PairingRequestPacket*>(buffer);
-        const uint32_t token = request->token;
-        const TargetType incomingType = request->type;
-
-        Serial.print(F("🔐 Pairing request received with token: "));
-        Serial.println(token);
-        Serial.print(F("📦 Incoming target type: "));
-        Serial.println(targetTypeToString(incomingType));
-
-        if (!targetTypeManager.isCompatible(incomingType)) {
-          Serial.print(F("❌ Target type mismatch. Expected "));
-          Serial.print(targetTypeToString(targetTypeManager.getAllowedType()));
-          Serial.print(F(", but got "));
-          Serial.println(targetTypeToString(incomingType));
-          showStatus(statusRgbLed, STATUS_ERROR, 2);
-          break;
-        }
-
-        const uint8_t assignedID = registry.assignID(token);
+        const uint8_t assignedID = receive.pairingRequest(buffer);
         if (assignedID != 0xFF) {
           char pipeName[6];
           sprintf(pipeName, "TGT%d", assignedID);
@@ -136,6 +118,7 @@ void loop() {
           Serial.print(F(": "));
           Serial.println(pipeName);
 
+          TargetType incomingType = reinterpret_cast<PairingRequestPacket*>(buffer)->type;
           send.pairingResponse(assignedID, incomingType);
           showStatus(statusRgbLed, STATUS_PAIRING, 2);
           delay(100);
@@ -147,31 +130,14 @@ void loop() {
     }
 
     case OPCODE_HIT_PACKET: {
-        HitPacket* packet = reinterpret_cast<HitPacket*>(buffer);
-        uint8_t targetId = packet->id;
-
-        Serial.print(F("🎯 Hit received from target ID: "));
-        Serial.println(targetId);
-
-        // 🔢 Update score using game logic
-        uint8_t newScore = gameLogic.incrementScoreFor(targetId);
-
-        // 📦 Send updated score back to target
-        ScoreUpdatePacket response = {
-          OPCODE_SCORE_UPDATE,
-          newScore
-        };
-
-        const uint8_t* pipe = registry.getPipeForID(targetId);
-        if (pipe) {
-          send.toTargetPipe(targetId, pipe, reinterpret_cast<const byte*>(&response), sizeof(response));
-          Serial.print(F("📤 Score update sent to target ID "));
-          Serial.print(targetId);
-          Serial.print(F(": "));
-          Serial.println(newScore);
-        } else {
+        const uint8_t* pipe = receive.hitPacket(buffer);
+        if (!pipe) {
           Serial.println(F("❌ No pipe found for target ID."));
           showStatus(statusRgbLed, STATUS_ERROR);
+        } else {
+          uint8_t targetId = reinterpret_cast<HitPacket*>(buffer)->id;
+          uint8_t newScore = gameLogic.incrementScoreFor(targetId);
+          send.scoreUpdate(targetId, pipe, newScore);
         }
       break;
     }
