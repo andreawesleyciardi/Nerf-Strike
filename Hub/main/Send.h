@@ -21,7 +21,7 @@ public:
 
   void toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length);
 private:
-  RF24 radio;
+  RF24& radio;
 };
 
 extern Send send;
