@@ -109,6 +109,9 @@ void loop() {
     case OPCODE_PAIRING_REQUEST: {
         const uint8_t assignedID = receive.pairingRequest(buffer);
         if (assignedID != 0xFF) {
+          TargetType incomingType = reinterpret_cast<PairingRequestPacket*>(buffer)->type;
+          send.pairingResponse(assignedID, incomingType);
+
           char pipeName[6];
           sprintf(pipeName, "TGT%d", assignedID);
           registry.storePipeForID(assignedID, reinterpret_cast<uint8_t*>(pipeName));
@@ -117,9 +120,7 @@ void loop() {
           Serial.print(assignedID);
           Serial.print(F(": "));
           Serial.println(pipeName);
-
-          TargetType incomingType = reinterpret_cast<PairingRequestPacket*>(buffer)->type;
-          send.pairingResponse(assignedID, incomingType);
+          
           showStatus(statusRgbLed, STATUS_PAIRING, 2);
           delay(100);
         } else {

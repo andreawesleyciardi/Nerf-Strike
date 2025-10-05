@@ -62,6 +62,10 @@ bool WirelessManager::receivePairingResponse(uint8_t &assignedID) {
 }
 
 bool WirelessManager::receivePairingResponse(uint8_t &assignedID, TargetType &typeOut) {
+  Serial.print(F("📡 Target receiving pairing response on pairing pipe: 0x"));
+  Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
+  Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
+
   radio.openReadingPipe(1, pairingPipe);
   radio.startListening();
 
@@ -71,7 +75,8 @@ bool WirelessManager::receivePairingResponse(uint8_t &assignedID, TargetType &ty
     if (radio.available()) {
       PairingResponsePacket response;
       radio.read(&response, sizeof(response));
-
+      Serial.print(F("⏳ Receiving pairing response with opcode: "));
+      Serial.println(response.opcode);
       if (response.opcode == OPCODE_PAIRING_RESPONSE) {
         assignedID = response.assignedID;
         typeOut = response.type;

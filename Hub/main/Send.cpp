@@ -12,10 +12,13 @@ void Send::pairingResponse(uint8_t assignedID, TargetType type) {
     type
   };
 
-  Serial.println(F("📡 Hub sending pairing response on pairing pipe..."));
+  Serial.print(F("📡 Hub sending pairing response on pairing pipe: 0x"));
+  Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
+  Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
 
   radio.stopListening();
   radio.openWritingPipe(pairingPipe);
+  delay(50);
   bool success = radio.write(&response, sizeof(response));
   delay(100);  // ✅ Give target time to switch pipes
   radio.startListening();
