@@ -1,7 +1,7 @@
 #ifndef WIN_LOST_SCREEN_H
 #define WIN_LOST_SCREEN_H
 
-#include "../DisplayManager.h"
+#include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
@@ -9,7 +9,7 @@
 
 class WinLostScreen : public Screen {
 public:
-  void render(DisplayManager& display) override {
+  void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "🏆 Game Over");
     display.showLine(1, "You won!");

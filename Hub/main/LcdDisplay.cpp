@@ -1,33 +1,33 @@
-#include "DisplayManager.h"
+#include "LcdDisplay.h"
 
-DisplayManager::DisplayManager(uint8_t addr, uint8_t cols, uint8_t rows)
+LcdDisplay::LcdDisplay(uint8_t addr, uint8_t cols, uint8_t rows)
   : lcd(addr, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE), cols(cols), rows(rows) {}
 
-void DisplayManager::setup() {
+void LcdDisplay::setup() {
   lcd.begin(cols, rows);
   lcd.backlight();
   lcd.clear();
 }
 
-uint8_t DisplayManager::getRowCount() const {
+uint8_t LcdDisplay::getRowCount() const {
   return rows;
 }
 
-void DisplayManager::clear() {
+void LcdDisplay::clear() {
   lcd.clear();
 }
 
-void DisplayManager::clearRow(uint8_t row) {
+void LcdDisplay::clearRow(uint8_t row) {
   lcd.setCursor(0, row);
   lcd.print(String(' ', cols));
 }
 
-void DisplayManager::showLine(uint8_t row, const String& text) {
+void LcdDisplay::showLine(uint8_t row, const String& text) {
   lcd.setCursor(0, row);
   lcd.print(text.substring(0, cols));
 }
 
-void DisplayManager::showText(const String& text, bool scroll, uint16_t scrollDelay) {
+void LcdDisplay::showText(const String& text, bool scroll, uint16_t scrollDelay) {
   lcd.clear();
   if (!scroll || text.length() <= cols) {
     lcd.setCursor(0, 0);
@@ -42,20 +42,20 @@ void DisplayManager::showText(const String& text, bool scroll, uint16_t scrollDe
   }
 }
 
-void DisplayManager::showMenuItem(const String& label, uint8_t index, uint8_t total) {
+void LcdDisplay::showMenuItem(const String& label, uint8_t index, uint8_t total) {
   lcd.clear();
   String line = String(index + 1) + "/" + String(total) + " " + label;
   printAligned(line, 0);
 }
 
-void DisplayManager::showButtonLabels(const String& leftLabel, const String& rightLabel) {
+void LcdDisplay::showButtonLabels(const String& leftLabel, const String& rightLabel) {
   lcd.setCursor(0, rows - 1);
   lcd.print(leftLabel);
   lcd.setCursor(cols - rightLabel.length(), rows - 1);
   lcd.print(rightLabel);
 }
 
-void DisplayManager::printAligned(const String& text, uint8_t row, const String& align) {
+void LcdDisplay::printAligned(const String& text, uint8_t row, const String& align) {
   int pad = 0;
   if (align == "center") {
     pad = (cols - text.length()) / 2;
@@ -66,7 +66,7 @@ void DisplayManager::printAligned(const String& text, uint8_t row, const String&
   lcd.print(text);
 }
 
-void DisplayManager::scrollIn(const String& text, uint8_t row, uint16_t speed) {
+void LcdDisplay::scrollIn(const String& text, uint8_t row, uint16_t speed) {
   lcd.clear();
   for (int i = 0; i <= text.length(); i++) {
     lcd.setCursor(0, row);
@@ -75,7 +75,7 @@ void DisplayManager::scrollIn(const String& text, uint8_t row, uint16_t speed) {
   }
 }
 
-void DisplayManager::scrollOut(uint8_t row, uint16_t speed) {
+void LcdDisplay::scrollOut(uint8_t row, uint16_t speed) {
   for (int i = cols; i >= 0; i--) {
     lcd.setCursor(0, row);
     lcd.print(String(' ', i));
@@ -84,7 +84,7 @@ void DisplayManager::scrollOut(uint8_t row, uint16_t speed) {
   clearRow(row);
 }
 
-void DisplayManager::fadeOut(uint8_t delayMs) {
+void LcdDisplay::fadeOut(uint8_t delayMs) {
   for (int i = 0; i < 3; i++) {
     lcd.noBacklight();
     delay(delayMs);
@@ -94,7 +94,7 @@ void DisplayManager::fadeOut(uint8_t delayMs) {
   lcd.clear();
 }
 
-void DisplayManager::fadeIn(const String& text, uint8_t row, uint8_t delayMs) {
+void LcdDisplay::fadeIn(const String& text, uint8_t row, uint8_t delayMs) {
   lcd.clear();
   lcd.noBacklight();
   delay(delayMs);

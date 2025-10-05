@@ -1,7 +1,7 @@
 #ifndef SETTINGS_SCREEN_H
 #define SETTINGS_SCREEN_H
 
-#include "../DisplayManager.h"
+#include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
@@ -9,7 +9,7 @@
 
 class SettingsScreen : public Screen {
 public:
-  void render(DisplayManager& display) override {
+  void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "⚙️ Settings");
     display.showLine(1, "Adjust brightness, sound...");

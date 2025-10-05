@@ -1,18 +1,18 @@
 #ifndef SCREEN_RENDERER_H
 #define SCREEN_RENDERER_H
 
-#include "DisplayManager.h"
+#include "LcdDisplay.h"
 #include "ScreenManager.h"
 #include "HubStateManager.h"
 #include "GameModeRegistry.h"
 
 class ScreenRenderer {
 public:
-  ScreenRenderer(DisplayManager& display, ScreenManager& manager, HubStateManager& state, GameModeRegistry& registry);
+  ScreenRenderer(LcdDisplay& display, ScreenManager& manager, HubStateManager& state, GameModeRegistry& registry);
   void render();
 
 private:
-  DisplayManager& display;
+  LcdDisplay& display;
   ScreenManager& manager;
   HubStateManager& hubState;
   GameModeRegistry& gameModes;

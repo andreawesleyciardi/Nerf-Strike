@@ -1,7 +1,7 @@
 #ifndef HELP_SCREEN_H
 #define HELP_SCREEN_H
 
-#include "../DisplayManager.h"
+#include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
@@ -9,7 +9,7 @@
 
 class HelpScreen : public Screen {
 public:
-  void render(DisplayManager& display) override {
+  void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "❓ Help");
     display.showLine(1, "Commands: list, test, clear");

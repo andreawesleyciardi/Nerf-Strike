@@ -1,7 +1,7 @@
 #ifndef ERROR_SCREEN_H
 #define ERROR_SCREEN_H
 
-#include "../DisplayManager.h"
+#include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
@@ -9,7 +9,7 @@
 
 class ErrorScreen : public Screen {
 public:
-  void render(DisplayManager& display) override {
+  void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "⚠️ Error Occurred");
     display.showLine(1, "Check connections...");

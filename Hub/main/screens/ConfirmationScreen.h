@@ -1,7 +1,7 @@
 #ifndef CONFIRMATION_SCREEN_H
 #define CONFIRMATION_SCREEN_H
 
-#include "../DisplayManager.h"
+#include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
@@ -9,7 +9,7 @@
 
 class ConfirmationScreen : public Screen {
 public:
-  void render(DisplayManager& display) override {
+  void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "❗ Confirm Exit?");
     display.showLine(3, "[Cancel]  [Exit]");

@@ -1,7 +1,7 @@
 #ifndef GAME_MODE_LIST_SCREEN_H
 #define GAME_MODE_LIST_SCREEN_H
 
-#include "../DisplayManager.h"
+#include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
@@ -9,7 +9,7 @@
 
 class GameModeListScreen : public Screen {
 public:
-  void render(DisplayManager& display) override {
+  void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "🎮 Select Game Mode");
     display.showLine(3, "[Back]  [Select]");

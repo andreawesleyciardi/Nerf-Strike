@@ -1,11 +1,11 @@
 #include "ScreenRenderer.h"
 #include "ScreenManager.h"
-#include "DisplayManager.h"
+#include "LcdDisplay.h"
 #include "EncoderMode.h"
 #include "ButtonLabels.h"
 #include "screens/Screen.h"
 
-ScreenRenderer::ScreenRenderer(DisplayManager& d, ScreenManager& m, HubStateManager& state, GameModeRegistry& registry)
+ScreenRenderer::ScreenRenderer(LcdDisplay& d, ScreenManager& m, HubStateManager& state, GameModeRegistry& registry)
   : display(d), manager(m), hubState(state), gameModes(registry) {}
 
 void ScreenRenderer::render() {

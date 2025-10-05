@@ -1,7 +1,7 @@
 #ifndef PAIRING_SCREEN_H
 #define PAIRING_SCREEN_H
 
-#include "../DisplayManager.h"
+#include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
@@ -9,7 +9,7 @@
 
 class PairingScreen : public Screen {
 public:
-  void render(DisplayManager& display) override {
+  void render(LcdDisplay& display) override {
     display.clear();
     display.printAligned("Pairing...", 1, "center");
     display.showLine(3, "[Cancel]");

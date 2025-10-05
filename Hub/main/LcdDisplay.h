@@ -1,12 +1,12 @@
-#ifndef DISPLAY_MANAGER_H
-#define DISPLAY_MANAGER_H
+#ifndef LCD_DISPLAY_H
+#define LCD_DISPLAY_H
 
 #include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
 
-class DisplayManager {
+class LcdDisplay {
 public:
-  DisplayManager(uint8_t addr = 0x3F, uint8_t cols = 20, uint8_t rows = 4);
+  LcdDisplay(uint8_t addr = 0x3F, uint8_t cols = 20, uint8_t rows = 4);
   void setup();
   uint8_t getRowCount() const;
 

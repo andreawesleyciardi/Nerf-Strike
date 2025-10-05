@@ -10,7 +10,7 @@
 #include "PairingRegistry.h"
 #include "CommandConsole.h"
 #include "OPCodes.h"
-#include "DisplayManager.h"
+#include "LcdDisplay.h"
 #include "ScreenManager.h"
 #include "ScreenRenderer.h"
 #include "ScreenController.h"
@@ -26,7 +26,7 @@ WirelessHub wireless;
 PairingRegistry registry;
 GameModeRegistry gameModeRegistry;
 TargetTypeManager targetTypeManager;
-DisplayManager display(lcdI2CAddress, 20, 4);
+LcdDisplay display(lcdI2CAddress, 20, 4);
 ScreenManager screenManager;
 ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
 ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
