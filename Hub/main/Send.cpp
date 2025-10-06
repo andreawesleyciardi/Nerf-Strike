@@ -1,6 +1,7 @@
 #include "Send.h"
 #include <RF24.h>
 #include <OPCodes.h>
+#include <Protocol.h>
 #include "HubConfig.h"
 
 Send::Send(RF24& radio) : radio(radio) {}
@@ -23,14 +24,15 @@ void Send::pairingResponse(uint8_t assignedID, TargetType type) {
   delay(100);  // ✅ Give target time to switch pipes
   radio.startListening();
 
-  if (success) {
-    Serial.print(F("✅ Sent pairing response with ID: "));
-    Serial.print(assignedID);
-    Serial.print(F(" | Type: "));
-    Serial.println(targetTypeToString(type));
-  } else {
+  if (!success) {
     Serial.println(F("❌ Failed to send pairing response."));
+    return;
   }
+
+  Serial.print(F("✅ Sent pairing response with ID: "));
+  Serial.print(assignedID);
+  Serial.print(F(" | Type: "));
+  Serial.println(targetTypeToString(type));
 }
 
 void Send::verificationResponse(uint8_t id) {
@@ -44,13 +46,14 @@ void Send::verificationResponse(uint8_t id) {
   bool success = radio.write(&response, sizeof(response));
   radio.startListening();
 
-  if (success) {
-    Serial.print(F("✅ Sent verification response for ID: "));
-    Serial.println(id);
-  } else {
+  if (!success) {
     Serial.print(F("❌ Failed to send verification response for ID: "));
     Serial.println(id);
+    return;
   }
+
+  Serial.print(F("✅ Sent verification response for ID: "));
+  Serial.println(id);
 }
 
 void Send::toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length) {
@@ -61,14 +64,15 @@ void Send::toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uin
   bool success = radio.write(packet, length);
   radio.startListening();
 
-  if (success) {
-    Serial.print("📤 Sent data to target ID ");
-    Serial.print(id);
-    Serial.print(" via pipe ");
-    Serial.println((char*)pipe);
-  } else {
+  if (!success) {
     Serial.println(F("❌ Failed to send data to target."));
+    return;
   }
+  
+  Serial.print("📤 Sent data to target ID ");
+  Serial.print(id);
+  Serial.print(" via pipe ");
+  Serial.println((char*)pipe);
 }
 
 void Send::blinkAll(PairingRegistry& registry) {

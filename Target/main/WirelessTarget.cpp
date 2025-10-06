@@ -1,12 +1,12 @@
-#include "WirelessManager.h"
+#include "WirelessTarget.h"
 #include <TargetType.h>
 #include <OPCodes.h>
 #include <Protocol.h>
 #include "TargetConfig.h"
 
-WirelessManager::WirelessManager() : radio(transmitterCEPin, transmitterCSNPin) {}
+WirelessTarget::WirelessTarget() : radio(transmitterCEPin, transmitterCSNPin) {}
 
-void WirelessManager::setup() {
+void WirelessTarget::setup() {
   Serial.println(F("🔧 Initializing radio..."));
 
   if (!radio.begin()) {
@@ -34,7 +34,7 @@ void WirelessManager::setup() {
   Serial.println(F("📡 Radio listening on pairing pipe."));
 }
 
-void WirelessManager::sendPairingRequest(uint32_t token) {
+void WirelessTarget::sendPairingRequest(uint32_t token) {
   PairingRequestPacket request = {
     OPCODE_PAIRING_REQUEST,
     token,
@@ -56,12 +56,12 @@ void WirelessManager::sendPairingRequest(uint32_t token) {
   }
 }
 
-bool WirelessManager::receivePairingResponse(uint8_t &assignedID) {
+bool WirelessTarget::receivePairingResponse(uint8_t &assignedID) {
   TargetType dummyType;
   return receivePairingResponse(assignedID, dummyType);
 }
 
-bool WirelessManager::receivePairingResponse(uint8_t &assignedID, TargetType &typeOut) {
+bool WirelessTarget::receivePairingResponse(uint8_t &assignedID, TargetType &typeOut) {
   Serial.print(F("📡 Target receiving pairing response on pairing pipe: 0x"));
   Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
   Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
@@ -94,7 +94,7 @@ bool WirelessManager::receivePairingResponse(uint8_t &assignedID, TargetType &ty
   return false;
 }
 
-void WirelessManager::sendVerificationRequest(uint8_t id) {
+void WirelessTarget::sendVerificationRequest(uint8_t id) {
   VerificationRequestPacket request = {
     OPCODE_VERIFICATION_REQUEST,
     id
@@ -115,7 +115,7 @@ void WirelessManager::sendVerificationRequest(uint8_t id) {
   }
 }
 
-bool WirelessManager::waitForVerificationResponse(uint8_t id) {
+bool WirelessTarget::waitForVerificationResponse(uint8_t id) {
   Serial.println(F("⏳ Waiting for verification acknowledgment..."));
   unsigned long startTime = millis();
 
@@ -136,9 +136,9 @@ bool WirelessManager::waitForVerificationResponse(uint8_t id) {
   return false;
 }
 
-bool WirelessManager::sendHitPacket(uint8_t id) {
-  HitPacket packet = {
-    OPCODE_HIT_PACKET,
+bool WirelessTarget::sendHitPacket(uint8_t id) {
+  HitEventPacket packet = {
+    OPCODE_HIT_EVENT,
     id
   };
 
@@ -157,7 +157,7 @@ bool WirelessManager::sendHitPacket(uint8_t id) {
 
 // Utilities functions ---------------------------------------------------------------------------------
 
-void WirelessManager::switchToTargetPipe(uint8_t id) {
+void WirelessTarget::switchToTargetPipe(uint8_t id) {
   sprintf((char*)targetPipe, "TGT%d", id);
   radio.stopListening();
   radio.openReadingPipe(1, targetPipe);
@@ -167,7 +167,7 @@ void WirelessManager::switchToTargetPipe(uint8_t id) {
   Serial.println((char*)targetPipe);
 }
 
-void WirelessManager::sendToHub(const byte* data, uint8_t length) {
+void WirelessTarget::sendToHub(const byte* data, uint8_t length) {
   radio.stopListening();
   radio.openWritingPipe(targetPipe);
   bool success = radio.write(data, length);
@@ -180,10 +180,14 @@ void WirelessManager::sendToHub(const byte* data, uint8_t length) {
   }
 }
 
-bool WirelessManager::available() {
+bool WirelessTarget::available() {
   return radio.available();
 }
 
-void WirelessManager::read(byte* buffer, uint8_t length) {
+void WirelessTarget::read(byte* buffer, uint8_t length) {
   radio.read(buffer, length);
+}
+
+RF24& WirelessTarget::getRadio() {
+  return radio;
 }

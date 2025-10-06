@@ -2,8 +2,8 @@
 #include <Protocol.h>
 #include <OPCodes.h>
 
-Receive::Receive(TargetTypeManager& typeMgr, PairingRegistry& reg)
-  : targetTypeManager(typeMgr), registry(reg) {}
+Receive::Receive(TargetTypeManager& targetTypeManager, PairingRegistry& registry)
+  : targetTypeManager(targetTypeManager), registry(registry) {}
 
 const uint8_t* Receive::verificationRequest(const byte* buffer) {
   VerificationRequestPacket* request = reinterpret_cast<VerificationRequestPacket*>(const_cast<byte*>(buffer));
@@ -37,8 +37,8 @@ const uint8_t Receive::pairingRequest(const byte* buffer) {
   return assignedID;
 }
 
-const uint8_t* Receive::hitPacket(const byte* buffer) {
-  HitPacket* packet = reinterpret_cast<HitPacket*>(const_cast<byte*>(buffer));
+const uint8_t* Receive::hitEvent(const byte* buffer) {
+  HitEventPacket* packet = reinterpret_cast<HitEventPacket*>(const_cast<byte*>(buffer));
   uint8_t targetId = packet->id;
 
   Serial.print(F("🎯 Hit received from target ID: "));

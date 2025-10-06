@@ -1,5 +1,5 @@
-#ifndef WIRELESS_MANAGER_H
-#define WIRELESS_MANAGER_H
+#ifndef WIRELESS_TARGET_H
+#define WIRELESS_TARGET_H
 
 #include <Arduino.h>
 #include <RF24.h>
@@ -7,9 +7,9 @@
 #include <TargetType.h>
 #include <OPCodes.h>
 
-class WirelessManager {
+class WirelessTarget {
 public:
-  WirelessManager();
+  WirelessTarget();
   void setup();
 
   void sendPairingRequest(uint32_t token);
@@ -26,6 +26,8 @@ public:
 
   bool available();
   void read(byte* buffer, uint8_t length);
+
+  RF24& getRadio();
 
 private:
   RF24 radio;

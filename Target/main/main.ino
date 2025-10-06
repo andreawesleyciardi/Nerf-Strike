@@ -3,12 +3,14 @@
 #include <DisplayFeedback.h>
 #include "TargetConfig.h"
 #include "TargetPins.h"
-#include "WirelessManager.h"
-#include "PairingManager.h"
+#include "WirelessTarget.h"
+#include "Send.h"
+#include "PairingRegistry.h"
 
 // Core managers
-WirelessManager wireless;
-PairingManager pairingManager(wireless);
+WirelessTarget wireless;
+Send send(wireless.getRadio());
+PairingRegistry registry(wireless, send);
 
 void setup() {
   delay(1000);
@@ -23,9 +25,9 @@ void setup() {
   Serial.println(F("✅ Radio initialized and chip connected."));
   Serial.println(F("Radio listening on pairing pipe."));
 
-  pairingManager.pair();  // Stateless pairing
+  registry.pair();  // Stateless pairing
 
-  showAssignedIDBriefly(pairingManager.getAssignedID());
+  showAssignedIDBriefly(registry.getAssignedID());
 
   Serial.println(F("Setup complete."));
 }
@@ -43,28 +45,28 @@ void loop() {
 
   if (statusButton.wasPressed()) {
     Serial.println(F("🔍 Verifying connection with hub..."));
-    bool verified = pairingManager.verify();
+    bool verified = registry.verify();
     if (verified) {
       Serial.println(F("✅ Connection verified."));
       showStatus(statusRgbLed, STATUS_CONNECTED);
     } else {
       Serial.println(F("❌ Verification failed. Re-pairing..."));
       showStatus(statusRgbLed, STATUS_ERROR);
-      pairingManager.pair();
+      registry.pair();
     }
-    showAssignedIDBriefly(pairingManager.getAssignedID());
+    showAssignedIDBriefly(registry.getAssignedID());
   }
 
   if (statusButton.wasLongPressed(feedback)) {
     Serial.println(F("🧹 Token reset triggered..."));
-    pairingManager.resetToken();
+    registry.resetToken();
     showStatus(statusRgbLed, STATUS_OK, 3);
     delay(500);
-    pairingManager.pair();
+    registry.pair();
     awaitingAck = false;
     lastHeartbeat = millis();
     heartbeatLost = false;
-    showAssignedIDBriefly(pairingManager.getAssignedID());
+    showAssignedIDBriefly(registry.getAssignedID());
   }
 
   if (wireless.available()) {
@@ -82,7 +84,7 @@ void loop() {
 
       case OPCODE_BLINK_COMMAND: {
           Serial.println(F("🔦 Blink command received."));
-          uint8_t assignedID = pairingManager.getAssignedID();
+          uint8_t assignedID = registry.getAssignedID();
           scoreDisplay.showScore(assignedID);
           showStatus(statusRgbLed, STATUS_PAIRING);
           rgbRing.chase("Blue", 30);
@@ -107,7 +109,7 @@ void loop() {
     }
   }
 
-  uint8_t targetId = pairingManager.getAssignedID();
+  uint8_t targetId = registry.getAssignedID();
   if (targetId != 0xFF) {
     if (sensor.isHit()) {
       Serial.println(F("✅ Target got hit."));
@@ -126,22 +128,22 @@ void loop() {
 
     if (awaitingAck && millis() - lastHitTime > 5000) {
       Serial.println(F("🔄 Signal lost after hit. Re-pairing..."));
-      pairingManager.pair();
+      registry.pair();
       awaitingAck = false;
       lastHeartbeat = millis();
       heartbeatLost = false;
 
-      showAssignedIDBriefly(pairingManager.getAssignedID());
+      showAssignedIDBriefly(registry.getAssignedID());
     }
 
     if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {
       Serial.println(F("💔 No heartbeat. Re-pairing..."));
       heartbeatLost = true;
       showStatus(statusRgbLed, STATUS_DISCONNECTED);
-      pairingManager.pair();
+      registry.pair();
       lastHeartbeat = millis();
 
-      showAssignedIDBriefly(pairingManager.getAssignedID());
+      showAssignedIDBriefly(registry.getAssignedID());
     }
   }
 }

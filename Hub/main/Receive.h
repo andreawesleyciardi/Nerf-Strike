@@ -11,7 +11,7 @@ public:
 
   const uint8_t* verificationRequest(const byte* buffer);
   const uint8_t pairingRequest(const byte* buffer);
-  const uint8_t* hitPacket(const byte* buffer);
+  const uint8_t* hitEvent(const byte* buffer);
 
 private:
   TargetTypeManager& targetTypeManager;

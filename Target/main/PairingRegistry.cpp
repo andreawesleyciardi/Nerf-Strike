@@ -1,11 +1,11 @@
-#include "PairingManager.h"
+#include "PairingRegistry.h"
 #include <EEPROM.h>
 
 #define EEPROM_TOKEN_ADDR 0  // Starting address to store token
 
-PairingManager::PairingManager(WirelessManager& wm) : wireless(wm), assignedID(0xFF) {}
+PairingRegistry::PairingRegistry(WirelessTarget& wm, Send& send) : wireless(wm), assignedID(0xFF) {}
 
-void PairingManager::pair() {
+void PairingRegistry::pair() {
   token = loadTokenFromEEPROM();
 
   if (token == 0xFFFFFFFF || token == 0) {
@@ -25,6 +25,8 @@ void PairingManager::pair() {
 
     wireless.sendPairingRequest(token);
 
+    // CONTINUE CREATING COMMUNICATION-RECEIVE <--------------------------
+
     uint8_t id;
     if (wireless.receivePairingResponse(id)) {
       assignedID = id;
@@ -41,11 +43,11 @@ void PairingManager::pair() {
   assignedID = 0xFF;
 }
 
-uint8_t PairingManager::getAssignedID() {
+uint8_t PairingRegistry::getAssignedID() {
   return assignedID;
 }
 
-bool PairingManager::verify() {
+bool PairingRegistry::verify() {
   if (assignedID == 0xFF) {
     Serial.println(F("⚠️ Cannot verify — no assigned ID."));
     return false;
@@ -55,17 +57,17 @@ bool PairingManager::verify() {
   return wireless.waitForVerificationResponse(assignedID);
 }
 
-uint32_t PairingManager::loadTokenFromEEPROM() {
+uint32_t PairingRegistry::loadTokenFromEEPROM() {
   uint32_t storedToken;
   EEPROM.get(EEPROM_TOKEN_ADDR, storedToken);
   return storedToken;
 }
 
-void PairingManager::saveTokenToEEPROM(uint32_t newToken) {
+void PairingRegistry::saveTokenToEEPROM(uint32_t newToken) {
   EEPROM.put(EEPROM_TOKEN_ADDR, newToken);
 }
 
-void PairingManager::resetToken() {
+void PairingRegistry::resetToken() {
   uint32_t blank = 0xFFFFFFFF;
   EEPROM.put(EEPROM_TOKEN_ADDR, blank);
   Serial.println(F("🧹 Token cleared from EEPROM."));

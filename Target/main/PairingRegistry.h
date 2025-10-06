@@ -1,19 +1,21 @@
-#ifndef PAIRING_MANAGER_H
-#define PAIRING_MANAGER_H
+#ifndef PAIRING_REGISTRY_H
+#define PAIRING_REGISTRY_H
 
 #include <Arduino.h>
-#include "WirelessManager.h"
+#include "WirelessTarget.h"
+#include "Send.h"
 
-class PairingManager {
+class PairingRegistry {
 public:
-  PairingManager(WirelessManager& wm);
+  PairingRegistry(WirelessTarget& wm, Send& send);
   void pair();
   uint8_t getAssignedID();
   void resetToken();
   bool verify();
 
 private:
-  WirelessManager& wireless;
+  WirelessTarget& wireless;
+  Send& send;
   uint8_t assignedID;
   uint32_t token;
 

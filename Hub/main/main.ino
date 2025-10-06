@@ -98,58 +98,6 @@ void loop() {
   switch (header->opcode) {
     case OPCODE_VERIFICATION_REQUEST: communication.verification(buffer); break;
     case OPCODE_PAIRING_REQUEST:      communication.pairing(buffer); break;
-    case OPCODE_HIT_PACKET:           communication.hit(buffer); break;
+    case OPCODE_HIT_EVENT:            communication.hit(buffer); break;
   }
-
-  // switch (header->opcode) {
-  //   case OPCODE_VERIFICATION_REQUEST: {
-  //       const uint8_t* pipe = receive.verificationRequest(buffer);
-  //       if (!pipe) {
-  //         Serial.println(F("❌ No pipe found for ID."));
-  //         showStatus(statusRgbLed, STATUS_ERROR);
-  //       } else {
-  //         uint8_t targetId = reinterpret_cast<VerificationRequestPacket*>(buffer)->id;
-  //         Serial.println(F("✅ Pipe found. Sending verification ACK."));
-  //         send.verificationResponse(targetId);
-  //       }
-  //     break;
-  //   }
-
-  //   case OPCODE_PAIRING_REQUEST: {
-  //       const uint8_t assignedID = receive.pairingRequest(buffer);
-  //       if (assignedID != 0xFF) {
-  //         TargetType incomingType = reinterpret_cast<PairingRequestPacket*>(buffer)->type;
-  //         send.pairingResponse(assignedID, incomingType);
-
-  //         char pipeName[6];
-  //         sprintf(pipeName, "TGT%d", assignedID);
-  //         registry.storePipeForID(assignedID, reinterpret_cast<uint8_t*>(pipeName));
-
-  //         Serial.print(F("📡 Stored pipe for ID "));
-  //         Serial.print(assignedID);
-  //         Serial.print(F(": "));
-  //         Serial.println(pipeName);
-          
-  //         showStatus(statusRgbLed, STATUS_PAIRING, 2);
-  //         delay(100);
-  //       } else {
-  //         Serial.println(F("❌ Failed to assign ID."));
-  //         showStatus(statusRgbLed, STATUS_ERROR, 2);
-  //       }
-  //     break;
-  //   }
-
-  //   case OPCODE_HIT_PACKET: {
-  //       const uint8_t* pipe = receive.hitPacket(buffer);
-  //       if (!pipe) {
-  //         Serial.println(F("❌ No pipe found for target ID."));
-  //         showStatus(statusRgbLed, STATUS_ERROR);
-  //       } else {
-  //         uint8_t targetId = reinterpret_cast<HitPacket*>(buffer)->id;
-  //         uint8_t newScore = gameLogic.incrementScoreFor(targetId);
-  //         send.scoreUpdate(targetId, pipe, newScore);
-  //       }
-  //     break;
-  //   }
-  // }
 }

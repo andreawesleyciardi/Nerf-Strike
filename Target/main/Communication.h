@@ -6,11 +6,10 @@
 #include "Receive.h"
 #include "Send.h"
 #include "PairingRegistry.h"
-#include "GameLogic.h"
 
 class Communication {
 public:
-  Communication(Receive& receive, Send& send, PairingRegistry& registry, GameLogic& gameLogic, RGBLed& statusRgbLed);
+  Communication(Receive& receive, Send& send, PairingRegistry& registry, RGBLed& statusRgbLed);
 
   void pairing(const byte* buffer);
   void verification(const byte* buffer);
@@ -20,7 +19,6 @@ private:
   Receive& receive;
   Send& send;
   PairingRegistry& registry;
-  GameLogic& gameLogic;
   RGBLed& statusRgbLed;
 };
 

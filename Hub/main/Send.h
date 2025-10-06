@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <RF24.h>
 #include <TargetType.h>
-#include <Protocol.h>
 #include "PairingRegistry.h"
 
 class Send {

@@ -6,20 +6,6 @@
 Communication::Communication(Receive& receive, Send& send, PairingRegistry& registry, GameLogic& gameLogic, RGBLed& statusRgbLed)
   : receive(receive), send(send), registry(registry), gameLogic(gameLogic), statusRgbLed(statusRgbLed) {}
 
-void Communication::verification(const byte* buffer) {
-  const uint8_t* pipe = receive.verificationRequest(buffer);
-  if (!pipe) {
-    Serial.println(F("❌ No pipe found for ID."));
-    showStatus(statusRgbLed, STATUS_ERROR);
-    return;
-  }
-
-  const VerificationRequestPacket* request = reinterpret_cast<const VerificationRequestPacket*>(buffer);
-  uint8_t targetId = request->id;
-  Serial.println(F("✅ Pipe found. Sending verification ACK."));
-  send.verificationResponse(targetId);
-}
-
 void Communication::pairing(const byte* buffer) {
   const uint8_t assignedID = receive.pairingRequest(buffer);
   if (assignedID == 0xFF) {
@@ -45,15 +31,29 @@ void Communication::pairing(const byte* buffer) {
   delay(100);
 }
 
+void Communication::verification(const byte* buffer) {
+  const uint8_t* pipe = receive.verificationRequest(buffer);
+  if (!pipe) {
+    Serial.println(F("❌ No pipe found for ID."));
+    showStatus(statusRgbLed, STATUS_ERROR);
+    return;
+  }
+
+  const VerificationRequestPacket* request = reinterpret_cast<const VerificationRequestPacket*>(buffer);
+  uint8_t targetId = request->id;
+  Serial.println(F("✅ Pipe found. Sending verification ACK."));
+  send.verificationResponse(targetId);
+}
+
 void Communication::hit(const byte* buffer) {
-  const uint8_t* pipe = receive.hitPacket(buffer);
+  const uint8_t* pipe = receive.hitEvent(buffer);
   if (!pipe) {
     Serial.println(F("❌ No pipe found for target ID."));
     showStatus(statusRgbLed, STATUS_ERROR);
     return;
   }
 
-  const HitPacket* request = reinterpret_cast<const HitPacket*>(buffer);
+  const HitEventPacket* request = reinterpret_cast<const HitEventPacket*>(buffer);
   uint8_t targetId = request->id;
   uint8_t newScore = gameLogic.incrementScoreFor(targetId);
   send.scoreUpdate(targetId, pipe, newScore);
