@@ -8,9 +8,9 @@
 
 class Send {
 public:
-  Send(RF24& radio);
+  Send(RF24& radio, PairingRegistry& registry);
 
-  void pairingResponse(uint8_t assignedID, TargetType type);
+  void pairingResponse(uint8_t assignedID);
   void verificationResponse(uint8_t id);
   
   void blinkAll(PairingRegistry& registry);
@@ -18,9 +18,10 @@ public:
 
   void scoreUpdate(uint8_t id, const uint8_t* pipe, uint8_t newScore);
 
-  void toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length);
+  const bool toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length);
 private:
   RF24& radio;
+  PairingRegistry& registry;
 };
 
 extern Send send;

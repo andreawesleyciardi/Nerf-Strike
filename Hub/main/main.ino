@@ -4,10 +4,10 @@
 #include "HubPins.h"
 #include "HubStateManager.h"
 #include "WirelessHub.h"
+#include "PairingRegistry.h"
 #include "Send.h"
 #include "Receive.h"
 #include "Communication.h"
-#include "PairingRegistry.h"
 #include "CommandConsole.h"
 #include "OPCodes.h"
 #include "LcdDisplay.h"
@@ -33,7 +33,7 @@ ScreenController screenController(screenManager, hubState, registry, gameModeReg
 CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager);
 
 Receive receive(targetTypeManager, registry);
-Send send(wireless.getRadio());
+Send send(wireless.getRadio(), registry);
 
 Communication communication(receive, send, registry, gameLogic, statusRgbLed);
 
@@ -94,6 +94,9 @@ void loop() {
   byte buffer[8];
   wireless.read(buffer, sizeof(buffer));
   PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
+
+  Serial.print(F("Request received with opcode: "));
+  Serial.println(header->opcode);
 
   switch (header->opcode) {
     case OPCODE_VERIFICATION_REQUEST: communication.verification(buffer); break;

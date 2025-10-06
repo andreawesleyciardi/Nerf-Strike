@@ -39,11 +39,10 @@ const uint8_t Receive::pairingRequest(const byte* buffer) {
 
 const uint8_t* Receive::hitEvent(const byte* buffer) {
   HitEventPacket* packet = reinterpret_cast<HitEventPacket*>(const_cast<byte*>(buffer));
-  uint8_t targetId = packet->id;
 
   Serial.print(F("🎯 Hit received from target ID: "));
-  Serial.println(targetId);
+  Serial.println(packet->id);
 
-  const uint8_t* pipe = registry.getPipeForID(targetId);
+  const uint8_t* pipe = registry.getPipeForID(packet->id);
   return pipe;
 }

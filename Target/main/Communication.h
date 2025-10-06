@@ -11,9 +11,9 @@ class Communication {
 public:
   Communication(Receive& receive, Send& send, PairingRegistry& registry, RGBLed& statusRgbLed);
 
-  void pairing(const byte* buffer);
-  void verification(const byte* buffer);
-  void hit(const byte* buffer);
+  void pairing();
+  const bool verification();
+  void hit();
 
 private:
   Receive& receive;

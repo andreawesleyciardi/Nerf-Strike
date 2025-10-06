@@ -22,12 +22,3 @@ private:
 };
 
 #endif
-
-
-
-  // void sendPairingResponse(uint8_t assignedID, TargetType type);  // ✅ Updated
-  // void sendVerificationResponse(uint8_t id);
-  // void sendToTargetPipe(uint8_t id, const uint8_t* pipe, const byte* data, uint8_t length);
-
-  // void triggerBlinkOnTargets(PairingRegistry& registry);
-  // void sendHeartbeatToTargets(PairingRegistry& registry);

@@ -14,9 +14,7 @@ void Communication::pairing(const byte* buffer) {
     return;
   }
 
-  const PairingRequestPacket* request = reinterpret_cast<const PairingRequestPacket*>(buffer);
-  TargetType incomingType = request->type;
-  send.pairingResponse(assignedID, incomingType);
+  send.pairingResponse(assignedID);
 
   char pipeName[6];
   sprintf(pipeName, "TGT%d", assignedID);

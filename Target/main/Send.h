@@ -9,16 +9,18 @@
 
 class Send {
 public:
-  Send(RF24& radio);
+  Send(RF24& radio, PairingRegistry& registry);
+  
+  const bool toHub(const byte* data, uint8_t length, bool onTargetPipe = false);
 
   void pairingRequest(uint32_t token);
-  void verificationRequest(uint8_t assignedID);
+  const bool verificationRequest(uint8_t assignedID);
 
-  void hitEvent(uint8_t assignedID);
+  void hitEvent(uint8_t targetId);
 
-  void toHub(const byte* data, uint8_t length);
 private:
   RF24& radio;
+  PairingRegistry& registry;
 };
 
 extern Send send;

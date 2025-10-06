@@ -4,13 +4,18 @@
 #include "TargetConfig.h"
 #include "TargetPins.h"
 #include "WirelessTarget.h"
-#include "Send.h"
 #include "PairingRegistry.h"
+#include "Send.h"
+#include "Receive.h"
+#include "Communication.h"
 
-// Core managers
+// 🧠 Core Managers
 WirelessTarget wireless;
-Send send(wireless.getRadio());
-PairingRegistry registry(wireless, send);
+PairingRegistry registry(wireless.getRadio());
+Receive receive(wireless.getRadio(), registry);
+Send send(wireless.getRadio(), registry);
+
+Communication communication(receive, send, registry, statusRgbLed);
 
 void setup() {
   delay(1000);
@@ -25,7 +30,8 @@ void setup() {
   Serial.println(F("✅ Radio initialized and chip connected."));
   Serial.println(F("Radio listening on pairing pipe."));
 
-  registry.pair();  // Stateless pairing
+  // registry.pair();  // Stateless pairing
+  communication.pairing();
 
   showAssignedIDBriefly(registry.getAssignedID());
 
@@ -45,16 +51,18 @@ void loop() {
 
   if (statusButton.wasPressed()) {
     Serial.println(F("🔍 Verifying connection with hub..."));
-    bool verified = registry.verify();
-    if (verified) {
-      Serial.println(F("✅ Connection verified."));
-      showStatus(statusRgbLed, STATUS_CONNECTED);
-    } else {
-      Serial.println(F("❌ Verification failed. Re-pairing..."));
-      showStatus(statusRgbLed, STATUS_ERROR);
-      registry.pair();
+    // bool verified = registry.verify();
+    // if (verified) {
+    //   Serial.println(F("✅ Connection verified."));
+    //   showStatus(statusRgbLed, STATUS_CONNECTED);
+    // } else {
+    //   Serial.println(F("❌ Verification failed. Re-pairing..."));
+    //   showStatus(statusRgbLed, STATUS_ERROR);
+    //   communication.pairing();
+    // }
+    if (communication.verification()) {
+      showAssignedIDBriefly(registry.getAssignedID());
     }
-    showAssignedIDBriefly(registry.getAssignedID());
   }
 
   if (statusButton.wasLongPressed(feedback)) {
@@ -62,7 +70,7 @@ void loop() {
     registry.resetToken();
     showStatus(statusRgbLed, STATUS_OK, 3);
     delay(500);
-    registry.pair();
+    communication.pairing();
     awaitingAck = false;
     lastHeartbeat = millis();
     heartbeatLost = false;
@@ -76,7 +84,7 @@ void loop() {
 
     switch (header->opcode) {
       case OPCODE_HEARTBEAT: {
-          Serial.println(F("💓 Heartbeat received from hub."));
+          // Serial.println(F("💓 Heartbeat received from hub."));                  // To restore
           lastHeartbeat = millis();
           heartbeatLost = false;
         break;
@@ -112,39 +120,42 @@ void loop() {
   uint8_t targetId = registry.getAssignedID();
   if (targetId != 0xFF) {
     if (sensor.isHit()) {
+      // TO CREATE CONDITIONS: if (gameStatus == PLAYING) {
       Serial.println(F("✅ Target got hit."));
       rgbRing.blink("Green");
       buzzer.beep(10);
 
-      if (wireless.sendHitPacket(targetId)) {
-        Serial.println(F("📡 Hit packet sent to hub."));
-        awaitingAck = false;
-      } else {
-        Serial.println(F("⚠️ No response from hub. Will retry pairing."));
-        awaitingAck = true;
-      }
-      lastHitTime = millis();
+      communication.hit();
+
+    //   if (wireless.send HitPacket(targetId)) {
+    //     Serial.println(F("📡 Hit packet sent to hub."));
+    //     awaitingAck = false;
+    //   } else {
+    //     Serial.println(F("⚠️ No response from hub. Will retry pairing."));
+    //     awaitingAck = true;
+    //   }
+    //   lastHitTime = millis();
     }
 
-    if (awaitingAck && millis() - lastHitTime > 5000) {
-      Serial.println(F("🔄 Signal lost after hit. Re-pairing..."));
-      registry.pair();
-      awaitingAck = false;
-      lastHeartbeat = millis();
-      heartbeatLost = false;
+    // if (awaitingAck && millis() - lastHitTime > 5000) {
+    //   Serial.println(F("🔄 Signal lost after hit. Re-pairing..."));
+    //   communication.pairing();
+    //   awaitingAck = false;
+    //   lastHeartbeat = millis();
+    //   heartbeatLost = false;
 
-      showAssignedIDBriefly(registry.getAssignedID());
-    }
+    //   showAssignedIDBriefly(registry.getAssignedID());
+    // }
 
-    if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {
-      Serial.println(F("💔 No heartbeat. Re-pairing..."));
-      heartbeatLost = true;
-      showStatus(statusRgbLed, STATUS_DISCONNECTED);
-      registry.pair();
-      lastHeartbeat = millis();
+    // if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {
+    //   Serial.println(F("💔 No heartbeat. Re-pairing..."));
+    //   heartbeatLost = true;
+    //   showStatus(statusRgbLed, STATUS_DISCONNECTED);
+    //   communication.pairing();
+    //   lastHeartbeat = millis();
 
-      showAssignedIDBriefly(registry.getAssignedID());
-    }
+    //   showAssignedIDBriefly(registry.getAssignedID());
+    // }
   }
 }
 

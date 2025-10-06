@@ -4,13 +4,33 @@
 #include <Protocol.h>
 #include "HubConfig.h"
 
-Send::Send(RF24& radio) : radio(radio) {}
+Send::Send(RF24& radio, PairingRegistry& registry)
+  : radio(radio), registry(registry) {}
 
-void Send::pairingResponse(uint8_t assignedID, TargetType type) {
+const bool Send::toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length) {
+  radio.stopListening();
+  radio.openWritingPipe(pipe);
+  delay(5);  // ✅ Give target time to listen
+
+  bool success = radio.write(packet, length);
+  radio.startListening();
+
+  if (!success) {
+    Serial.println(F("❌ Failed to send data to target."));
+    return false;
+  }
+  
+  // Serial.print("📤 Sent data to target ID ");                                  // TO RESTORE
+  // Serial.print(id);
+  // Serial.print(" via pipe ");
+  // Serial.println((char*)pipe);
+  return true;
+}
+
+void Send::pairingResponse(uint8_t assignedID) {
   PairingResponsePacket response = {
     OPCODE_PAIRING_RESPONSE,
-    assignedID,
-    type
+    assignedID
   };
 
   Serial.print(F("📡 Hub sending pairing response on pairing pipe: 0x"));
@@ -30,9 +50,7 @@ void Send::pairingResponse(uint8_t assignedID, TargetType type) {
   }
 
   Serial.print(F("✅ Sent pairing response with ID: "));
-  Serial.print(assignedID);
-  Serial.print(F(" | Type: "));
-  Serial.println(targetTypeToString(type));
+  Serial.println(assignedID);
 }
 
 void Send::verificationResponse(uint8_t id) {
@@ -41,10 +59,12 @@ void Send::verificationResponse(uint8_t id) {
     id
   };
 
-  radio.stopListening();
-  radio.openWritingPipe(pairingPipe);
-  bool success = radio.write(&response, sizeof(response));
-  radio.startListening();
+  const uint8_t* pipe = registry.getPipeForID(id);
+  Serial.print("📤 Trying to send verification response to target ID ");
+  Serial.print(id);
+  Serial.print(" via pipe ");
+  Serial.println((char*)pipe);
+  bool success = toTargetPipe(id, pipe, &response, sizeof(response));
 
   if (!success) {
     Serial.print(F("❌ Failed to send verification response for ID: "));
@@ -54,25 +74,6 @@ void Send::verificationResponse(uint8_t id) {
 
   Serial.print(F("✅ Sent verification response for ID: "));
   Serial.println(id);
-}
-
-void Send::toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length) {
-  radio.stopListening();
-  radio.openWritingPipe(pipe);
-  delay(5);  // ✅ Give target time to listen
-
-  bool success = radio.write(packet, length);
-  radio.startListening();
-
-  if (!success) {
-    Serial.println(F("❌ Failed to send data to target."));
-    return;
-  }
-  
-  Serial.print("📤 Sent data to target ID ");
-  Serial.print(id);
-  Serial.print(" via pipe ");
-  Serial.println((char*)pipe);
 }
 
 void Send::blinkAll(PairingRegistry& registry) {

@@ -3,24 +3,27 @@
 
 #include <Arduino.h>
 #include "WirelessTarget.h"
-#include "Send.h"
 
 class PairingRegistry {
 public:
-  PairingRegistry(WirelessTarget& wm, Send& send);
-  void pair();
-  uint8_t getAssignedID();
-  void resetToken();
-  bool verify();
+  PairingRegistry(RF24& radio);
 
-private:
-  WirelessTarget& wireless;
-  Send& send;
-  uint8_t assignedID;
-  uint32_t token;
+  void setAssignedID(uint8_t newAssignedID);
+  uint8_t getAssignedID();
+  void setToken(uint32_t newToken);
+  void resetToken();
 
   uint32_t loadTokenFromEEPROM();
   void saveTokenToEEPROM(uint32_t newToken);
+
+  void switchToTargetPipe(uint8_t id);
+  const uint8_t* getTargetPipe();
+
+private:
+  RF24& radio;
+  uint32_t token;
+  uint8_t assignedID;
+  uint8_t targetPipe[6];
 };
 
 #endif

@@ -3,58 +3,21 @@
 
 #define EEPROM_TOKEN_ADDR 0  // Starting address to store token
 
-PairingRegistry::PairingRegistry(WirelessTarget& wm, Send& send) : wireless(wm), assignedID(0xFF) {}
-
-void PairingRegistry::pair() {
-  token = loadTokenFromEEPROM();
-
-  if (token == 0xFFFFFFFF || token == 0) {
-    token = random(100000, 999999);
-    saveTokenToEEPROM(token);
-    Serial.print(F("🆕 Generated new token: "));
-    Serial.println(token);
-  } else {
-    Serial.print(F("🔁 Reusing stored token: "));
-    Serial.println(token);
-  }
-
-  for (int attempt = 1; attempt <= 3; attempt++) {
-    Serial.print(F("📨 Attempt "));
-    Serial.print(attempt);
-    Serial.println(F(" to pair..."));
-
-    wireless.sendPairingRequest(token);
-
-    // CONTINUE CREATING COMMUNICATION-RECEIVE <--------------------------
-
-    uint8_t id;
-    if (wireless.receivePairingResponse(id)) {
-      assignedID = id;
-      wireless.switchToTargetPipe(id);
-      Serial.print(F("✅ Paired successfully with ID: "));
-      Serial.println(id);
-      return;
-    }
-
-    delay(500);
-  }
-
-  Serial.println(F("❌ Pairing failed after multiple attempts."));
-  assignedID = 0xFF;
-}
+PairingRegistry::PairingRegistry(RF24& radio) : radio(radio), assignedID(0xFF) {}
 
 uint8_t PairingRegistry::getAssignedID() {
   return assignedID;
 }
 
-bool PairingRegistry::verify() {
-  if (assignedID == 0xFF) {
-    Serial.println(F("⚠️ Cannot verify — no assigned ID."));
-    return false;
+void PairingRegistry::setAssignedID(uint8_t newAssignedID) {
+  assignedID = newAssignedID;
+  if (newAssignedID != 0xFF) {
+    switchToTargetPipe(newAssignedID);
   }
+}
 
-  wireless.sendVerificationRequest(assignedID);
-  return wireless.waitForVerificationResponse(assignedID);
+void PairingRegistry::setToken(uint32_t newToken) {
+  token = newToken;
 }
 
 uint32_t PairingRegistry::loadTokenFromEEPROM() {
@@ -64,6 +27,7 @@ uint32_t PairingRegistry::loadTokenFromEEPROM() {
 }
 
 void PairingRegistry::saveTokenToEEPROM(uint32_t newToken) {
+  token = newToken;
   EEPROM.put(EEPROM_TOKEN_ADDR, newToken);
 }
 
@@ -71,4 +35,23 @@ void PairingRegistry::resetToken() {
   uint32_t blank = 0xFFFFFFFF;
   EEPROM.put(EEPROM_TOKEN_ADDR, blank);
   Serial.println(F("🧹 Token cleared from EEPROM."));
+}
+
+void PairingRegistry::switchToTargetPipe(uint8_t id) {
+  sprintf((char*)targetPipe, "TGT%d", id);
+  radio.stopListening();
+  radio.openReadingPipe(1, targetPipe);
+  radio.startListening();
+
+  Serial.print(F("🔀 Switched to target pipe: "));
+  Serial.println((char*)targetPipe);
+}
+
+const uint8_t* PairingRegistry::getTargetPipe() {
+  Serial.print(F("📡 getTargetPipe returns: "));
+  for (int i = 0; i < 6; i++) {
+    Serial.print((char)targetPipe[i]);
+  }
+  Serial.println();
+  return targetPipe;
 }

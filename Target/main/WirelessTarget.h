@@ -12,17 +12,13 @@ public:
   WirelessTarget();
   void setup();
 
-  void sendPairingRequest(uint32_t token);
-  bool receivePairingResponse(uint8_t &assignedID); // Legacy fallback
-  bool receivePairingResponse(uint8_t &assignedID, TargetType &typeOut); // ✅ Updated version
+  // void sendVerificationRequest(uint8_t id);
+  // bool waitForVerificationResponse(uint8_t id);
 
-  void sendVerificationRequest(uint8_t id);
-  bool waitForVerificationResponse(uint8_t id);
-
-  void switchToTargetPipe(uint8_t id);
+  // void switchToTargetPipe(uint8_t id);
   void sendToHub(const byte* data, uint8_t length);
 
-  bool sendHitPacket(uint8_t targetId);
+  // bool sendHitPacket(uint8_t targetId);
 
   bool available();
   void read(byte* buffer, uint8_t length);
