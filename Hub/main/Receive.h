@@ -2,6 +2,7 @@
 #define RECEIVE_H
 
 #include <Arduino.h>
+#include <Protocol.h>
 #include "TargetTypeManager.h"
 #include "PairingRegistry.h"
 
@@ -11,7 +12,7 @@ public:
 
   const uint8_t* verificationRequest(const byte* buffer);
   const uint8_t pairingRequest(const byte* buffer);
-  const uint8_t* hitEvent(const byte* buffer);
+  HitRequestPacket hitRequest(const byte* buffer);
 
 private:
   TargetTypeManager& targetTypeManager;

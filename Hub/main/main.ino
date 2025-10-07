@@ -64,6 +64,7 @@ void loop() {
   console.processSerial();
 
   if (statusButton.isLongPressed()) {
+    // I NEED TO KEEP IN MEMORY WHAT WAS PREVIOUSLY ON THE DISPLAY SO THAT AFTER I CAN RESET IT
     send.blinkAll(registry);
     showStatus(statusRgbLed, STATUS_OK, 3);
   }
@@ -101,6 +102,15 @@ void loop() {
   switch (header->opcode) {
     case OPCODE_VERIFICATION_REQUEST: communication.verification(buffer); break;
     case OPCODE_PAIRING_REQUEST:      communication.pairing(buffer); break;
-    case OPCODE_HIT_EVENT:            communication.hit(buffer); break;
+    case OPCODE_HIT_REQUEST: {
+        // TO CREATE CONDITIONS: if (gameStatus == PLAYING) {
+          if (communication.hit(buffer)) {
+            // ADD SUCCESSFUL FEEDBACK
+          } else {
+            // ADD ERROR FEEDBACK
+          }
+        // TO CREATE CONDITIONS: }
+      break;
+    }
   }
 }

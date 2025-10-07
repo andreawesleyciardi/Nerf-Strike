@@ -11,7 +11,7 @@ public:
   // const uint8_t pairingResponse(const byte* buffer);
   const uint8_t pairingResponse();
   const bool verificationResponse(uint8_t id);
-  const uint8_t* scoreUpdate(const byte* buffer);
+  HitResponsePacket hitResponse();
 
 private:
   RF24& radio;

@@ -51,15 +51,6 @@ void loop() {
 
   if (statusButton.wasPressed()) {
     Serial.println(F("🔍 Verifying connection with hub..."));
-    // bool verified = registry.verify();
-    // if (verified) {
-    //   Serial.println(F("✅ Connection verified."));
-    //   showStatus(statusRgbLed, STATUS_CONNECTED);
-    // } else {
-    //   Serial.println(F("❌ Verification failed. Re-pairing..."));
-    //   showStatus(statusRgbLed, STATUS_ERROR);
-    //   communication.pairing();
-    // }
     if (communication.verification()) {
       showAssignedIDBriefly(registry.getAssignedID());
     }
@@ -101,14 +92,14 @@ void loop() {
         break;
       }
 
-      case OPCODE_SCORE_UPDATE: {
-          ScoreUpdatePacket* packet = reinterpret_cast<ScoreUpdatePacket*>(buffer);
-          uint8_t newScore = packet->score;
-          Serial.print(F("🎯 New score received: "));
-          Serial.println(newScore);
-          scoreDisplay.updateScore(newScore);
-        break;
-      }
+      // case OPCODE_SCORE_UPDATE: {
+      //     ScoreUpdatePacket* packet = reinterpret_cast<ScoreUpdatePacket*>(buffer);
+      //     uint8_t newScore = packet->score;
+      //     Serial.print(F("🎯 New score received: "));
+      //     Serial.println(newScore);
+      //     scoreDisplay.updateScore(newScore);
+      //   break;
+      // }
 
       default:
         Serial.print(F("⚠️ Unknown opcode received: "));
@@ -121,11 +112,23 @@ void loop() {
   if (targetId != 0xFF) {
     if (sensor.isHit()) {
       // TO CREATE CONDITIONS: if (gameStatus == PLAYING) {
-      Serial.println(F("✅ Target got hit."));
-      rgbRing.blink("Green");
-      buzzer.beep(10);
+        Serial.println(F("✅ Target got hit."));
+        HitResponsePacket response = communication.hit();
+        if (response.score != 0xFF) {
+          rgbRing.blink("Green");
+          scoreDisplay.updateScore(response.score);
+          buzzer.beep(2);
+          Serial.print(F("🎯 New score received: "));
+          Serial.println(response.score);
+          // feedback.updateScore(response.score);
+        } else {
+          showStatus(statusRgbLed, STATUS_ERROR);
+          Serial.print(F("🎯 Was not possible to update the score"));
+          // feedback.signalError();  // Optional: blink red or buzz
+        }
+      // TO CREATE CONDITIONS: }
 
-      communication.hit();
+      
 
     //   if (wireless.send HitPacket(targetId)) {
     //     Serial.println(F("📡 Hit packet sent to hub."));
@@ -147,7 +150,7 @@ void loop() {
     //   showAssignedIDBriefly(registry.getAssignedID());
     // }
 
-    // if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {
+    // if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {                  // TO CHECK HOW TO REACTIVATE
     //   Serial.println(F("💔 No heartbeat. Re-pairing..."));
     //   heartbeatLost = true;
     //   showStatus(statusRgbLed, STATUS_DISCONNECTED);

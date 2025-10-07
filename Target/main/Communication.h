@@ -13,9 +13,10 @@ public:
 
   void pairing();
   const bool verification();
-  void hit();
+  HitResponsePacket hit();
 
 private:
+  const uint8_t verifyAssignedID();
   Receive& receive;
   Send& send;
   PairingRegistry& registry;

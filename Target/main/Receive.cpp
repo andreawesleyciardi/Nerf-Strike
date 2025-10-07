@@ -7,14 +7,13 @@ Receive::Receive(RF24& radio, PairingRegistry& registry)
   : radio(radio), registry(registry) {}
 
 const uint8_t Receive::pairingResponse() {
-  Serial.print(F("📡 Target receiving pairing response on pairing pipe: 0x"));
+  Serial.print(F("📡 Target waiting for pairing response on pairing pipe: 0x"));
   Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
   Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
 
   radio.openReadingPipe(1, pairingPipe);
   radio.startListening();
 
-  Serial.println(F("⏳ Waiting for pairing response..."));
   unsigned long startTime = millis();
   while (millis() - startTime < 1000) {
     if (radio.available()) {
@@ -37,7 +36,6 @@ const uint8_t Receive::pairingResponse() {
 const bool Receive::verificationResponse(uint8_t id) {
   Serial.println(F("⏳ Waiting for verification acknowledgment..."));
   unsigned long startTime = millis();
-
   while (millis() - startTime < 1000) {
     if (radio.available()) {
       VerificationResponsePacket response;
@@ -55,6 +53,25 @@ const bool Receive::verificationResponse(uint8_t id) {
   return false;
 }
 
-const uint8_t* Receive::scoreUpdate(const byte* buffer) {
-  
+HitResponsePacket Receive::hitResponse() {
+  Serial.println(F("⏳ Waiting for hit acknowledgment..."));
+  HitResponsePacket response = { OPCODE_SCORE_UPDATE, 0xFF };
+
+  unsigned long startTime = millis();
+  while (millis() - startTime < 100) {
+    if (radio.available()) {
+      byte buffer[8];
+      radio.read(buffer, sizeof(buffer));
+
+      PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
+      if (header->opcode == OPCODE_SCORE_UPDATE) {
+        response = *reinterpret_cast<HitResponsePacket*>(buffer);
+        Serial.print(F("✅ Hit acknowledged. Updated score: "));
+        Serial.println(response.score);
+        break;
+      }
+    }
+  }
+
+  return response;
 }

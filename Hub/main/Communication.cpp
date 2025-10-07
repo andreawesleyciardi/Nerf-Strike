@@ -6,6 +6,16 @@
 Communication::Communication(Receive& receive, Send& send, PairingRegistry& registry, GameLogic& gameLogic, RGBLed& statusRgbLed)
   : receive(receive), send(send), registry(registry), gameLogic(gameLogic), statusRgbLed(statusRgbLed) {}
 
+const uint8_t* Communication::verifyPipeForID(uint8_t targetId) {
+  const uint8_t* pipe = registry.getPipeForID(targetId);
+  if (!pipe) {
+    Serial.print(F("❌ No pipe found for ID: "));
+    Serial.println(targetId);
+    showStatus(statusRgbLed, STATUS_ERROR);
+  }
+  return pipe;
+}
+
 void Communication::pairing(const byte* buffer) {
   const uint8_t assignedID = receive.pairingRequest(buffer);
   if (assignedID == 0xFF) {
@@ -43,16 +53,12 @@ void Communication::verification(const byte* buffer) {
   send.verificationResponse(targetId);
 }
 
-void Communication::hit(const byte* buffer) {
-  const uint8_t* pipe = receive.hitEvent(buffer);
-  if (!pipe) {
-    Serial.println(F("❌ No pipe found for target ID."));
-    showStatus(statusRgbLed, STATUS_ERROR);
-    return;
+const bool Communication::hit(const byte* buffer) {
+  HitRequestPacket request = receive.hitRequest(buffer);
+  const uint8_t* pipe = verifyPipeForID(request.id);
+  if (pipe) {
+    uint8_t newScore = gameLogic.updateScoreFor(request.id);
+    return send.hitResponse(request.id, pipe, newScore);
   }
-
-  const HitEventPacket* request = reinterpret_cast<const HitEventPacket*>(buffer);
-  uint8_t targetId = request->id;
-  uint8_t newScore = gameLogic.incrementScoreFor(targetId);
-  send.scoreUpdate(targetId, pipe, newScore);
+  return false;
 }

@@ -8,7 +8,7 @@ void GameLogic::reset() {
   }
 }
 
-uint8_t GameLogic::incrementScoreFor(uint8_t targetId) {
+uint8_t GameLogic::updateScoreFor(uint8_t targetId) {
   if (targetId < MAX_TARGETS) {
     scores[targetId]++;
     return scores[targetId];

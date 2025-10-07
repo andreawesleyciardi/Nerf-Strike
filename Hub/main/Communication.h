@@ -14,9 +14,10 @@ public:
 
   void pairing(const byte* buffer);
   void verification(const byte* buffer);
-  void hit(const byte* buffer);
+  const bool hit(const byte* buffer);
 
 private:
+  const uint8_t* verifyPipeForID(uint8_t targetId);
   Receive& receive;
   Send& send;
   PairingRegistry& registry;

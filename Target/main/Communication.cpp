@@ -6,6 +6,15 @@
 Communication::Communication(Receive& receive, Send& send, PairingRegistry& registry, RGBLed& statusRgbLed)
   : receive(receive), send(send), registry(registry), statusRgbLed(statusRgbLed) {}
 
+const uint8_t Communication::verifyAssignedID() {
+  uint8_t assignedID = registry.getAssignedID();
+  if (assignedID == 0xFF) {
+    Serial.println(F("⚠️ Cannot verify — no assigned ID."));
+    showStatus(statusRgbLed, STATUS_ERROR);
+  }
+  return assignedID;
+}
+
 void Communication::pairing() {
   showStatus(statusRgbLed, STATUS_PAIRING);
   uint32_t token = registry.loadTokenFromEEPROM();
@@ -45,30 +54,34 @@ void Communication::pairing() {
 }
 
 const bool Communication::verification() {
-  uint8_t assignedID = registry.getAssignedID();
-  if (assignedID == 0xFF) {
-    Serial.println(F("⚠️ Cannot verify — no assigned ID."));
-    showStatus(statusRgbLed, STATUS_ERROR);
-    return false;
-  }
+  uint8_t assignedID = verifyAssignedID();
+  if (assignedID != 0xFF) {
+    if (!send.verificationRequest(assignedID)) {
+      showStatus(statusRgbLed, STATUS_ERROR);
+      return false;
+    }
 
-  if (!send.verificationRequest(assignedID)) {
-    showStatus(statusRgbLed, STATUS_ERROR);
-    return false;
-  }
+    if (!receive.verificationResponse(assignedID)) {
+      Serial.println(F("❌ Verification failed. Re-pairing..."));
+      showStatus(statusRgbLed, STATUS_ERROR);
+      pairing();
+      return false;
+    }
 
-  if (!receive.verificationResponse(assignedID)) {
-    Serial.println(F("❌ Verification failed. Re-pairing..."));
-    showStatus(statusRgbLed, STATUS_ERROR);
-    pairing();
-    return false;
+    Serial.println(F("✅ Connection verified."));
+    showStatus(statusRgbLed, STATUS_CONNECTED);
+    return true;
   }
-
-  Serial.println(F("✅ Connection verified."));
-  showStatus(statusRgbLed, STATUS_CONNECTED);
-  return true;
+  return false;
 }
 
-void Communication::hit() {
-  
+HitResponsePacket Communication::hit() {
+  uint8_t assignedID = verifyAssignedID();
+  if (assignedID != 0xFF) {
+    if (!send.hitRequest(assignedID)) {
+      return { OPCODE_SCORE_UPDATE, 0xFF };
+    }
+    return receive.hitResponse();
+  }
+  return { OPCODE_SCORE_UPDATE, 0xFF };
 }

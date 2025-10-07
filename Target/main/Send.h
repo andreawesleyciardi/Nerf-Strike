@@ -16,7 +16,7 @@ public:
   void pairingRequest(uint32_t token);
   const bool verificationRequest(uint8_t assignedID);
 
-  void hitEvent(uint8_t targetId);
+  const bool hitRequest(uint8_t targetId);
 
 private:
   RF24& radio;

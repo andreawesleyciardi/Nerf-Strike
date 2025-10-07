@@ -1,19 +1,9 @@
 #include "Receive.h"
-#include <Protocol.h>
-#include <OPCodes.h>
+// #include <Protocol.h>
+// #include <OPCodes.h>
 
 Receive::Receive(TargetTypeManager& targetTypeManager, PairingRegistry& registry)
   : targetTypeManager(targetTypeManager), registry(registry) {}
-
-const uint8_t* Receive::verificationRequest(const byte* buffer) {
-  VerificationRequestPacket* request = reinterpret_cast<VerificationRequestPacket*>(const_cast<byte*>(buffer));
-
-  Serial.print(F("🔍 Received verification request for ID: "));
-  Serial.println(request->id);
-
-  const uint8_t* pipe = registry.getPipeForID(request->id);
-  return pipe;
-}
 
 const uint8_t Receive::pairingRequest(const byte* buffer) {
   const PairingRequestPacket* request = reinterpret_cast<const PairingRequestPacket*>(buffer);
@@ -37,12 +27,21 @@ const uint8_t Receive::pairingRequest(const byte* buffer) {
   return assignedID;
 }
 
-const uint8_t* Receive::hitEvent(const byte* buffer) {
-  HitEventPacket* packet = reinterpret_cast<HitEventPacket*>(const_cast<byte*>(buffer));
+const uint8_t* Receive::verificationRequest(const byte* buffer) {
+  VerificationRequestPacket* request = reinterpret_cast<VerificationRequestPacket*>(const_cast<byte*>(buffer));
+
+  Serial.print(F("🔍 Received verification request for ID: "));
+  Serial.println(request->id);
+
+  const uint8_t* pipe = registry.getPipeForID(request->id);
+  return pipe;
+}
+
+HitRequestPacket Receive::hitRequest(const byte* buffer) {
+  HitRequestPacket* packet = reinterpret_cast<HitRequestPacket*>(const_cast<byte*>(buffer));
 
   Serial.print(F("🎯 Hit received from target ID: "));
   Serial.println(packet->id);
 
-  const uint8_t* pipe = registry.getPipeForID(packet->id);
-  return pipe;
+  return *packet;
 }

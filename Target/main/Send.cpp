@@ -68,23 +68,20 @@ const bool Send::verificationRequest(uint8_t id) {
   return true;
 }
 
-void Send::hitEvent(uint8_t targetId) {
-  HitEventPacket packet = {
-    OPCODE_HIT_EVENT,
+const bool Send::hitRequest(uint8_t targetId) {
+  HitRequestPacket request = {
+    OPCODE_HIT_REQUEST,
     targetId
   };
 
-  radio.stopListening();
-  bool success = radio.write(&packet, sizeof(packet));
-  radio.startListening();
+  bool success = toHub(reinterpret_cast<const byte*>(&request), sizeof(request));
 
-  if (success) {
-    Serial.println(F("📡 Hit packet sent successfully."));
-    return;
-  } else {
-    Serial.println(F("❌ Failed to send hit packet."));
-    return;
+  if (!success) {
+    Serial.println(F("❌ Failed to send hit request."));
+    return false;
   }
+  Serial.println(F("📡 Hit request sent successfully."));
+  return true;
 }
 
 // void Send::toHub(const byte* data, uint8_t length) {

@@ -7,7 +7,7 @@
 class GameLogic {
 public:
   void reset();
-  uint8_t incrementScoreFor(uint8_t targetId);
+  uint8_t updateScoreFor(uint8_t targetId);
   uint8_t getScoreFor(uint8_t targetId);
 
 private:

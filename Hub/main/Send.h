@@ -10,15 +10,16 @@ class Send {
 public:
   Send(RF24& radio, PairingRegistry& registry);
 
+  const bool toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length);
+
   void pairingResponse(uint8_t assignedID);
   void verificationResponse(uint8_t id);
   
   void blinkAll(PairingRegistry& registry);
   void heartbeatAll(PairingRegistry& registry);
 
-  void scoreUpdate(uint8_t id, const uint8_t* pipe, uint8_t newScore);
-
-  const bool toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length);
+  const bool hitResponse(uint8_t id, const uint8_t* pipe, uint8_t newScore);
+  
 private:
   RF24& radio;
   PairingRegistry& registry;
