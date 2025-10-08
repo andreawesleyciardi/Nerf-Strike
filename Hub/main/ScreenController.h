@@ -7,6 +7,7 @@
 #include "GameModeRegistry.h"
 #include "RotaryEncoder.h"
 #include "Button.h"
+#include "screens/Screen.h"  // ✅ Needed for ScreenRequest
 
 class ScreenController {
 public:

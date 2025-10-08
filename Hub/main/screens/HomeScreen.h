@@ -7,24 +7,31 @@
 #include "../ButtonLabels.h"
 #include "Screen.h"
 
+// - Home screen:
+// I want to show a message (for now just "Welcome").
+// Button left label "Help": navigates to the "Help screen".
+// Button encoder: navigates to "Setting screen".
+// Button right label "Start": navigates to the "Pairing screen".
+
 class HomeScreen : public Screen {
 public:
+  HomeScreen() {}
+
   void render(LcdDisplay& display) override {
     display.clear();
-    display.showLine(0, "🏠 Welcome");
+    display.showLine(0, "Welcome");
     display.showLine(1, "This is the Home screen");
-    display.showLine(3, "[Help]  [Settings]  [Start]");
   }
 
-  void handleInput(RotaryEncoder& encoder, Button& left, Button& right, ScreenManager& screenManager) override {
+  void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
     if (left.wasPressed()) {
-      screenManager.replace(ScreenType::Help);
+      request = ScreenRequest::to(ScreenType::Help);
     }
     if (encoder.wasPressed()) {
-      screenManager.replace(ScreenType::Settings);
+      request = ScreenRequest::to(ScreenType::Settings);
     }
-    if (right.wasPressed()) {
-      screenManager.replace(ScreenType::Pairing);
+    if (right.wasPressed() || encoder.wasPressed()) {
+      request = ScreenRequest::to(ScreenType::Pairing);
     }
   }
 
@@ -33,11 +40,15 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Help", "Start", "Settings"};
+    return {"Help", "<>", "Start"};
   }
 
   ScreenType getType() const override {
     return ScreenType::Home;
+  }
+
+  String getHash() const {
+    return "Home";
   }
 };
 

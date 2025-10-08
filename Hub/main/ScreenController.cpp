@@ -13,7 +13,13 @@ void ScreenController::update() {
   // General input handling via active screen
   Screen* activeScreen = screenManager.getActive();
   if (activeScreen) {
-    activeScreen->handleInput(encoder, leftButton, rightButton, screenManager);
+    activeScreen->handleInput(encoder, leftButton, rightButton);
+
+    // Check if the screen requested a transition
+    ScreenRequest request = activeScreen->getRequestedScreen();
+    if (request.hasRequest) {
+      screenManager.replace(request.target);
+    }
   }
 
   // Optional: screen-specific overrides
@@ -35,10 +41,12 @@ void ScreenController::handleGameModeList() {
     const GameMode& selected = gameModes.getMode(hubState.getCurrentMenuIndex());
     Serial.print("🎮 Selected Game Mode: ");
     Serial.println(selected.getName());
-    screenManager.push(ScreenType::GameModeOptions);
+
+    // Instead of pushing, we now request a screen change
+    screenManager.replace(ScreenType::GameModeOptions);
   }
 
   if (leftButton.wasPressed()) {
-    screenManager.pop();
+    screenManager.replace(ScreenType::Home);  // Or wherever "back" should go
   }
 }

@@ -1,34 +1,42 @@
 #ifndef SCREEN_MANAGER_H
 #define SCREEN_MANAGER_H
 
+#include <Arduino.h>
 #include "ScreenTypes.h"
 #include "EncoderMode.h"
 #include "ButtonLabels.h"
+#include "HubStateManager.h"
+#include "GameModeRegistry.h"
+#include "PairingRegistry.h"
+#include "GameLogic.h"
 #include "screens/Screen.h"
-#include <Arduino.h>
 
 class ScreenManager {
 public:
+  ScreenManager(HubStateManager& hubState, GameModeRegistry& modes, PairingRegistry& registry, GameLogic& logic);
+
   void setup();
-  void push(ScreenType screen);
-  void pop();
   void replace(ScreenType screen);
 
-  ScreenType current();
-  Screen* getActive();
-  EncoderMode getEncoderMode();
-  ButtonLabels getButtonLabels();
+  ScreenType current() const;
+  Screen* getActive() const;
+  EncoderMode getEncoderMode() const;
+  ButtonLabels getButtonLabels() const;
 
 private:
-  static const uint8_t maxStackDepth = 5;
-  ScreenType stack[maxStackDepth];
-  uint8_t stackSize = 0;
+  void updateContext(ScreenType screen);
 
-  Screen* screens[12];  // One for each ScreenType enum value
+  HubStateManager& hubState;
+  GameModeRegistry& gameModes;
+  PairingRegistry& registry;
+  GameLogic& gameLogic;
+
+  static const uint8_t screenCount = 12;
+  Screen* screens[screenCount];
+  ScreenType activeScreen = ScreenType::Home;
+
   EncoderMode encoderMode = EncoderMode::None;
   ButtonLabels labels = {"", "", ""};
-
-  void updateContext(ScreenType screen);
 };
 
 #endif

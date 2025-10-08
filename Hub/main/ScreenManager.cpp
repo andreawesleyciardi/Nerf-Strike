@@ -14,62 +14,44 @@
 #include "screens/ErrorScreen.h"
 #include "screens/WinLostScreen.h"
 
+ScreenManager::ScreenManager(HubStateManager& hubState, GameModeRegistry& gameModes, PairingRegistry& registry, GameLogic& gameLogic)
+  : hubState(hubState), gameModes(gameModes), registry(registry), gameLogic(gameLogic) {}
+
 void ScreenManager::setup() {
-  // Register all screens
-  screens[(int)ScreenType::Home] = new HomeScreen();
-  screens[(int)ScreenType::Help] = new HelpScreen();
-  screens[(int)ScreenType::Settings] = new SettingsScreen();
-  screens[(int)ScreenType::Pairing] = new PairingScreen();
-  screens[(int)ScreenType::TargetList] = new TargetListScreen();
-  screens[(int)ScreenType::GameModeList] = new GameModeListScreen();
-  screens[(int)ScreenType::GameModeOptions] = new GameModeOptionsScreen();
-  screens[(int)ScreenType::GameModeDetails] = new GameModeDetailsScreen();
-  screens[(int)ScreenType::Playing] = new PlayingScreen();
-  screens[(int)ScreenType::Confirmation] = new ConfirmationScreen();
-  screens[(int)ScreenType::Error] = new ErrorScreen();
-  screens[(int)ScreenType::WinLost] = new WinLostScreen();
+  screens[(int)ScreenType::Home]             = new HomeScreen();
+  screens[(int)ScreenType::Help]             = new HelpScreen();
+  screens[(int)ScreenType::Settings]         = new SettingsScreen(hubState);
+  screens[(int)ScreenType::Pairing]          = new PairingScreen(registry);
+  screens[(int)ScreenType::TargetList]       = new TargetListScreen(registry);
+  screens[(int)ScreenType::GameModeList]     = new GameModeListScreen(gameModes);
+  screens[(int)ScreenType::GameModeOptions]  = new GameModeOptionsScreen(gameModes);
+  screens[(int)ScreenType::GameModeDetails]  = new GameModeDetailsScreen(gameModes);
+  screens[(int)ScreenType::Playing]          = new PlayingScreen(gameLogic, registry);
+  screens[(int)ScreenType::Confirmation]     = new ConfirmationScreen(hubState);
+  screens[(int)ScreenType::Error]            = new ErrorScreen(hubState);
+  screens[(int)ScreenType::WinLost]          = new WinLostScreen(hubState, registry, gameLogic);
 
-  // Start with Home screen
-  stackSize = 1;
-  stack[0] = ScreenType::Home;
-  updateContext(ScreenType::Home);
-}
-
-void ScreenManager::push(ScreenType screen) {
-  if (stackSize < maxStackDepth) {
-    stack[stackSize++] = screen;
-    updateContext(screen);
-  }
-}
-
-void ScreenManager::pop() {
-  if (stackSize > 1) {
-    stackSize--;
-    updateContext(stack[stackSize - 1]);
-  }
+  replace(ScreenType::Home);  // Start with Home screen
 }
 
 void ScreenManager::replace(ScreenType screen) {
-  if (stackSize > 0) {
-    stack[stackSize - 1] = screen;
-    updateContext(screen);
-  }
+  activeScreen = screen;
+  updateContext(screen);
 }
 
-ScreenType ScreenManager::current() {
-  return stackSize > 0 ? stack[stackSize - 1] : ScreenType::Home;
+ScreenType ScreenManager::current() const {
+  return activeScreen;
 }
 
-Screen* ScreenManager::getActive() {
-  ScreenType type = current();
-  return screens[(int)type];
+Screen* ScreenManager::getActive() const {
+  return screens[(int)activeScreen];
 }
 
-EncoderMode ScreenManager::getEncoderMode() {
+EncoderMode ScreenManager::getEncoderMode() const {
   return encoderMode;
 }
 
-ButtonLabels ScreenManager::getButtonLabels() {
+ButtonLabels ScreenManager::getButtonLabels() const {
   return labels;
 }
 

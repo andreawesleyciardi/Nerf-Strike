@@ -2,10 +2,11 @@
 #define COMMAND_CONSOLE_H
 
 #include <Arduino.h>
-#include "PairingRegistry.h"
-#include "Send.h"
 #include <RotaryEncoder.h>
 #include <Button.h>
+
+#include "PairingRegistry.h"
+#include "Send.h"
 #include "TargetTypeManager.h"
 
 class CommandConsole {

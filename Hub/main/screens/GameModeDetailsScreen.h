@@ -5,20 +5,32 @@
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
+#include "../GameModeRegistry.h"
 #include "Screen.h"
+
+// - GameMode Details screen:
+// Shows a text with the description of the game mode.
+// Button left label "Back": navigates to the "GameModeList screen".
+// Button right label "Start": navigates to the "Playing screen".
 
 class GameModeDetailsScreen : public Screen {
 public:
+  GameModeDetailsScreen(GameModeRegistry& gameModes)
+    : gameModes(gameModes) {}
+
   void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "📋 Mode Details");
     display.showLine(1, "Description, rules...");
-    display.showLine(3, "[Back]  [Play]");
   }
 
-  void handleInput(RotaryEncoder& encoder, Button& left, Button& right, ScreenManager& screenManager) override {
-    if (left.wasPressed()) screenManager.pop();
-    if (right.wasPressed() || encoder.wasPressed()) screenManager.push(ScreenType::Playing);
+  void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
+    if (left.wasPressed()) {
+      request = ScreenRequest::to(ScreenType::GameModeList);
+    }
+    if (right.wasPressed()) {
+      request = ScreenRequest::to(ScreenType::Playing);
+    }
   }
 
   EncoderMode getEncoderMode() const override {
@@ -26,12 +38,26 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Back", "Play", ""};
+    return {"Back", "", "Start"};
   }
 
   ScreenType getType() const override {
     return ScreenType::GameModeDetails;
   }
+
+  String getHash() const override {
+    const GameMode& mode = gameModes.getMode(selectedIndex);
+    String hash = "GameModeDetails-" + mode.getName();
+    for (uint8_t i = 0; i < mode.getSettingCount(); i++) {
+      const ModeSetting& setting = mode.getSetting(i);
+      hash += "-" + setting.label + ":" + String(setting.value);
+    }
+    return hash;
+  }
+
+private:
+  GameModeRegistry& gameModes;
+  uint8_t selectedIndex = 0;  // You can update this externally if needed
 };
 
 #endif

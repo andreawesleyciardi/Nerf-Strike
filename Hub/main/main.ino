@@ -1,22 +1,25 @@
 #include <DisplayFeedback.h>
 #include <Protocol.h>
+#include <OPCodes.h>
+#include <TargetType.h>
+
 #include "HubConfig.h"
 #include "HubPins.h"
 #include "HubStateManager.h"
+// communication
 #include "WirelessHub.h"
 #include "PairingRegistry.h"
 #include "Send.h"
 #include "Receive.h"
 #include "Communication.h"
+
 #include "CommandConsole.h"
-#include "OPCodes.h"
 #include "LcdDisplay.h"
 #include "ScreenManager.h"
 #include "ScreenRenderer.h"
 #include "ScreenController.h"
 #include "GameModeRegistry.h"
 #include "ScreenTypes.h"
-#include <TargetType.h>
 #include "TargetTypeManager.h"
 #include "GameLogic.h"
 
@@ -27,7 +30,7 @@ PairingRegistry registry;
 GameModeRegistry gameModeRegistry;
 TargetTypeManager targetTypeManager;
 LcdDisplay display(lcdI2CAddress, 20, 4);
-ScreenManager screenManager;
+ScreenManager screenManager(hubState, gameModeRegistry, registry, gameLogic);
 ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
 ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
 CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager);

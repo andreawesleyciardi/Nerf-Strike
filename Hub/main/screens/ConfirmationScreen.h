@@ -5,19 +5,31 @@
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
+#include "../HubStateManager.h"
 #include "Screen.h"
+
+// - Confirmation screen:
+// A message with a question is shown.
+// Button left label "Cancel": negates whatever question is shown to the user. Navigates to screen to define based on the question.
+// Button right label "Confirm": validates whatever question is shown to the user. Navigates to screen to define based on the question.
 
 class ConfirmationScreen : public Screen {
 public:
+  ConfirmationScreen(HubStateManager& hubState)
+    : hubState(hubState) {}
+
   void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "❗ Confirm Exit?");
-    display.showLine(3, "[Cancel]  [Exit]");
   }
 
-  void handleInput(RotaryEncoder& encoder, Button& left, Button& right, ScreenManager& screenManager) override {
-    if (left.wasPressed()) screenManager.pop();
-    if (right.wasPressed() || encoder.wasPressed()) screenManager.replace(ScreenType::Home);
+  void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
+    if (left.wasPressed()) {
+      // negates whatever question is shown to the user. Navigates to screen to define based on the question.
+    }
+    if (right.wasPressed()) {
+      // validates whatever question is shown to the user. Navigates to screen to define based on the question.
+    }
   }
 
   EncoderMode getEncoderMode() const override {
@@ -25,12 +37,21 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Cancel", "Exit", ""};
+    return {"Cancel", "", "Confirm"};
   }
 
   ScreenType getType() const override {
     return ScreenType::Confirmation;
   }
+
+  String getHash() const override {
+    String hash = "Confirmation";
+    hash += "-" + String(hubState.getCurrentMenuIndex());
+    return hash;
+  }
+
+private:
+  HubStateManager& hubState;
 };
 
 #endif

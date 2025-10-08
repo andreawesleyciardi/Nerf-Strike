@@ -4,9 +4,6 @@
 #include <Arduino.h>
 #include <RF24.h>
 #include "HubConfig.h"
-// #include <Protocol.h>
-// #include <TargetType.h>
-// #include "PairingRegistry.h"
 
 class WirelessHub {
 public:

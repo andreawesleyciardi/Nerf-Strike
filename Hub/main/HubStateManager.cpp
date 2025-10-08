@@ -33,3 +33,7 @@ void HubStateManager::previousMenuItem() {
 uint8_t HubStateManager::getCurrentMenuIndex() {
   return menuIndex;
 }
+
+// const String HubStateManager::getLastErrorMessage() {
+//   return "ERROR MESSAGE TO FIX";
+// }

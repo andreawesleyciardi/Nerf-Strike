@@ -1,6 +1,4 @@
 #include "WirelessHub.h"
-// #include <OPCodes.h>
-// #include <Protocol.h>
 
 WirelessHub::WirelessHub() : radio(transmitterCEPin, transmitterCSNPin) {}
 

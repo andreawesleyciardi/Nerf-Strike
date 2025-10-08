@@ -13,11 +13,15 @@ uint8_t LcdDisplay::getRowCount() const {
   return rows;
 }
 
+uint8_t LcdDisplay::getColumnCount() const {
+  return cols;
+}
+
 void LcdDisplay::clear() {
   lcd.clear();
 }
 
-void LcdDisplay::clearRow(uint8_t row) {
+void LcdDisplay::clearLine(uint8_t row) {
   lcd.setCursor(0, row);
   lcd.print(String(' ', cols));
 }
@@ -48,11 +52,33 @@ void LcdDisplay::showMenuItem(const String& label, uint8_t index, uint8_t total)
   printAligned(line, 0);
 }
 
-void LcdDisplay::showButtonLabels(const String& leftLabel, const String& rightLabel) {
-  lcd.setCursor(0, rows - 1);
-  lcd.print(leftLabel);
-  lcd.setCursor(cols - rightLabel.length(), rows - 1);
-  lcd.print(rightLabel);
+void LcdDisplay::showButtonLabels(const ButtonLabels& labels) {
+  String leftLabel = String(labels.left).length() > 0 ? "[" + String(labels.left) + "]" : "";
+  String encoderLabel = String(labels.encoder).length() > 0 ? "[" + String(labels.encoder) + "]" : "";
+  String rightLabel = String(labels.right).length() > 0 ? "[" + String(labels.right) + "]" : "";
+
+  if (strcmp(labels.alignment, "center") == 0) {
+    String line = leftLabel + " " + encoderLabel + " " + rightLabel;
+    printAligned(line, getRowCount() - 1, "center");
+    return;
+  }
+
+  if (strcmp(labels.alignment, "left") == 0) {
+    String line = leftLabel + " " + encoderLabel + " " + rightLabel;
+    showLine(getRowCount() - 1, line);
+    return;
+  }
+
+  // Default: spread
+  int totalWidth = getColumnCount();
+  int leftPos = 0;
+  int rightPos = totalWidth - rightLabel.length();
+  int encoderPos = (totalWidth - encoderLabel.length()) / 2;
+
+  clearLine(getRowCount() - 1);
+  if (leftLabel.length() > 0) printAt(leftLabel, getRowCount() - 1, leftPos);
+  if (encoderLabel.length() > 0) printAt(encoderLabel, getRowCount() - 1, encoderPos);
+  if (rightLabel.length() > 0) printAt(rightLabel, getRowCount() - 1, rightPos);
 }
 
 void LcdDisplay::printAligned(const String& text, uint8_t row, const String& align) {
@@ -63,6 +89,11 @@ void LcdDisplay::printAligned(const String& text, uint8_t row, const String& ali
     pad = cols - text.length();
   }
   lcd.setCursor(max(0, pad), row);
+  lcd.print(text);
+}
+
+void LcdDisplay::printAt(const String& text, uint8_t row, uint8_t col) {
+  lcd.setCursor(col, row);
   lcd.print(text);
 }
 
@@ -81,7 +112,7 @@ void LcdDisplay::scrollOut(uint8_t row, uint16_t speed) {
     lcd.print(String(' ', i));
     delay(speed);
   }
-  clearRow(row);
+  clearLine(row);
 }
 
 void LcdDisplay::fadeOut(uint8_t delayMs) {

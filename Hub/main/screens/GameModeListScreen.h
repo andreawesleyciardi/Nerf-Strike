@@ -5,19 +5,33 @@
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
+#include "../GameModeRegistry.h"
 #include "Screen.h"
+
+// - GameMode List screen:
+// I want to show a list of the game modes (remember the list we made time ago).
+// With the encoder I want to be able to scroll the list vertically with a pointer that shows a currently selected item.
+// Based on how many targets are paired the list of game modes changes (for example the user can't choose "battle" if only one target is paired).
+// Button left label "Exit": navigates to the "Home screen".
+// Button right label "Select" or "Options": if the game mode selected has no extra options the label is "Select" and navigates to the "GameMode Details", if the game mode selected needs more options to be selected the label is "Options" and navigates to "GameMode Options screen".
 
 class GameModeListScreen : public Screen {
 public:
+  GameModeListScreen(GameModeRegistry& gameModes)
+    : gameModes(gameModes) {}
+
   void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "🎮 Select Game Mode");
-    display.showLine(3, "[Back]  [Select]");
   }
 
-  void handleInput(RotaryEncoder& encoder, Button& left, Button& right, ScreenManager& screenManager) override {
-    if (left.wasPressed()) screenManager.pop();
-    if (right.wasPressed() || encoder.wasPressed()) screenManager.push(ScreenType::GameModeOptions);
+  void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
+    if (left.wasPressed()) {
+      request = ScreenRequest::to(ScreenType::Home);
+    }
+    if (right.wasPressed()) {
+      request = ScreenRequest::to(ScreenType::GameModeDetails);
+    }
   }
 
   EncoderMode getEncoderMode() const override {
@@ -25,12 +39,19 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Back", "Select", ""};
+    return {"Exit", "", "Select"};
   }
 
   ScreenType getType() const override {
     return ScreenType::GameModeList;
   }
+
+  String getHash() const override {
+    return "GameModeList";
+  }
+
+private:
+  GameModeRegistry& gameModes;
 };
 
 #endif

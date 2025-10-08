@@ -5,6 +5,7 @@
 #include "ScreenManager.h"
 #include "HubStateManager.h"
 #include "GameModeRegistry.h"
+#include "ScreenTypes.h"
 
 class ScreenRenderer {
 public:
@@ -17,10 +18,13 @@ private:
   HubStateManager& hubState;
   GameModeRegistry& gameModes;
 
-  void renderHome();
-  void renderHelp();
-  void renderPairing();
-  void renderGameModeList();
+  ScreenType lastRenderedScreen = ScreenType::Home;
+  String lastRenderedHash = "";
+
+  // void renderHome();
+  // void renderHelp();
+  // void renderPairing();
+  // void renderGameModeList();
 };
 
 #endif

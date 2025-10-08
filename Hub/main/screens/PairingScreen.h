@@ -5,19 +5,31 @@
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
+#include "../PairingRegistry.h"
 #include "Screen.h"
+
+// - Pairing screen:
+// I want to show the message "Pairing…" if the pairing with the targets is on going (if possible show the text with some animation like pulse for example for make clear to the user that the Hub is working and not blocked).
+// When the pairing is finish I want to show "[x] Targets were found" and [x] is the number of paired targets.
+// Button left label "Targets": navigates to the "Target List screen".
+// Button right label "Play": navigates to the "GameMode List screen".
 
 class PairingScreen : public Screen {
 public:
+  PairingScreen(PairingRegistry& registry)
+    : registry(registry) {}
+
   void render(LcdDisplay& display) override {
     display.clear();
     display.printAligned("Pairing...", 1, "center");
-    display.showLine(3, "[Cancel]");
   }
 
-  void handleInput(RotaryEncoder& encoder, Button& left, Button& right, ScreenManager& screenManager) override {
-    if (left.wasPressed() || right.wasPressed() || encoder.wasPressed()) {
-      screenManager.pop();
+  void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
+    if (left.wasPressed()) {
+      request = ScreenRequest::to(ScreenType::TargetList);
+    }
+    if (right.wasPressed()) {
+      request = ScreenRequest::to(ScreenType::GameModeList);
     }
   }
 
@@ -26,12 +38,24 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Cancel", "", ""};
+    return {"Targets", "", "Next"};
   }
 
   ScreenType getType() const override {
     return ScreenType::Pairing;
   }
+
+  String getHash() const override {
+    String hash = "Pairing";
+    // for (uint8_t i = 0; i < registry.getCount(); i++) {
+    //   hash += "-" + String(registry.getTargetIdAt(i));
+    //   hash += ":" + String((int)registry.getTargetTypeAt(i));
+    // }
+    return hash;
+  }
+
+private:
+  PairingRegistry& registry;
 };
 
 #endif

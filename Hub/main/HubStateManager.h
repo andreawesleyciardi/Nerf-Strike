@@ -24,6 +24,8 @@ public:
   void previousMenuItem();
   uint8_t getCurrentMenuIndex();
 
+  // const String getLastErrorMessage();
+
 private:
   HubGameState currentMode;
   uint8_t selectedTargetID;

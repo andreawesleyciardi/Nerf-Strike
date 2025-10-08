@@ -1,6 +1,5 @@
 #include "ScreenRenderer.h"
 #include "ScreenManager.h"
-#include "LcdDisplay.h"
 #include "EncoderMode.h"
 #include "ButtonLabels.h"
 #include "screens/Screen.h"
@@ -9,19 +8,31 @@ ScreenRenderer::ScreenRenderer(LcdDisplay& d, ScreenManager& m, HubStateManager&
   : display(d), manager(m), hubState(state), gameModes(registry) {}
 
 void ScreenRenderer::render() {
-  // display.fadeOut();  // Optional: smooth transition between screens
-
-  // Delegate to active screen
+  ScreenType currentScreen = manager.current();
   Screen* screen = manager.getActive();
-  if (screen) {
-    screen->render(display);
-  } else {
+
+  if (!screen) {
     display.showText("Screen not implemented");
+    lastRenderedHash = "error";
+    lastRenderedScreen = currentScreen;
+    return;
   }
+
+  String currentHash = screen->getHash();
+
+  // Skip rendering if screen and content haven't changed
+  if (currentScreen == lastRenderedScreen && currentHash == lastRenderedHash) {
+    return;
+  }
+
+  display.clear();
+  screen->render(display);
+  lastRenderedHash = currentHash;
+  lastRenderedScreen = currentScreen;
 
   // Button labels
   ButtonLabels labels = manager.getButtonLabels();
-  display.showButtonLabels(labels.left, labels.right);
+  display.showButtonLabels(labels);
 
   // Encoder hint
   EncoderMode mode = manager.getEncoderMode();

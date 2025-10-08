@@ -1,7 +1,8 @@
-#include "CommandConsole.h"
-#include "TargetTypeManager.h"
 #include <Protocol.h>
 #include <OPCodes.h>
+
+#include "CommandConsole.h"
+#include "TargetTypeManager.h"
 
 CommandConsole::CommandConsole(PairingRegistry& registry, Send& send,
                                RotaryEncoder& encoder, Button& left, Button& right,

@@ -5,20 +5,23 @@
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
+#include "../HubStateManager.h"
 #include "Screen.h"
 
 class SettingsScreen : public Screen {
 public:
+  SettingsScreen(HubStateManager& hubState)
+    : hubState(hubState) {}
+
   void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "⚙️ Settings");
     display.showLine(1, "Adjust brightness, sound...");
-    display.showLine(3, "[Back]");
   }
 
-  void handleInput(RotaryEncoder& encoder, Button& left, Button& right, ScreenManager& screenManager) override {
+  void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
     if (left.wasPressed() || right.wasPressed() || encoder.wasPressed()) {
-      screenManager.pop();
+      request = ScreenRequest::to(ScreenType::Home);
     }
   }
 
@@ -27,12 +30,22 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Back", "", ""};
+    return {"Back", "<>", ""};
   }
 
   ScreenType getType() const override {
     return ScreenType::Settings;
   }
+
+  String getHash() const override {
+    String hash = "Settings";
+    // hash += "-Brightness:" + String(hubState.getBrightness());
+    // hash += "-Tier:" + String((int)hubState.getProductTier());
+    return hash;
+  }
+
+private:
+  HubStateManager& hubState;
 };
 
 #endif

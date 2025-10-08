@@ -7,18 +7,24 @@
 #include "../ButtonLabels.h"
 #include "Screen.h"
 
+// - Help screen:
+// Shows available commands or tips.
+// Button left: not needed.
+// Button right label "Home": navigates to the "Home screen".
+
 class HelpScreen : public Screen {
 public:
+  HelpScreen() {}
+
   void render(LcdDisplay& display) override {
     display.clear();
     display.showLine(0, "❓ Help");
     display.showLine(1, "Commands: list, test, clear");
-    display.showLine(3, "[Back]");
   }
 
-  void handleInput(RotaryEncoder& encoder, Button& left, Button& right, ScreenManager& screenManager) override {
-    if (left.wasPressed() || right.wasPressed() || encoder.wasPressed()) {
-      screenManager.pop();
+  void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
+    if (right.wasPressed()) {
+      request = ScreenRequest::to(ScreenType::Home);
     }
   }
 
@@ -27,11 +33,15 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Back", "", ""};
+    return {"", "", "Home"};
   }
 
   ScreenType getType() const override {
     return ScreenType::Help;
+  }
+
+  String getHash() const override {
+    return "Help";
   }
 };
 

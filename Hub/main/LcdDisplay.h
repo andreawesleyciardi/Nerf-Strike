@@ -3,20 +3,24 @@
 
 #include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
+#include "ButtonLabels.h"
 
 class LcdDisplay {
 public:
   LcdDisplay(uint8_t addr = 0x3F, uint8_t cols = 20, uint8_t rows = 4);
   void setup();
+
+  // Dimensions
   uint8_t getRowCount() const;
+  uint8_t getColumnCount() const;
 
   // Text rendering
   void clear();
-  void clearRow(uint8_t row);
+  void clearLine(uint8_t row);
   void showLine(uint8_t row, const String& text);
   void showText(const String& text, bool scroll = false, uint16_t scrollDelay = 300);
   void showMenuItem(const String& label, uint8_t index, uint8_t total);
-  void showButtonLabels(const String& leftLabel, const String& rightLabel);
+  void showButtonLabels(const ButtonLabels& labels);
 
   // Alignment
   void printAligned(const String& text, uint8_t row = 0, const String& align = "left");
@@ -28,6 +32,8 @@ public:
   void fadeIn(const String& text, uint8_t row = 0, uint8_t delayMs = 30);
 
 private:
+  void printAt(const String& text, uint8_t row, uint8_t col);
+
   LiquidCrystal_I2C lcd;
   uint8_t cols;
   uint8_t rows;
