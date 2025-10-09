@@ -7,6 +7,9 @@
 #include "../ButtonLabels.h"
 #include "../GameModeRegistry.h"
 #include "Screen.h"
+#include "../GameSessionState.h"
+
+extern GameSessionState session;
 
 // - GameMode Details screen:
 // Shows a text with the description of the game mode.
@@ -15,12 +18,12 @@
 
 class GameModeDetailsScreen : public Screen {
 public:
-  GameModeDetailsScreen(GameModeRegistry& gameModes)
-    : gameModes(gameModes) {}
+  GameModeDetailsScreen(LcdDisplay& display, GameModeRegistry& gameModes)
+    : display(display), gameModes(gameModes) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
-    display.showLine(0, "📋 Mode Details");
+    display.showLine(0, "Mode Details");
     display.showLine(1, "Description, rules...");
   }
 
@@ -56,6 +59,7 @@ public:
   }
 
 private:
+  LcdDisplay& display;
   GameModeRegistry& gameModes;
   uint8_t selectedIndex = 0;  // You can update this externally if needed
 };

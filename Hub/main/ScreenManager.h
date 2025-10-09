@@ -2,6 +2,7 @@
 #define SCREEN_MANAGER_H
 
 #include <Arduino.h>
+#include "LcdDisplay.h"
 #include "ScreenTypes.h"
 #include "EncoderMode.h"
 #include "ButtonLabels.h"
@@ -13,7 +14,7 @@
 
 class ScreenManager {
 public:
-  ScreenManager(HubStateManager& hubState, GameModeRegistry& modes, PairingRegistry& registry, GameLogic& logic);
+  ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& modes, PairingRegistry& registry, GameLogic& logic);
 
   void setup();
   void replace(ScreenType screen);
@@ -26,6 +27,7 @@ public:
 private:
   void updateContext(ScreenType screen);
 
+  LcdDisplay& display;
   HubStateManager& hubState;
   GameModeRegistry& gameModes;
   PairingRegistry& registry;
@@ -33,7 +35,7 @@ private:
 
   static const uint8_t screenCount = 12;
   Screen* screens[screenCount];
-  ScreenType activeScreen = ScreenType::Home;
+  ScreenType activeScreen = ScreenType::Splash;
 
   EncoderMode encoderMode = EncoderMode::None;
   ButtonLabels labels = {"", "", ""};

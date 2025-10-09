@@ -7,6 +7,9 @@
 #include "../ButtonLabels.h"
 #include "../HubStateManager.h"
 #include "Screen.h"
+#include "../GameSessionState.h"
+
+extern GameSessionState session;
 
 // - Error screen:
 // Show error messages or failed actions.
@@ -15,12 +18,12 @@
 
 class ErrorScreen : public Screen {
 public:
-  ErrorScreen(HubStateManager& hubState)
-    : hubState(hubState) {}
+  ErrorScreen(LcdDisplay& display, HubStateManager& hubState)
+    : display(display), hubState(hubState) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
-    display.showLine(0, "⚠️ Error Occurred");
+    display.showLine(0, "Error Occurred");
     display.showLine(1, "Check connections...");
   }
 
@@ -51,6 +54,7 @@ public:
   }
 
 private:
+  LcdDisplay& display;
   HubStateManager& hubState;
 };
 

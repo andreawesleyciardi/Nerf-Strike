@@ -7,6 +7,9 @@
 #include "../ButtonLabels.h"
 #include "../GameModeRegistry.h"
 #include "Screen.h"
+#include "../GameSessionState.h"
+
+extern GameSessionState session;
 
 // - GameMode List screen:
 // I want to show a list of the game modes (remember the list we made time ago).
@@ -17,12 +20,12 @@
 
 class GameModeListScreen : public Screen {
 public:
-  GameModeListScreen(GameModeRegistry& gameModes)
-    : gameModes(gameModes) {}
+  GameModeListScreen(LcdDisplay& display, GameModeRegistry& gameModes)
+    : display(display), gameModes(gameModes) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
-    display.showLine(0, "🎮 Select Game Mode");
+    display.showLine(0, "Select Game Mode");
   }
 
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
@@ -51,6 +54,7 @@ public:
   }
 
 private:
+  LcdDisplay& display;
   GameModeRegistry& gameModes;
 };
 

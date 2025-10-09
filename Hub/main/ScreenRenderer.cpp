@@ -5,7 +5,8 @@
 #include "screens/Screen.h"
 
 ScreenRenderer::ScreenRenderer(LcdDisplay& d, ScreenManager& m, HubStateManager& state, GameModeRegistry& registry)
-  : display(d), manager(m), hubState(state), gameModes(registry) {}
+  : display(d), manager(m), hubState(state), gameModes(registry),
+    lastRenderedScreen(ScreenType::None), lastRenderedHash(""), forceRender(false) {}
 
 void ScreenRenderer::render() {
   ScreenType currentScreen = manager.current();
@@ -20,23 +21,29 @@ void ScreenRenderer::render() {
 
   String currentHash = screen->getHash();
 
-  // Skip rendering if screen and content haven't changed
-  if (currentScreen == lastRenderedScreen && currentHash == lastRenderedHash) {
+  // ✅ Skip rendering if screen and content haven't changed
+  if (!forceRender && currentScreen == lastRenderedScreen && currentHash == lastRenderedHash) {
     return;
   }
 
+  forceRender = false;  // Reset flag after use
+
   display.clear();
-  screen->render(display);
+  screen->render();
   lastRenderedHash = currentHash;
   lastRenderedScreen = currentScreen;
 
-  // Button labels
+  // ✅ Button labels
   ButtonLabels labels = manager.getButtonLabels();
   display.showButtonLabels(labels);
 
-  // Encoder hint
+  // ✅ Encoder hint
   EncoderMode mode = manager.getEncoderMode();
   if (mode == EncoderMode::SelectItem || mode == EncoderMode::AdjustField) {
     display.printAligned("<>", display.getRowCount() - 1, "center");
   }
+}
+
+void ScreenRenderer::requestRefresh() {
+  forceRender = true;
 }

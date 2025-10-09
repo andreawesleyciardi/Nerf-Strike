@@ -1,6 +1,7 @@
 #include "ScreenManager.h"
 
 // Include all screen headers
+#include "screens/SplashScreen.h"
 #include "screens/HomeScreen.h"
 #include "screens/HelpScreen.h"
 #include "screens/SettingsScreen.h"
@@ -14,24 +15,25 @@
 #include "screens/ErrorScreen.h"
 #include "screens/WinLostScreen.h"
 
-ScreenManager::ScreenManager(HubStateManager& hubState, GameModeRegistry& gameModes, PairingRegistry& registry, GameLogic& gameLogic)
-  : hubState(hubState), gameModes(gameModes), registry(registry), gameLogic(gameLogic) {}
+ScreenManager::ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& gameModes, PairingRegistry& registry, GameLogic& gameLogic)
+  : display(display), hubState(hubState), gameModes(gameModes), registry(registry), gameLogic(gameLogic) {}
 
 void ScreenManager::setup() {
-  screens[(int)ScreenType::Home]             = new HomeScreen();
-  screens[(int)ScreenType::Help]             = new HelpScreen();
-  screens[(int)ScreenType::Settings]         = new SettingsScreen(hubState);
-  screens[(int)ScreenType::Pairing]          = new PairingScreen(registry);
-  screens[(int)ScreenType::TargetList]       = new TargetListScreen(registry);
-  screens[(int)ScreenType::GameModeList]     = new GameModeListScreen(gameModes);
-  screens[(int)ScreenType::GameModeOptions]  = new GameModeOptionsScreen(gameModes);
-  screens[(int)ScreenType::GameModeDetails]  = new GameModeDetailsScreen(gameModes);
-  screens[(int)ScreenType::Playing]          = new PlayingScreen(gameLogic, registry);
-  screens[(int)ScreenType::Confirmation]     = new ConfirmationScreen(hubState);
-  screens[(int)ScreenType::Error]            = new ErrorScreen(hubState);
-  screens[(int)ScreenType::WinLost]          = new WinLostScreen(hubState, registry, gameLogic);
+  screens[(int)ScreenType::Splash]           = new SplashScreen(display);
+  screens[(int)ScreenType::Home]             = new HomeScreen(display, registry);
+  screens[(int)ScreenType::Help]             = new HelpScreen(display);
+  screens[(int)ScreenType::Settings]         = new SettingsScreen(display, hubState);
+  screens[(int)ScreenType::Pairing]          = new PairingScreen(display, registry);
+  screens[(int)ScreenType::TargetList]       = new TargetListScreen(display, registry);
+  screens[(int)ScreenType::GameModeList]     = new GameModeListScreen(display, gameModes);
+  screens[(int)ScreenType::GameModeOptions]  = new GameModeOptionsScreen(display, gameModes);
+  screens[(int)ScreenType::GameModeDetails]  = new GameModeDetailsScreen(display, gameModes);
+  screens[(int)ScreenType::Playing]          = new PlayingScreen(display, gameLogic, registry);
+  screens[(int)ScreenType::Confirmation]     = new ConfirmationScreen(display, hubState);
+  screens[(int)ScreenType::Error]            = new ErrorScreen(display, hubState);
+  screens[(int)ScreenType::WinLost]          = new WinLostScreen(display, hubState, registry, gameLogic);
 
-  replace(ScreenType::Home);  // Start with Home screen
+  replace(ScreenType::Splash);  // Start with Home screen
 }
 
 void ScreenManager::replace(ScreenType screen) {

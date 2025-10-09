@@ -13,13 +13,16 @@
 // When the pairing is finish I want to show "[x] Targets were found" and [x] is the number of paired targets.
 // Button left label "Targets": navigates to the "Target List screen".
 // Button right label "Play": navigates to the "GameMode List screen".
+#include "../GameSessionState.h"
+
+extern GameSessionState session;
 
 class PairingScreen : public Screen {
 public:
-  PairingScreen(PairingRegistry& registry)
-    : registry(registry) {}
+  PairingScreen(LcdDisplay& display, PairingRegistry& registry)
+    : display(display), registry(registry) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
     display.printAligned("Pairing...", 1, "center");
   }
@@ -55,6 +58,7 @@ public:
   }
 
 private:
+  LcdDisplay& display;
   PairingRegistry& registry;
 };
 

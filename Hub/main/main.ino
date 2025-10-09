@@ -22,6 +22,7 @@
 #include "ScreenTypes.h"
 #include "TargetTypeManager.h"
 #include "GameLogic.h"
+#include "GameSessionState.h"
 
 // 🧠 Core Managers
 HubStateManager hubState;
@@ -30,7 +31,7 @@ PairingRegistry registry;
 GameModeRegistry gameModeRegistry;
 TargetTypeManager targetTypeManager;
 LcdDisplay display(lcdI2CAddress, 20, 4);
-ScreenManager screenManager(hubState, gameModeRegistry, registry, gameLogic);
+ScreenManager screenManager(display, hubState, gameModeRegistry, registry, gameLogic);
 ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
 ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
 CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager);
@@ -39,6 +40,8 @@ Receive receive(targetTypeManager, registry);
 Send send(wireless.getRadio(), registry);
 
 Communication communication(receive, send, registry, gameLogic, statusRgbLed);
+
+GameSessionState session;
 
 // ⏱️ Timing
 unsigned long lastHeartbeat = 0;
@@ -59,6 +62,7 @@ void setup() {
 
   display.setup();
   screenManager.setup();
+  timeDisplay.setup(4);
 }
 
 void loop() {
@@ -76,16 +80,6 @@ void loop() {
     Serial.println(F("🔋 Battery check triggered"));
     showStatus(batteryRgbLed, STATUS_OK);
     batteryRgbLed.pulse("Yellow", 10, 20);
-  }
-
-  if (leftButton.wasPressed()) {
-    Serial.println(F("Left Button pressed"));
-    showStatus(statusRgbLed, STATUS_ERROR, 2);
-  }
-
-  if (rightButton.wasPressed()) {
-    Serial.println(F("Right Button pressed"));
-    statusRgbLed.pulse("Purple", 10, 20);
   }
 
   if (millis() - lastHeartbeat > 3000) {

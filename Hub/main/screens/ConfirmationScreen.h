@@ -7,6 +7,9 @@
 #include "../ButtonLabels.h"
 #include "../HubStateManager.h"
 #include "Screen.h"
+#include "../GameSessionState.h"
+
+extern GameSessionState session;
 
 // - Confirmation screen:
 // A message with a question is shown.
@@ -15,12 +18,12 @@
 
 class ConfirmationScreen : public Screen {
 public:
-  ConfirmationScreen(HubStateManager& hubState)
-    : hubState(hubState) {}
+  ConfirmationScreen(LcdDisplay& display, HubStateManager& hubState)
+    : display(display), hubState(hubState) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
-    display.showLine(0, "❗ Confirm Exit?");
+    display.showLine(0, "Confirm Exit?");
   }
 
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
@@ -51,6 +54,7 @@ public:
   }
 
 private:
+  LcdDisplay& display;
   HubStateManager& hubState;
 };
 

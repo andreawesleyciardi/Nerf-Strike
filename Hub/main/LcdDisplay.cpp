@@ -26,7 +26,11 @@ void LcdDisplay::clearLine(uint8_t row) {
   lcd.print(String(' ', cols));
 }
 
-void LcdDisplay::showLine(uint8_t row, const String& text) {
+void LcdDisplay::showLine(uint8_t row, const String& text, const String& align) {
+  if (align == "center" || align == "right") {
+    printAligned(text, row, align);
+    return;
+  }
   lcd.setCursor(0, row);
   lcd.print(text.substring(0, cols));
 }

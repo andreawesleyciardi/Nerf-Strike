@@ -14,11 +14,12 @@
 
 class HelpScreen : public Screen {
 public:
-  HelpScreen() {}
+  HelpScreen(LcdDisplay& display)
+   : display(display) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
-    display.showLine(0, "❓ Help");
+    display.showLine(0, "Help");
     display.showLine(1, "Commands: list, test, clear");
   }
 
@@ -43,6 +44,9 @@ public:
   String getHash() const override {
     return "Help";
   }
+
+private:
+  LcdDisplay& display;
 };
 
 #endif

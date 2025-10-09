@@ -8,20 +8,28 @@
 #include "../HubStateManager.h"
 #include "Screen.h"
 
+// - Settings screen:
+// I want to show a list of general settings like for example the type of Targets allowed.
+// Button left label "Back": navigates to the "Home screen".
+// Button right label "Help": navigates to the "Help screen".
+
 class SettingsScreen : public Screen {
 public:
-  SettingsScreen(HubStateManager& hubState)
-    : hubState(hubState) {}
+  SettingsScreen(LcdDisplay& display, HubStateManager& hubState)
+    : display(display), hubState(hubState) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
-    display.showLine(0, "⚙️ Settings");
+    display.showLine(0, "Settings");
     display.showLine(1, "Adjust brightness, sound...");
   }
 
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
-    if (left.wasPressed() || right.wasPressed() || encoder.wasPressed()) {
+    if (left.wasPressed()) {
       request = ScreenRequest::to(ScreenType::Home);
+    }
+    if (left.wasPressed() || right.wasPressed() || encoder.wasPressed()) {
+      request = ScreenRequest::to(ScreenType::Help);
     }
   }
 
@@ -30,7 +38,7 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Back", "<>", ""};
+    return {"Back", "", "Help"};
   }
 
   ScreenType getType() const override {
@@ -45,6 +53,7 @@ public:
   }
 
 private:
+  LcdDisplay& display;
   HubStateManager& hubState;
 };
 

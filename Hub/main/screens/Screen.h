@@ -5,7 +5,7 @@
 #include <RotaryEncoder.h>
 #include <Button.h>
 
-#include "../LcdDisplay.h"
+// #include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
@@ -34,7 +34,7 @@ public:
   virtual ~Screen() {}
 
   // Called every frame to render the screen
-  virtual void render(LcdDisplay& display) = 0;
+  virtual void render() = 0;
 
   // Called every frame to handle input
   virtual void handleInput(RotaryEncoder& encoder, Button& left, Button& right) = 0;
@@ -58,6 +58,8 @@ public:
   virtual String getHash() const {
     return "";
   }
+
+  virtual void loop() {}
 
 protected:
   ScreenRequest request;

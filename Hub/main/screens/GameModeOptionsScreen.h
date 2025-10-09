@@ -7,6 +7,9 @@
 #include "../ButtonLabels.h"
 #include "../GameModeRegistry.h"
 #include "Screen.h"
+#include "../GameSessionState.h"
+
+extern GameSessionState session;
 
 // - GameMode Options screen:
 // Some game modes will have extra options.
@@ -19,12 +22,12 @@
 
 class GameModeOptionsScreen : public Screen {
 public:
-  GameModeOptionsScreen(GameModeRegistry& gameModes)
-    : gameModes(gameModes) {}
+  GameModeOptionsScreen(LcdDisplay& display, GameModeRegistry& gameModes)
+    : display(display), gameModes(gameModes) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
-    display.showLine(0, "⚙️ Game Options");
+    display.showLine(0, "Game Options");
     display.showLine(1, "Adjust settings...");
   }
 
@@ -63,6 +66,7 @@ public:
   }
 
 private:
+  LcdDisplay& display;
   GameModeRegistry& gameModes;
   uint8_t selectedIndex = 0;  // You can update this externally if needed
 };

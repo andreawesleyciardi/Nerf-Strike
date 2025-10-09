@@ -11,6 +11,7 @@ class ScreenRenderer {
 public:
   ScreenRenderer(LcdDisplay& display, ScreenManager& manager, HubStateManager& state, GameModeRegistry& registry);
   void render();
+  void requestRefresh();
 
 private:
   LcdDisplay& display;
@@ -20,6 +21,8 @@ private:
 
   ScreenType lastRenderedScreen = ScreenType::Home;
   String lastRenderedHash = "";
+
+  bool forceRender = false;
 
   // void renderHome();
   // void renderHelp();

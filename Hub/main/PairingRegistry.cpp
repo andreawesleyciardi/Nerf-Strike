@@ -72,3 +72,22 @@ uint8_t PairingRegistry::getIDAt(uint8_t index) {
   if (index >= MAX_TARGETS || !entries[index].active) return 0xFF;
   return entries[index].id;
 }
+
+void PairingRegistry::setActive(uint8_t id, bool active) {
+  for (auto& entry : entries) {
+    if (entry.id == id) {
+      entry.active = active;
+      break;
+    }
+  }
+}
+
+uint8_t PairingRegistry::getPairedTargetIds(uint8_t* outArray) {
+  uint8_t count = 0;
+  for (uint8_t i = 0; i < MAX_TARGETS; ++i) {
+    if (entries[i].active && count < MAX_TARGETS) {
+      outArray[count++] = entries[i].id;
+    }
+  }
+  return count;
+}

@@ -4,6 +4,8 @@
 #include <Arduino.h>
 
 enum class ScreenType {
+  None,
+  Splash,
   Home,
   Help,
   Settings,

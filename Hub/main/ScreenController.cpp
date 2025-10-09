@@ -15,6 +15,8 @@ void ScreenController::update() {
   if (activeScreen) {
     activeScreen->handleInput(encoder, leftButton, rightButton);
 
+    activeScreen->loop();
+
     // Check if the screen requested a transition
     ScreenRequest request = activeScreen->getRequestedScreen();
     if (request.hasRequest) {

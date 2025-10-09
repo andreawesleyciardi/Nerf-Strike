@@ -17,7 +17,7 @@ public:
   // Text rendering
   void clear();
   void clearLine(uint8_t row);
-  void showLine(uint8_t row, const String& text);
+  void showLine(uint8_t row, const String& text, const String& align = "left");
   void showText(const String& text, bool scroll = false, uint16_t scrollDelay = 300);
   void showMenuItem(const String& label, uint8_t index, uint8_t total);
   void showButtonLabels(const ButtonLabels& labels);

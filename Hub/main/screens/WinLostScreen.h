@@ -9,15 +9,18 @@
 #include "../PairingRegistry.h"
 #include "../GameLogic.h"
 #include "Screen.h"
+#include "../GameSessionState.h"
+
+extern GameSessionState session;
 
 class WinLostScreen : public Screen {
 public:
-  WinLostScreen(HubStateManager& hubState, PairingRegistry& registry, GameLogic& gameLogic)
-    : hubState(hubState), registry(registry), gameLogic(gameLogic) {}
+  WinLostScreen(LcdDisplay& display, HubStateManager& hubState, PairingRegistry& registry, GameLogic& gameLogic)
+    : display(display), hubState(hubState), registry(registry), gameLogic(gameLogic) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
-    display.showLine(0, "🏆 Game Over");
+    display.showLine(0, "Game Over");
     display.showLine(1, "You won!");  // You could make this dynamic based on outcome
   }
 
@@ -50,6 +53,7 @@ public:
   }
 
 private:
+  LcdDisplay& display;
   HubStateManager& hubState;
   PairingRegistry& registry;
   GameLogic& gameLogic;

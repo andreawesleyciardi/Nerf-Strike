@@ -6,29 +6,33 @@
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
 #include "Screen.h"
+#include "../GameSessionState.h"
+
+extern GameSessionState session;
 
 // - Home screen:
 // I want to show a message (for now just "Welcome").
-// Button left label "Help": navigates to the "Help screen".
-// Button encoder: navigates to "Setting screen".
+// Button left label "Settings": navigates to the "Settings screen".
+// Button encoder: starts immediately the game with default session settings.
 // Button right label "Start": navigates to the "Pairing screen".
 
 class HomeScreen : public Screen {
 public:
-  HomeScreen() {}
+  HomeScreen(LcdDisplay& display, PairingRegistry& registry)
+   : display(display), registry(registry) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
-    display.showLine(0, "Welcome");
-    display.showLine(1, "This is the Home screen");
+    display.showLine(0, "Home screen");
   }
 
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
     if (left.wasPressed()) {
-      request = ScreenRequest::to(ScreenType::Help);
+      request = ScreenRequest::to(ScreenType::Settings);
     }
     if (encoder.wasPressed()) {
-      request = ScreenRequest::to(ScreenType::Settings);
+      session.defaultState(registry);
+      request = ScreenRequest::to(ScreenType::Playing);
     }
     if (right.wasPressed() || encoder.wasPressed()) {
       request = ScreenRequest::to(ScreenType::Pairing);
@@ -50,6 +54,10 @@ public:
   String getHash() const {
     return "Home";
   }
+
+private:
+  LcdDisplay& display;
+  PairingRegistry& registry;
 };
 
 #endif

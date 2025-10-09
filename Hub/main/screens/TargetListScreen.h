@@ -7,6 +7,9 @@
 #include "../ButtonLabels.h"
 #include "../PairingRegistry.h"
 #include "Screen.h"
+#include "../GameSessionState.h"
+
+extern GameSessionState session;
 
 // - Target List screen:
 // I see a list of the targets paired (Target 1, Target 2, Target 3…) and next to each one their ID.
@@ -17,12 +20,12 @@
 
 class TargetListScreen : public Screen {
 public:
-  TargetListScreen(PairingRegistry& registry)
-    : registry(registry) {}
+  TargetListScreen(LcdDisplay& display, PairingRegistry& registry)
+    : display(display), registry(registry) {}
 
-  void render(LcdDisplay& display) override {
+  void render() override {
     display.clear();
-    display.showLine(0, "🎯 Target List");
+    display.showLine(0, "Target List");
     display.showLine(1, "Paired targets: XX");
     // display.showLine(1, "Paired targets: " + String(registry.getCount()));
   }
@@ -61,6 +64,7 @@ public:
   }
 
 private:
+  LcdDisplay& display;
   PairingRegistry& registry;
 };
 
