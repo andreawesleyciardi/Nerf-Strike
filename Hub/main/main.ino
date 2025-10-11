@@ -31,17 +31,20 @@ PairingRegistry registry;
 GameModeRegistry gameModeRegistry;
 TargetTypeManager targetTypeManager;
 LcdDisplay display(lcdI2CAddress, 20, 4);
+
+GameSessionState session;
+GameLogic gameLogic(session, gameModeRegistry);
 ScreenManager screenManager(display, hubState, gameModeRegistry, registry, gameLogic);
 ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
 ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
+
 CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager);
 
 Receive receive(targetTypeManager, registry);
 Send send(wireless.getRadio(), registry);
-
 Communication communication(receive, send, registry, gameLogic, statusRgbLed);
 
-GameSessionState session;
+
 
 // ⏱️ Timing
 unsigned long lastHeartbeat = 0;

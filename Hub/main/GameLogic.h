@@ -3,15 +3,18 @@
 
 #include <Arduino.h>
 #include "PairingRegistry.h"
+#include "GameSessionState.h"
+#include "GameModeRegistry.h"
 
 class GameLogic {
 public:
+  GameLogic(GameSessionState& session, GameModeRegistry& gameModeRegistry);
   void reset();
   uint8_t updateScoreFor(uint8_t targetId);
-  uint8_t getScoreFor(uint8_t targetId);
 
 private:
-  uint8_t scores[MAX_TARGETS] = {0};
+  GameSessionState& session;
+  GameModeRegistry& gameModeRegistry;
 };
 
 extern GameLogic gameLogic;

@@ -77,3 +77,14 @@ uint8_t GameModeRegistry::getFilteredModes(uint8_t pairedTargets, const GameMode
   }
   return count;
 }
+
+const GameMode& GameModeRegistry::getModeByName(const String& name) const {
+  for (uint8_t i = 0; i < MAX_MODES; ++i) {
+    if (modes[i].getName() == name) {
+      return modes[i];
+    }
+  }
+
+  // Fallback: return first mode or a static default
+  return modes[0];  // You could also throw or log an error if needed
+}
