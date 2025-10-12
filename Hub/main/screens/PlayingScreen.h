@@ -21,8 +21,29 @@ extern ScreenRenderer screenRenderer;
 
 class PlayingScreen : public Screen {
 public:
-  PlayingScreen(LcdDisplay& display, GameLogic& gameLogic, PairingRegistry& registry)
-    : display(display), gameLogic(gameLogic), registry(registry) {}
+  PlayingScreen(LcdDisplay& display, GameLogic& gameLogic, PairingRegistry& registry, Communication& communication)
+    : display(display), gameLogic(gameLogic), registry(registry), communication(communication) {}
+
+  void onEnter() override {
+    // ✅ Push entity colors to targets
+    for (uint8_t i = 0; i < session.entityCount; ++i) {
+      const EntityInfo& entity = session.entities[i];
+      const Color& color = entity.color;
+
+      for (uint8_t j = 0; j < entity.targetCount; ++j) {
+        uint8_t targetId = entity.targetIds[j];
+        communication.entityColor(targetId, color.name);
+      }
+    }
+
+    // ✅ Start countdown
+    countdownStarted = true;
+    countdownActive = true;
+    countdownValue = 5;
+    countdownStartTime = millis();
+    timeDisplay.showScore(countdownValue);
+    screenRenderer.requestRefresh();
+  }
 
   void render() override {
     display.clear();
@@ -32,7 +53,6 @@ public:
       display.showLine(1, "Starting in...", "center");
     } else {
       display.showLine(1, "Game in progress", "center");
-      // display.showLine(1, "Score: 0");  // You can make this dynamic later
     }
   }
 
@@ -49,15 +69,6 @@ public:
   }
 
   void loop() override {
-    if (!countdownStarted) {
-      countdownStarted = true;
-      countdownActive = true;
-      countdownValue = 5;
-      countdownStartTime = millis();
-      screenRenderer.requestRefresh();  // Trigger LCD update
-      timeDisplay.showScore(countdownValue);
-    }
-
     if (countdownActive) {
       unsigned long now = millis();
       if (now - countdownStartTime >= 1000) {
@@ -98,6 +109,7 @@ private:
   LcdDisplay& display;
   GameLogic& gameLogic;
   PairingRegistry& registry;
+  Communication& communication;
 
   bool countdownStarted = false;
   bool countdownActive = false;

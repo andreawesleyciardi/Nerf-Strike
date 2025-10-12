@@ -39,6 +39,8 @@ public:
   // Called every frame to handle input
   virtual void handleInput(RotaryEncoder& encoder, Button& left, Button& right) = 0;
 
+  virtual void onEnter() {}
+
   // Returns a requested screen transition (if any)
   virtual ScreenRequest getRequestedScreen() const {
     return request;

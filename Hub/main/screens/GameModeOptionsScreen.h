@@ -43,6 +43,11 @@ public:
     }
   }
 
+  void loop() override {
+    // GameMode& mode = session.getSelectedGameMode();
+    // mode.getSetting(index).value = newValue;
+  }
+
   EncoderMode getEncoderMode() const override {
     return EncoderMode::AdjustField;
   }

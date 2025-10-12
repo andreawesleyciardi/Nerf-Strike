@@ -15,6 +15,7 @@ public:
   void pairing(const byte* buffer);
   void verification(const byte* buffer);
   const bool hit(const byte* buffer);
+  const bool entityColor(uint8_t targetId, String colorName);
 
 private:
   const uint8_t* verifyPipeForID(uint8_t targetId);

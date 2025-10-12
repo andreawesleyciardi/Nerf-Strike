@@ -33,10 +33,9 @@ TargetTypeManager targetTypeManager;
 LcdDisplay display(lcdI2CAddress, 20, 4);
 
 GameSessionState session;
-GameLogic gameLogic(session, gameModeRegistry);
-ScreenManager screenManager(display, hubState, gameModeRegistry, registry, gameLogic);
-ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
-ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
+GameSessionState defaultSession;
+
+GameLogic gameLogic(session);
 
 CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager);
 
@@ -44,7 +43,9 @@ Receive receive(targetTypeManager, registry);
 Send send(wireless.getRadio(), registry);
 Communication communication(receive, send, registry, gameLogic, statusRgbLed);
 
-
+ScreenManager screenManager(display, hubState, gameModeRegistry, registry, gameLogic, communication);
+ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
+ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
 
 // ⏱️ Timing
 unsigned long lastHeartbeat = 0;
@@ -54,6 +55,8 @@ void setup() {
   Serial.println(F("🧠 Hub starting..."));
   initializeHubPins();
   wireless.initialize();
+
+  defaultSession.initializeDefault(registry);
 
   showStatus(statusRgbLed, STATUS_PAIRING);
   delay(500);

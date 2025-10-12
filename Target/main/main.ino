@@ -92,6 +92,18 @@ void loop() {
         break;
       }
 
+      case OPCODE_ENTITY_COLOR: {
+          String colorName = communication.entityColor(buffer);
+          if (colorName != "") {
+            rgbRing.chase(colorName, 30);
+            Serial.println(F("🌈 Entity color is set to: "));
+            Serial.println(colorName);
+          } else {
+            Serial.println(F("❌ Was not possible to set the entity color"));
+          }
+        break;
+      }
+
       // case OPCODE_SCORE_UPDATE: {
       //     ScoreUpdatePacket* packet = reinterpret_cast<ScoreUpdatePacket*>(buffer);
       //     uint8_t newScore = packet->score;

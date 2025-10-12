@@ -14,7 +14,9 @@ enum class EntityType {
 struct EntityInfo {
   uint8_t entityId;
   EntityType type;
-  Color color;  // Uses your custom Color class
+  Color color;
+  int score = 0;
+
   uint8_t targetIds[MAX_TARGETS_PER_ENTITY];
   uint8_t targetCount = 0;
 
@@ -28,6 +30,18 @@ struct EntityInfo {
     if (targetCount < MAX_TARGETS_PER_ENTITY) {
       targetIds[targetCount++] = targetId;
     }
+  }
+
+  bool ownsTarget(uint8_t targetId) const {
+    for (uint8_t i = 0; i < targetCount; ++i) {
+      if (targetIds[i] == targetId) return true;
+    }
+    return false;
+  }
+
+  void reset() {
+    score = 0;
+    targetCount = 0;
   }
 };
 

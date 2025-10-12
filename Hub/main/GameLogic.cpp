@@ -1,7 +1,7 @@
 #include "GameLogic.h"
 
-GameLogic::GameLogic(GameSessionState& session, GameModeRegistry& gameModeRegistry)
-  : session(session), gameModeRegistry(gameModeRegistry) {}
+GameLogic::GameLogic(GameSessionState& session)
+  : session(session) {}
 
 void GameLogic::reset() {
   for (uint8_t i = 0; i < MAX_TARGETS; i++) {
@@ -9,18 +9,42 @@ void GameLogic::reset() {
   }
 }
 
-uint8_t GameLogic::updateScoreFor(uint8_t targetId) {
+uint8_t GameLogic::updateEntityScore(uint8_t targetId) {
   if (targetId >= MAX_TARGETS) {       // TO CHECK IF IS CORRECT
     return 0;
   }
 
-  int currentScore = session.getScoreForTarget(targetId);
-  // session.isMultiplayer();
-  const GameMode& mode = gameModeRegistry.getModeByName(session.selectedGameModeName);
-  currentScore++;
-  // DEVELOP GAME LOGIC BASED ON THE MODE
+  uint8_t entityId = session.getEntityIdForTarget(targetId);
+  int currentScore = session.getScoreForEntity(entityId);
+  const GameMode& gameMode = session.getSelectedGameMode();
+  String gameModeName = gameMode.getName();
 
-  session.setScore(targetId, currentScore);
+  int deltaScore = calculateDeltaScore(gameModeName, currentScore);
 
-  return currentScore;
+  int updatedScore = currentScore;
+  session.setScoreForEntity(entityId, updatedScore);
+  return updatedScore;
+}
+
+int GameLogic::calculateDeltaScore(String gameModeName, int currentScore) {
+  if (gameModeName == ModeName::Training) {
+    // Training mode logic
+  } else if (gameModeName == ModeName::ToNumber) {
+    // To number mode logic
+  } else if (gameModeName == ModeName::Timer) {
+    // Timer mode logic
+  } else if (gameModeName == ModeName::TimeForShots) {
+    // Time for shots mode logic
+  } else if (gameModeName == ModeName::TwoTargets) {
+    // Two targets mode logic
+  } else if (gameModeName == ModeName::Team) {
+    // Team mode logic
+  } else if (gameModeName == ModeName::Battle) {
+    // Battle mode logic
+  } else if (gameModeName == ModeName::CrazyTargets) {
+    // Crazy targets mode logic
+  } else {
+    // Unknown or fallback mode logic
+  }
+  return 0;
 }

@@ -38,10 +38,10 @@ const uint8_t* Receive::verificationRequest(const byte* buffer) {
 }
 
 HitRequestPacket Receive::hitRequest(const byte* buffer) {
-  HitRequestPacket* packet = reinterpret_cast<HitRequestPacket*>(const_cast<byte*>(buffer));
+  HitRequestPacket* request = reinterpret_cast<HitRequestPacket*>(const_cast<byte*>(buffer));
 
   Serial.print(F("🎯 Hit received from target ID: "));
-  Serial.println(packet->id);
+  Serial.println(request->id);
 
-  return *packet;
+  return *request;
 }

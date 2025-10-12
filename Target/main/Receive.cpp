@@ -55,7 +55,10 @@ const bool Receive::verificationResponse(uint8_t id) {
 
 HitResponsePacket Receive::hitResponse() {
   Serial.println(F("⏳ Waiting for hit acknowledgment..."));
-  HitResponsePacket response = { OPCODE_SCORE_UPDATE, 0xFF };
+  HitResponsePacket response = {
+    OPCODE_SCORE_UPDATE,
+    0xFF 
+  };
 
   unsigned long startTime = millis();
   while (millis() - startTime < 100) {
@@ -74,4 +77,9 @@ HitResponsePacket Receive::hitResponse() {
   }
 
   return response;
+}
+
+const String Receive::entityColor(const byte* buffer) {
+  EntityColorRequestPacket* request = reinterpret_cast<EntityColorRequestPacket*>(const_cast<byte*>(buffer));
+  return request->name;
 }

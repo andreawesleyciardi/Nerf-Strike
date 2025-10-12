@@ -19,6 +19,8 @@ public:
   void heartbeatAll(PairingRegistry& registry);
 
   const bool hitResponse(uint8_t id, const uint8_t* pipe, uint8_t newScore);
+
+  const bool entityColorRequest(uint8_t id, String colorName);
   
 private:
   RF24& radio;

@@ -85,3 +85,8 @@ HitResponsePacket Communication::hit() {
   }
   return { OPCODE_SCORE_UPDATE, 0xFF };
 }
+
+const String Communication::entityColor(const byte* buffer) {
+  return receive.entityColor(buffer);
+}
+

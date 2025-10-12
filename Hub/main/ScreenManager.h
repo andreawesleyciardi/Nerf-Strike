@@ -10,11 +10,12 @@
 #include "GameModeRegistry.h"
 #include "PairingRegistry.h"
 #include "GameLogic.h"
+#include "Communication.h"
 #include "screens/Screen.h"
 
 class ScreenManager {
 public:
-  ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& modes, PairingRegistry& registry, GameLogic& logic);
+  ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& modes, PairingRegistry& registry, GameLogic& logic, Communication& communication);
 
   void setup();
   void replace(ScreenType screen);
@@ -32,6 +33,7 @@ private:
   GameModeRegistry& gameModes;
   PairingRegistry& registry;
   GameLogic& gameLogic;
+  Communication& communication;
 
   static const uint8_t screenCount = 12;
   Screen* screens[screenCount];

@@ -94,8 +94,11 @@ void Send::blinkAll(PairingRegistry& registry) {
 }
 
 void Send::heartbeatAll(PairingRegistry& registry) {
-  HeartbeatPacket packet;
-  packet.opcode = OPCODE_HEARTBEAT;
+  HeartbeatPacket packet = {
+    OPCODE_HEARTBEAT
+  };
+  // HeartbeatPacket packet;
+  // packet.opcode = OPCODE_HEARTBEAT;
 
   for (uint8_t i = 0; i < MAX_TARGETS; i++) {
     uint8_t id = registry.getIDAt(i);
@@ -122,4 +125,23 @@ const bool Send::hitResponse(uint8_t id, const uint8_t* pipe, uint8_t newScore) 
   else {
     return false;
   }
+}
+
+const bool Send::entityColorRequest(uint8_t id, String colorName) {
+  EntityColorRequestPacket packet = {
+    OPCODE_ENTITY_COLOR,
+    colorName
+  };
+
+  const uint8_t* pipe = registry.getPipeForID(id);
+  if (id != 0xFF && pipe) {
+    if (toTargetPipe(id, pipe, &packet, sizeof(packet))) {
+      Serial.print(F("🌈 Entity color \""));
+      Serial.print(colorName);
+      Serial.print(F("\" sent to target ID"));
+      Serial.println(id);
+      return true;
+    }
+  }
+  return false;
 }

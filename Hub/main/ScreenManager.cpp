@@ -15,8 +15,8 @@
 #include "screens/ErrorScreen.h"
 #include "screens/WinLostScreen.h"
 
-ScreenManager::ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& gameModes, PairingRegistry& registry, GameLogic& gameLogic)
-  : display(display), hubState(hubState), gameModes(gameModes), registry(registry), gameLogic(gameLogic) {}
+ScreenManager::ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& gameModes, PairingRegistry& registry, GameLogic& gameLogic, Communication& communication)
+  : display(display), hubState(hubState), gameModes(gameModes), registry(registry), gameLogic(gameLogic), communication(communication) {}
 
 void ScreenManager::setup() {
   screens[(int)ScreenType::Splash]           = new SplashScreen(display);
@@ -28,7 +28,7 @@ void ScreenManager::setup() {
   screens[(int)ScreenType::GameModeList]     = new GameModeListScreen(display, gameModes);
   screens[(int)ScreenType::GameModeOptions]  = new GameModeOptionsScreen(display, gameModes);
   screens[(int)ScreenType::GameModeDetails]  = new GameModeDetailsScreen(display, gameModes);
-  screens[(int)ScreenType::Playing]          = new PlayingScreen(display, gameLogic, registry);
+  screens[(int)ScreenType::Playing]          = new PlayingScreen(display, gameLogic, registry, communication);
   screens[(int)ScreenType::Confirmation]     = new ConfirmationScreen(display, hubState);
   screens[(int)ScreenType::Error]            = new ErrorScreen(display, hubState);
   screens[(int)ScreenType::WinLost]          = new WinLostScreen(display, hubState, registry, gameLogic);
@@ -39,6 +39,11 @@ void ScreenManager::setup() {
 void ScreenManager::replace(ScreenType screen) {
   activeScreen = screen;
   updateContext(screen);
+
+  Screen* active = getActive();
+  if (active) {
+    active->onEnter();
+  }
 }
 
 ScreenType ScreenManager::current() const {

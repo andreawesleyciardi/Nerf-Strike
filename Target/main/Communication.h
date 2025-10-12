@@ -14,6 +14,7 @@ public:
   void pairing();
   const bool verification();
   HitResponsePacket hit();
+  const String entityColor(const byte* buffer);
 
 private:
   const uint8_t verifyAssignedID();

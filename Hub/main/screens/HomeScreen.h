@@ -9,6 +9,7 @@
 #include "../GameSessionState.h"
 
 extern GameSessionState session;
+extern GameSessionState defaultSession;
 
 // - Home screen:
 // I want to show a message (for now just "Welcome").
@@ -31,7 +32,7 @@ public:
       request = ScreenRequest::to(ScreenType::Settings);
     }
     if (encoder.wasPressed()) {
-      session.defaultState(registry);
+      session = defaultSession;
       request = ScreenRequest::to(ScreenType::Playing);
     }
     if (right.wasPressed() || encoder.wasPressed()) {

@@ -9,6 +9,17 @@ enum class ModeType {
   ALL
 };
 
+struct ModeName {
+  static constexpr const char* Training       = "Training";
+  static constexpr const char* ToNumber       = "To number";
+  static constexpr const char* Timer          = "Timer";
+  static constexpr const char* TimeForShots   = "Time for shots";
+  static constexpr const char* TwoTargets     = "Two targets";
+  static constexpr const char* Team           = "Team";
+  static constexpr const char* Battle         = "Battle";
+  static constexpr const char* CrazyTargets   = "Crazy targets";
+};
+
 struct ModeDescription {
   String singlePlayerText;
   String multiPlayerText;

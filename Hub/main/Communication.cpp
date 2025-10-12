@@ -57,8 +57,12 @@ const bool Communication::hit(const byte* buffer) {
   HitRequestPacket request = receive.hitRequest(buffer);
   const uint8_t* pipe = verifyPipeForID(request.id);
   if (pipe) {
-    uint8_t newScore = gameLogic.updateScoreFor(request.id);
+    uint8_t newScore = gameLogic.updateEntityScore(request.id);
     return send.hitResponse(request.id, pipe, newScore);
   }
   return false;
+}
+
+const bool Communication::entityColor(uint8_t targetId, String colorName) {
+  return send.entityColorRequest(targetId, colorName);
 }
