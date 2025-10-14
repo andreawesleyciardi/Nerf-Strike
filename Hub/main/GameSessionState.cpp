@@ -8,6 +8,18 @@ GameSessionState::GameSessionState() {
   reset();
 }
 
+uint8_t GameSessionState::calculateTargetsPerEntity(uint8_t totalPaired, uint8_t totalPlayers, uint8_t totalTeams) {
+  if (totalTeams == 0) {
+    // Single player mode
+    return (totalPaired - (totalPaired % totalPlayers)) / totalPlayers;
+  } else if (totalTeams == 1) {
+    // All players on the same team
+    return totalPaired;
+  }
+  // Multiple teams mode
+  return (totalPaired - (totalPaired % totalTeams)) / totalTeams;
+}
+
 void GameSessionState::initializeDefault(PairingRegistry& registry) {
   reset();
   setSelectedGameMode(gameModeRegistry.getModeByName("Training"));
@@ -16,10 +28,17 @@ void GameSessionState::initializeDefault(PairingRegistry& registry) {
   uint8_t pairedIds[MAX_ENTITIES * MAX_TARGETS_PER_ENTITY];
   uint8_t totalPaired = registry.getPairedTargetIds(pairedIds);
 
+  if (totalPaired == 0) {
+    Serial.println(F("⚠️ No paired targets found. Skipping entity assignment."));
+    return;
+  }
+
   EntityInfo e;
   e.entityId = 0;
   e.type = EntityType::Player;
   e.color = defaultColorFor(0);
+
+
 
   for (uint8_t i = 0; i < totalPaired && e.targetCount < MAX_TARGETS_PER_ENTITY; ++i) {
     e.addTarget(pairedIds[i]);
@@ -67,7 +86,7 @@ uint8_t GameSessionState::getEntityIdForTarget(uint8_t targetId) const {
 
 void GameSessionState::assignEntitiesBalanced(const uint8_t* pairedTargetIds, uint8_t totalTargets, uint8_t entityCountInput, bool useTeams, PairingRegistry& registry) {
   entityCount = 0;
-  uint8_t targetsPerEntity = totalTargets / entityCountInput;
+  uint8_t targetsPerEntity = calculateTargetsPerEntity(totalTargets)  / entityCountInput;
 
   for (uint8_t i = 0; i < entityCountInput && entityCount < MAX_ENTITIES; ++i) {
     EntityInfo e;

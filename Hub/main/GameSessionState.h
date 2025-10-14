@@ -41,6 +41,7 @@ public:
   GameSessionState();
 
   void reset();
+  uint8_t calculateTargetsPerEntity(uint8_t totalPaired = 1, uint8_t totalPlayers = 1, uint8_t totalTeams = 0);
   void initializeDefault(PairingRegistry& registry);
   // void defaultState(PairingRegistry& registry);
 

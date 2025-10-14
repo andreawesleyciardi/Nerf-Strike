@@ -26,12 +26,20 @@ public:
 
   void onEnter() override {
     // ✅ Push entity colors to targets
+    Serial.println(F("Playing onEnter"));
+    Serial.print(F("session.entityCount: "));
+    Serial.println(session.entityCount);
     for (uint8_t i = 0; i < session.entityCount; ++i) {
       const EntityInfo& entity = session.entities[i];
       const Color& color = entity.color;
-
+      Serial.print(F("entity.targetCount: "));
+      Serial.println(entity.targetCount);
       for (uint8_t j = 0; j < entity.targetCount; ++j) {
         uint8_t targetId = entity.targetIds[j];
+        Serial.print(F("Sending entity color "));
+        Serial.print(color.name);
+        Serial.print(F(" to targetId "));
+        Serial.println(targetId);
         communication.entityColor(targetId, color.name);
       }
     }

@@ -64,5 +64,6 @@ const bool Communication::hit(const byte* buffer) {
 }
 
 const bool Communication::entityColor(uint8_t targetId, String colorName) {
+  Serial.println(F("Communication::entityColor"));
   return send.entityColorRequest(targetId, colorName);
 }
