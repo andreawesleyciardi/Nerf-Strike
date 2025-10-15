@@ -37,7 +37,9 @@ public:
       request = ScreenRequest::to(ScreenType::Playing);
     }
     if (right.wasPressed()) {
-      request = ScreenRequest::to(ScreenType::Pairing);
+      GameSession defaultSession = createDefaultSession(registry);
+      sessionManager.setSession(defaultSession);
+      request = ScreenRequest::to(ScreenType::Entities);
     }
   }
 

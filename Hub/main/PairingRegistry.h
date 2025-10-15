@@ -15,7 +15,7 @@ public:
   uint8_t getIDAt(uint8_t index);
   void clearAll();
   void setActive(uint8_t id, bool active);
-  uint8_t getPairedTargetIds(uint8_t* outArray);
+  uint8_t getPairedTargetCount(uint8_t* outArray);
 
 private:
   struct Entry {

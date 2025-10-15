@@ -25,30 +25,30 @@ void ScreenController::update() {
   }
 
   // Optional: screen-specific overrides
-  if (current == ScreenType::GameModeList) {
-    handleGameModeList();  // Custom logic layered on top
-  }
+  // if (current == ScreenType::GameModeList) {
+  //   handleGameModeList();  // Custom logic layered on top
+  // }
 
   // Add other screen-specific handlers here
 }
 
-void ScreenController::handleGameModeList() {
-  int dir = encoder.getDirection();
-  if (dir != 0) {
-    if (dir > 0) hubState.nextMenuItem();
-    else hubState.previousMenuItem();
-  }
+// void ScreenController::handleGameModeList() {
+//   int dir = encoder.getDirection();
+//   if (dir != 0) {
+//     if (dir > 0) hubState.nextMenuItem();
+//     else hubState.previousMenuItem();
+//   }
 
-  if (encoder.wasPressed() || rightButton.wasPressed()) {
-    const GameMode& selected = gameModes.getMode(hubState.getCurrentMenuIndex());
-    Serial.print("🎮 Selected Game Mode: ");
-    Serial.println(selected.getName());
+//   if (encoder.wasPressed() || rightButton.wasPressed()) {
+//     const GameMode& selected = gameModes.getMode(hubState.getCurrentMenuIndex());
+//     Serial.print("🎮 Selected Game Mode: ");
+//     Serial.println(selected.getName());
 
-    // Instead of pushing, we now request a screen change
-    screenManager.replace(ScreenType::GameModeOptions);
-  }
+//     // Instead of pushing, we now request a screen change
+//     screenManager.replace(ScreenType::GameModeOptions);
+//   }
 
-  if (leftButton.wasPressed()) {
-    screenManager.replace(ScreenType::Home);  // Or wherever "back" should go
-  }
-}
+//   if (leftButton.wasPressed()) {
+//     screenManager.replace(ScreenType::Home);  // Or wherever "back" should go
+//   }
+// }

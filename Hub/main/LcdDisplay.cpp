@@ -57,9 +57,12 @@ void LcdDisplay::showMenuItem(const String& label, uint8_t index, uint8_t total)
 }
 
 void LcdDisplay::showButtonLabels(const ButtonLabels& labels) {
-  String leftLabel = String(labels.left).length() > 0 ? "[" + String(labels.left) + "]" : "";
-  String encoderLabel = String(labels.encoder).length() > 0 ? "[" + String(labels.encoder) + "]" : "";
-  String rightLabel = String(labels.right).length() > 0 ? "[" + String(labels.right) + "]" : "";
+  // String leftLabel = String(labels.left).length() > 0 ? "[" + String(labels.left) + "]" : "";
+  // String encoderLabel = String(labels.encoder).length() > 0 ? "[" + String(labels.encoder) + "]" : "";
+  // String rightLabel = String(labels.right).length() > 0 ? "[" + String(labels.right) + "]" : "";
+  String leftLabel = String(labels.left).length() > 0 ? String(labels.left) : "";
+  String encoderLabel = String(labels.encoder).length() > 0 ? String(labels.encoder) : "";
+  String rightLabel = String(labels.right).length() > 0 ? String(labels.right) : "";
 
   if (strcmp(labels.alignment, "center") == 0) {
     String line = leftLabel + " " + encoderLabel + " " + rightLabel;

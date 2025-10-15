@@ -82,7 +82,7 @@ void PairingRegistry::setActive(uint8_t id, bool active) {
   }
 }
 
-uint8_t PairingRegistry::getPairedTargetIds(uint8_t* outArray) {
+uint8_t PairingRegistry::getPairedTargetCount(uint8_t* outArray) {
   uint8_t count = 0;
   for (uint8_t i = 0; i < MAX_TARGETS; ++i) {
     if (entries[i].active && count < MAX_TARGETS) {

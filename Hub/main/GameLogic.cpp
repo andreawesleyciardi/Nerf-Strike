@@ -21,6 +21,7 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
     return batch;
   }
 
+  // Having the id of the hitted target I retreive the assigned entity; after get the current score using the game logic I calculate the new score
   uint8_t entityId = sessionManager.getEntityIdForTarget(targetId);
   int currentScore = sessionManager.getScoreForEntity(entityId);
   const GameMode& gameMode = sessionManager.getSelectedGameMode();
@@ -33,31 +34,35 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
   const EntityInfo* entities = sessionManager.getAllEntities();
   uint8_t entitiesCount = sessionManager.getEntityCount();
 
+  // All the list of entities is scrolled 
   for (uint8_t i = 0; i < entitiesCount; ++i) {
-    if (gameModeName.equals(ModeName::Battle)) {
-      if (entities[i].entityId != entityId) {
-        int currentOpponentScore = sessionManager.getScoreForEntity(entities[i].entityId);
-        int currentOpponentUpdatedScore = currentOpponentScore - 1;
-        sessionManager.setScoreForEntity(entities[i].entityId, currentOpponentUpdatedScore);
-        if (entities[i].targetCount > 0) {
-          for (uint8_t y = 0; y < entities[i].targetCount; ++y) {
-            batch.updates[batch.count++] = {
-              entities[i].targetIds[y],
-              static_cast<uint8_t>(currentOpponentUpdatedScore),
-              status == ScoreStatus::Won ? ScoreStatus::Lost : ScoreStatus::Subtract
-            };
-          }
-        }
-      }
-    }
     if (entities[i].entityId == entityId) {
       if (entities[i].targetCount > 0) {
+        // All the list of targets assigned to the entity is added to the batch array for get notified of the new score
         for (uint8_t y = 0; y < entities[i].targetCount; ++y) {
           batch.updates[batch.count++] = {
             entities[i].targetIds[y],
             static_cast<uint8_t>(updatedScore),
             status
           };
+        }
+      }
+    }
+    else {
+      if (gameModeName.equals(ModeName::Battle)) {
+        // In "Battle" game mode when an entity hits one of its targets subtract a point from the opponents
+        int currentOpponentScore = sessionManager.getScoreForEntity(entities[i].entityId);
+        int currentOpponentUpdatedScore = currentOpponentScore - 1;
+        sessionManager.setScoreForEntity(entities[i].entityId, currentOpponentUpdatedScore);
+        if (entities[i].targetCount > 0) {
+          for (uint8_t y = 0; y < entities[i].targetCount; ++y) {
+            // I add to the batch array the targets that need to be notified that a point is substracted
+            batch.updates[batch.count++] = {
+              entities[i].targetIds[y],
+              static_cast<uint8_t>(currentOpponentUpdatedScore),
+              status == ScoreStatus::Won ? ScoreStatus::Lost : ScoreStatus::Subtract
+            };
+          }
         }
       }
     }

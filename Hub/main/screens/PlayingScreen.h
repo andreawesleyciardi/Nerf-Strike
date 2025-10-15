@@ -66,9 +66,11 @@ public:
     if (!countdownStarted) {
       display.showLine(1, "Ready...", "center");
     } else if (countdownActive) {
-      display.showLine(1, "Starting in...", "center");
+      display.showLine(0, "Starting in...", "center");
+      display.showLine(1, "0" + String(countdownValue), "center");
     } else {
-      display.showLine(1, "Game in progress", "center");
+      display.showLine(0, "Game in", "center");
+      display.showLine(1, "progress...", "center");
     }
   }
 
@@ -108,7 +110,7 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Stop", "<>", "Restart"};
+    return {"Exit", "<>", "Reset"};
   }
 
   ScreenType getType() const override {

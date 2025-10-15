@@ -14,6 +14,7 @@
 #include "screens/ConfirmationScreen.h"
 #include "screens/ErrorScreen.h"
 #include "screens/WinLostScreen.h"
+#include "screens/EntitiesScreen.h"
 
 ScreenManager::ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& gameModes, PairingRegistry& registry, GameLogic& gameLogic, Communication& communication)
   : display(display), hubState(hubState), gameModes(gameModes), registry(registry), gameLogic(gameLogic), communication(communication) {}
@@ -32,8 +33,9 @@ void ScreenManager::setup() {
   screens[(int)ScreenType::Confirmation]     = new ConfirmationScreen(display, hubState);
   screens[(int)ScreenType::Error]            = new ErrorScreen(display, hubState);
   screens[(int)ScreenType::WinLost]          = new WinLostScreen(display, hubState, registry, gameLogic);
+  screens[(int)ScreenType::Entities]         = new EntitiesScreen(display, registry);
 
-  replace(ScreenType::Splash);  // Start with Home screen
+  replace(ScreenType::Splash);  // Start with Splash screen
 }
 
 void ScreenManager::replace(ScreenType screen) {

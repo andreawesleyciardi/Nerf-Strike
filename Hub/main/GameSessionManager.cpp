@@ -16,7 +16,7 @@ GameSessionManager::GameSessionManager() {
 //   session.status = GameSessionStatus::Playing;
 
 //   uint8_t pairedIds[MAX_ENTITIES * MAX_TARGETS_PER_ENTITY];
-//   uint8_t totalPaired = registry.getPairedTargetIds(pairedIds);
+//   uint8_t totalPaired = registry.getPairedTargetCount(pairedIds);
 
 //   if (totalPaired == 0) {
 //     Serial.println(F("⚠️ No paired targets found. Skipping entity assignment."));
@@ -119,6 +119,10 @@ uint8_t GameSessionManager::getEntityCount() const {
   return session.entityCount;
 }
 
+void GameSessionManager::setEntityCount(uint8_t value) {
+  session.entityCount = value;
+}
+
 void GameSessionManager::setSelectedGameMode(const GameMode& mode) {
   session.gameMode = mode;
 }
@@ -144,5 +148,8 @@ void GameSessionManager::restart() {
   for (uint8_t i = 0; i < session.entityCount; ++i) {
     session.entities[i].score = 0;
   }
-  session.status = GameSessionStatus::Playing;
+  setStatus(GameSessionStatus::Playing);
+}
+void GameSessionManager::setStatus(GameSessionStatus newStatus) {
+  session.status = newStatus;
 }

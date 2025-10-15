@@ -24,7 +24,7 @@ private:
   Button& leftButton;
   Button& rightButton;
 
-  void handleGameModeList();
+  // void handleGameModeList();
 };
 
 #endif

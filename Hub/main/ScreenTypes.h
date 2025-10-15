@@ -17,7 +17,8 @@ enum class ScreenType {
   Playing,
   Confirmation,
   Error,
-  WinLost
+  WinLost,
+  Entities
 };
 
 #endif

@@ -17,7 +17,7 @@ GameSession createDefaultSession(PairingRegistry& registry) {
   e.color = getColorForIndex(0);
 
   uint8_t pairedIds[MAX_TARGETS_PER_ENTITY];
-  uint8_t totalPaired = registry.getPairedTargetIds(pairedIds);
+  uint8_t totalPaired = registry.getPairedTargetCount(pairedIds);
 
   for (uint8_t i = 0; i < totalPaired && e.targetCount < MAX_TARGETS_PER_ENTITY; ++i) {
     e.addTarget(pairedIds[i]);
