@@ -78,13 +78,25 @@ bool GameSessionManager::isMultiplayer() const {
 }
 
 int GameSessionManager::getScoreForEntity(uint8_t entityId) const {
+  Serial.print(F("Inside GETScoreForEntity. entityId: "));
+  Serial.print(entityId);
+  Serial.print(F("Inside GETScoreForEntity. session.entityCount: "));
+  Serial.print(session.entityCount);
   if (entityId < session.entityCount) {
+    Serial.print(F("Inside IF in GETScoreForEntity. session.entities[entityId].score: "));
+    Serial.print(session.entities[entityId].score);
     return session.entities[entityId].score;
   }
   return 0;
 }
 
 void GameSessionManager::setScoreForEntity(uint8_t entityId, int value) {
+  Serial.print(F("Inside SETScoreForEntity. entityId: "));
+  Serial.print(entityId);
+  Serial.print(F("Inside SETScoreForEntity. value: "));
+  Serial.print(value);
+  Serial.print(F("Inside SETScoreForEntity. session.entityCount: "));
+  Serial.print(session.entityCount);
   if (entityId < session.entityCount) {
     session.entities[entityId].score = value;
   }
@@ -97,6 +109,14 @@ uint8_t GameSessionManager::getEntityIdForTarget(uint8_t targetId) const {
     }
   }
   return 255;
+}
+
+const EntityInfo (&GameSessionManager::getAllEntities() const)[MAX_ENTITIES] {
+  return session.entities;
+}
+
+uint8_t GameSessionManager::getEntityCount() const {
+  return session.entityCount;
 }
 
 void GameSessionManager::setSelectedGameMode(const GameMode& mode) {

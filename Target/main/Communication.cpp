@@ -79,11 +79,11 @@ HitResponsePacket Communication::hit() {
   uint8_t assignedID = verifyAssignedID();
   if (assignedID != 0xFF) {
     if (!send.hitRequest(assignedID)) {
-      return { OPCODE_SCORE_UPDATE, 0xFF };
+      return { OPCODE_SCORE_UPDATE, 0xFF, ScoreStatus::Error };
     }
     return receive.hitResponse();
   }
-  return { OPCODE_SCORE_UPDATE, 0xFF };
+  return { OPCODE_SCORE_UPDATE, 0xFF, ScoreStatus::Error };
 }
 
 const String Communication::entityColor(const byte* buffer) {

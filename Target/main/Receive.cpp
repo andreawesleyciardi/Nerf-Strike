@@ -59,7 +59,7 @@ HitResponsePacket Receive::hitResponse() {
   HitResponsePacket response = {
     OPCODE_SCORE_UPDATE,
     0xFF,
-    ScoreStatus::OnGoing
+    ScoreStatus::Waiting
   };
 
   unsigned long startTime = millis();

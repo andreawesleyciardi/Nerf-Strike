@@ -6,11 +6,16 @@
 #include "PairingRegistry.h"
 #include "GameSessionManager.h"
 
+struct ScoreUpdateBatch {
+  ScoreUpdatedPerTarget updates[MAX_TARGETS];
+  uint8_t count = 0;
+};
+
 class GameLogic {
 public:
   GameLogic(GameSessionManager& sessionManager);
   void reset();
-  ScoreUpdated updateEntityScore(uint8_t targetId);
+  ScoreUpdateBatch updateEntityScore(uint8_t targetId);
   int calculateScore(String gameModeName, int currentScore);
   ScoreStatus evaluateScoreStatus(String gameModeName, const GameMode& gameMode, int score = 0);
 

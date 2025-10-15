@@ -1,5 +1,6 @@
 #include "GameLogic.h"
 #include "GameMode.h"
+#include "EntityInfo.h"
 
 GameLogic::GameLogic(GameSessionManager& sessionManager)
   : sessionManager(sessionManager) {}
@@ -10,24 +11,59 @@ void GameLogic::reset() {
   }
 }
 
-ScoreUpdated GameLogic::updateEntityScore(uint8_t targetId) {
+ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
   Serial.println(F("Entered in updateEntityScore"));
-  if (targetId >= MAX_TARGETS) {       // TO CHECK IF IS CORRECT
-    return {0, ScoreStatus::Lost};
+  ScoreUpdateBatch batch;
+
+  if (targetId >= MAX_TARGETS) {
+    batch.updates[0] = {targetId, 0, ScoreStatus::Blocked};
+    batch.count = 1;
+    return batch;
   }
 
   uint8_t entityId = sessionManager.getEntityIdForTarget(targetId);
   int currentScore = sessionManager.getScoreForEntity(entityId);
   const GameMode& gameMode = sessionManager.getSelectedGameMode();
   String gameModeName = gameMode.getName();
-  Serial.println(F("gameModeName in updateEntityScore: "));
-  Serial.println(gameModeName);
-
   int updatedScore = calculateScore(gameModeName, currentScore);
   sessionManager.setScoreForEntity(entityId, updatedScore);
-
   ScoreStatus status = evaluateScoreStatus(gameModeName, gameMode, updatedScore);
-  return {static_cast<uint8_t>(updatedScore), status};
+  // To add a function that updates the session with the status if win or lost
+
+  const EntityInfo* entities = sessionManager.getAllEntities();
+  uint8_t entitiesCount = sessionManager.getEntityCount();
+
+  for (uint8_t i = 0; i < entitiesCount; ++i) {
+    if (gameModeName.equals(ModeName::Battle)) {
+      if (entities[i].entityId != entityId) {
+        int currentOpponentScore = sessionManager.getScoreForEntity(entities[i].entityId);
+        int currentOpponentUpdatedScore = currentOpponentScore - 1;
+        sessionManager.setScoreForEntity(entities[i].entityId, currentOpponentUpdatedScore);
+        if (entities[i].targetCount > 0) {
+          for (uint8_t y = 0; y < entities[i].targetCount; ++y) {
+            batch.updates[batch.count++] = {
+              entities[i].targetIds[y],
+              static_cast<uint8_t>(currentOpponentUpdatedScore),
+              status == ScoreStatus::Won ? ScoreStatus::Lost : ScoreStatus::Subtract
+            };
+          }
+        }
+      }
+    }
+    if (entities[i].entityId == entityId) {
+      if (entities[i].targetCount > 0) {
+        for (uint8_t y = 0; y < entities[i].targetCount; ++y) {
+          batch.updates[batch.count++] = {
+            entities[i].targetIds[y],
+            static_cast<uint8_t>(updatedScore),
+            status
+          };
+        }
+      }
+    }
+  }
+
+  return batch;
 }
 
 int GameLogic::calculateScore(String gameModeName, int currentScore) {
@@ -35,23 +71,23 @@ int GameLogic::calculateScore(String gameModeName, int currentScore) {
   Serial.println(gameModeName);
   Serial.print(F("currentScore: "));
   Serial.println(currentScore);
-  if (gameModeName == ModeName::Training) {
+  if (gameModeName.equals(ModeName::Training)) {
     // Training mode logic
-    return currentScore++;
-  } else if (gameModeName == ModeName::ToNumber) {
+    return currentScore + 1;
+  } else if (gameModeName.equals(ModeName::ToNumber)) {
     // To number mode logic
-    return currentScore++;
-  } else if (gameModeName == ModeName::Timer) {
+    return currentScore + 1;
+  } else if (gameModeName.equals(ModeName::Timer)) {
     // Timer mode logic
-  } else if (gameModeName == ModeName::TimeForShots) {
+  } else if (gameModeName.equals(ModeName::TimeForShots)) {
     // Time for shots mode logic
-  } else if (gameModeName == ModeName::TwoTargets) {
+  } else if (gameModeName.equals(ModeName::TwoTargets)) {
     // Two targets mode logic
-  } else if (gameModeName == ModeName::Team) {
+  } else if (gameModeName.equals(ModeName::Team)) {
     // Team mode logic
-  } else if (gameModeName == ModeName::Battle) {
+  } else if (gameModeName.equals(ModeName::Battle)) {
     // Battle mode logic
-  } else if (gameModeName == ModeName::CrazyTargets) {
+  } else if (gameModeName.equals(ModeName::CrazyTargets)) {
     // Crazy targets mode logic
   } else {
     // Unknown or fallback mode logic
@@ -66,24 +102,26 @@ ScoreStatus GameLogic::evaluateScoreStatus(String gameModeName, const GameMode& 
   // }
   Serial.print("gameModeName: ");
   Serial.println(gameModeName);
-  if (gameModeName == ModeName::Training) {
+  if (gameModeName.equals(ModeName::Training)) {
     // Training mode logic
-  } else if (gameModeName == ModeName::ToNumber) {
+  } else if (gameModeName.equals(ModeName::ToNumber)) {
     // To number mode logic
     if (score == settings[0].value) {
-      ScoreStatus::Win;
+      return ScoreStatus::Won;
+    } else {
+      return ScoreStatus::Add;
     }
-  } else if (gameModeName == ModeName::Timer) {
+  } else if (gameModeName.equals(ModeName::Timer)) {
     // Timer mode logic
-  } else if (gameModeName == ModeName::TimeForShots) {
+  } else if (gameModeName.equals(ModeName::TimeForShots)) {
     // Time for shots mode logic
-  } else if (gameModeName == ModeName::TwoTargets) {
+  } else if (gameModeName.equals(ModeName::TwoTargets)) {
     // Two targets mode logic
-  } else if (gameModeName == ModeName::Team) {
+  } else if (gameModeName.equals(ModeName::Team)) {
     // Team mode logic
-  } else if (gameModeName == ModeName::Battle) {
+  } else if (gameModeName.equals(ModeName::Battle)) {
     // Battle mode logic
-  } else if (gameModeName == ModeName::CrazyTargets) {
+  } else if (gameModeName.equals(ModeName::CrazyTargets)) {
     // Crazy targets mode logic
   } else {
     // Unknown or fallback mode logic

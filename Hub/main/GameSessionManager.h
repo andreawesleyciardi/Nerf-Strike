@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "GameSession.h"
 #include "PairingRegistry.h"
+#include "EntityInfo.h"
 
 class GameSessionManager {
 public:
@@ -18,6 +19,8 @@ public:
   int getScoreForEntity(uint8_t entityId) const;
   void setScoreForEntity(uint8_t entityId, int value);
   uint8_t getEntityIdForTarget(uint8_t targetId) const;
+  const EntityInfo (&getAllEntities() const)[MAX_ENTITIES];
+  uint8_t getEntityCount() const;
 
   void setSelectedGameMode(const GameMode& mode);
   const GameMode& getSelectedGameMode() const;

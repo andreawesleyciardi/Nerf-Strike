@@ -57,8 +57,20 @@ const bool Communication::hit(const byte* buffer) {
   HitRequestPacket request = receive.hitRequest(buffer);
   const uint8_t* pipe = verifyPipeForID(request.id);
   if (pipe) {
-    ScoreUpdated result = gameLogic.updateEntityScore(request.id);
-    return send.hitResponse(request.id, pipe, result);
+    ScoreUpdateBatch batch = gameLogic.updateEntityScore(request.id);
+
+    bool success = false;
+    for (uint8_t i = 0; i < batch.count; ++i) {
+      const ScoreUpdatedPerTarget& result = batch.updates[i];
+      const uint8_t* targetPipe = verifyPipeForID(result.targetId);
+      if (targetPipe) {
+        const bool wasSent = send.hitResponse(result.targetId, targetPipe, {result.newScore, result.status});
+        if (result.targetId == request.id) {
+          success = wasSent;
+        }
+      }
+    }
+    return success;
   }
   return false;
 }

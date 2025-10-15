@@ -106,14 +106,42 @@ void loop() {
         break;
       }
 
-      // case OPCODE_SCORE_UPDATE: {
-      //     ScoreUpdatePacket* packet = reinterpret_cast<ScoreUpdatePacket*>(buffer);
-      //     uint8_t newScore = packet->score;
-      //     Serial.print(F("🎯 New score received: "));
-      //     Serial.println(newScore);
-      //     scoreDisplay.updateScore(newScore);
-      //   break;
-      // }
+      case OPCODE_SCORE_UPDATE: {
+          HitResponsePacket* packet = reinterpret_cast<HitResponsePacket*>(buffer);
+          uint8_t newScore = packet->value;
+          if (packet->value != 0xFF) {
+          rgbRing.blink("Green");
+          scoreDisplay.updateScore(packet->value);
+          buzzer.beep(2);
+          Serial.print(F("🎯 New score received: "));
+          Serial.print(packet->value);
+          Serial.print(F(" with status: "));
+          Serial.println(static_cast<uint8_t>(packet->status));
+          // feedback.updateScore(response.score);
+          if (packet->status == ScoreStatus::Won || packet->status == ScoreStatus::Even) {
+            rgbRing.chase("Green");
+            rgbRing.chase("Green");
+            rgbRing.chase("Green");
+          } else if (packet->status == ScoreStatus::Lost) {
+            rgbRing.chase("Red");
+            rgbRing.chase("Red");
+            rgbRing.chase("Red");
+          } else if (packet->status == ScoreStatus::Subtract) {
+            rgbRing.chase("Orange");
+            rgbRing.chase("Orange");
+            rgbRing.chase("Orange");
+          }
+        } else {
+          showStatus(statusRgbLed, STATUS_ERROR);
+          Serial.print(F("🎯 Was not possible to update the score"));
+        }
+
+
+          // Serial.print(F("🎯 New score received: "));
+          // Serial.println(newScore);
+          // scoreDisplay.updateScore(newScore);
+        break;
+      }
 
       default:
         Serial.print(F("⚠️ Unknown opcode received: "));
@@ -128,27 +156,6 @@ void loop() {
       // TO CREATE CONDITIONS: if (gameStatus == PLAYING) {
         Serial.println(F("✅ Target got hit."));
         HitResponsePacket response = communication.hit();
-        if (response.value != 0xFF) {
-          rgbRing.blink("Green");
-          scoreDisplay.updateScore(response.value);
-          buzzer.beep(2);
-          Serial.print(F("🎯 New score received: "));
-          Serial.println(response.value);
-          // feedback.updateScore(response.score);
-          if (response.status == ScoreStatus::Win || response.status == ScoreStatus::Even) {
-            rgbRing.chase("Green");
-            rgbRing.chase("Green");
-            rgbRing.chase("Green");
-          } else if (response.status == ScoreStatus::Lost) {
-            rgbRing.chase("Red");
-            rgbRing.chase("Red");
-            rgbRing.chase("Red");
-          }
-        } else {
-          showStatus(statusRgbLed, STATUS_ERROR);
-          Serial.print(F("🎯 Was not possible to update the score"));
-          // feedback.signalError();  // Optional: blink red or buzz
-        }
       // TO CREATE CONDITIONS: }
 
       
