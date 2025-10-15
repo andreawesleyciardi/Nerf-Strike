@@ -7,9 +7,9 @@
 #include "../ButtonLabels.h"
 #include "../GameModeRegistry.h"
 #include "Screen.h"
-#include "../GameSessionState.h"
+#include "../GameSessionManager.h"
 
-extern GameSessionState session;
+extern GameSessionManager sessionManager;
 
 // - GameMode Options screen:
 // Some game modes will have extra options.
@@ -44,7 +44,7 @@ public:
   }
 
   void loop() override {
-    // GameMode& mode = session.getSelectedGameMode();
+    // GameMode& mode = sessionManager.getSelectedGameMode();
     // mode.getSetting(index).value = newValue;
   }
 

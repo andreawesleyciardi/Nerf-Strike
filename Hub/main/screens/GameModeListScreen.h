@@ -7,9 +7,9 @@
 #include "../ButtonLabels.h"
 #include "../GameModeRegistry.h"
 #include "Screen.h"
-#include "../GameSessionState.h"
+#include "../GameSessionManager.h"
 
-extern GameSessionState session;
+extern GameSessionManager sessionManager;
 
 // - GameMode List screen:
 // I want to show a list of the game modes (remember the list we made time ago).

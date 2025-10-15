@@ -13,9 +13,9 @@
 // When the pairing is finish I want to show "[x] Targets were found" and [x] is the number of paired targets.
 // Button left label "Targets": navigates to the "Target List screen".
 // Button right label "Play": navigates to the "GameMode List screen".
-#include "../GameSessionState.h"
+#include "../GameSessionManager.h"
 
-extern GameSessionState session;
+extern GameSessionManager sessionManager;
 
 class PairingScreen : public Screen {
 public:

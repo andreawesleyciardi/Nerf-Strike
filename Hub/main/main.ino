@@ -22,7 +22,7 @@
 #include "ScreenTypes.h"
 #include "TargetTypeManager.h"
 #include "GameLogic.h"
-#include "GameSessionState.h"
+#include "GameSessionManager.h"
 
 // 🧠 Core Managers
 HubStateManager hubState;
@@ -32,10 +32,9 @@ GameModeRegistry gameModeRegistry;
 TargetTypeManager targetTypeManager;
 LcdDisplay display(lcdI2CAddress, 20, 4);
 
-GameSessionState session;
-GameSessionState defaultSession;
+GameSessionManager sessionManager;
 
-GameLogic gameLogic(session);
+GameLogic gameLogic(sessionManager);
 
 CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager);
 
@@ -54,9 +53,7 @@ void setup() {
   Serial.begin(9600);
   Serial.println(F("🧠 Hub starting..."));
   initializeHubPins();
-  wireless.initialize();
-
-  defaultSession.initializeDefault(registry);
+  wireless.initialize();  
 
   showStatus(statusRgbLed, STATUS_PAIRING);
   delay(500);

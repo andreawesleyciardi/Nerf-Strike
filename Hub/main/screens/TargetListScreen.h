@@ -7,9 +7,9 @@
 #include "../ButtonLabels.h"
 #include "../PairingRegistry.h"
 #include "Screen.h"
-#include "../GameSessionState.h"
+#include "../GameSessionManager.h"
 
-extern GameSessionState session;
+extern GameSessionManager sessionManager;
 
 // - Target List screen:
 // I see a list of the targets paired (Target 1, Target 2, Target 3…) and next to each one their ID.

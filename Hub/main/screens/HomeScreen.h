@@ -6,10 +6,10 @@
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
 #include "Screen.h"
-#include "../GameSessionState.h"
+#include "../GameSessionManager.h"
+#include "../GameSession.h"
 
-extern GameSessionState session;
-extern GameSessionState defaultSession;
+extern GameSessionManager sessionManager;
 
 // - Home screen:
 // I want to show a message (for now just "Welcome").
@@ -32,10 +32,11 @@ public:
       request = ScreenRequest::to(ScreenType::Settings);
     }
     if (encoder.wasPressed()) {
-      session = defaultSession;
+      GameSession defaultSession = createDefaultSession(registry);
+      sessionManager.setSession(defaultSession);
       request = ScreenRequest::to(ScreenType::Playing);
     }
-    if (right.wasPressed() || encoder.wasPressed()) {
+    if (right.wasPressed()) {
       request = ScreenRequest::to(ScreenType::Pairing);
     }
   }

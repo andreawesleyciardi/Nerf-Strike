@@ -9,9 +9,9 @@
 #include "../PairingRegistry.h"
 #include "../GameLogic.h"
 #include "Screen.h"
-#include "../GameSessionState.h"
+#include "../GameSessionManager.h"
 
-extern GameSessionState session;
+extern GameSessionManager sessionManager;
 
 class WinLostScreen : public Screen {
 public:

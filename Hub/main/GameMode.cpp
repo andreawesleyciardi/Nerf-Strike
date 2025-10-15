@@ -10,11 +10,29 @@ GameMode::GameMode(String name, ModeType type, ModeDescription desc, const ModeS
   }
 }
 
-String GameMode::getName() const { return name; }
-ModeType GameMode::getType() const { return type; }
-const ModeDescription& GameMode::getDescription() const { return description; }
-const ModeSetting& GameMode::getSetting(uint8_t index) const { return modeSettings[index]; }
-uint8_t GameMode::getSettingCount() const { return settingCount; }
+String GameMode::getName() const {
+  return name;
+}
+
+ModeType GameMode::getType() const {
+  return type;
+}
+
+const ModeDescription& GameMode::getDescription() const { 
+  return description; 
+}
+
+const ModeSetting& GameMode::getSetting(uint8_t index) const {
+  return modeSettings[index];
+}
+
+const ModeSetting (&GameMode::getAllSettings() const)[MAX_SETTINGS] {
+  return modeSettings;
+}
+
+uint8_t GameMode::getSettingCount() const {
+  return settingCount;
+}
 
 bool GameMode::isPlayableWith(uint8_t pairedTargets) const {
   if (type == ModeType::SINGLE) return pairedTargets >= 1;

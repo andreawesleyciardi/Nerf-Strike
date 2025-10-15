@@ -1,6 +1,7 @@
 #include "Receive.h"
 #include <Protocol.h>
 #include <OPCodes.h>
+#include <Score.h>
 #include "TargetConfig.h"
 
 Receive::Receive(RF24& radio, PairingRegistry& registry)
@@ -57,7 +58,8 @@ HitResponsePacket Receive::hitResponse() {
   Serial.println(F("⏳ Waiting for hit acknowledgment..."));
   HitResponsePacket response = {
     OPCODE_SCORE_UPDATE,
-    0xFF 
+    0xFF,
+    ScoreStatus::OnGoing
   };
 
   unsigned long startTime = millis();
@@ -70,7 +72,7 @@ HitResponsePacket Receive::hitResponse() {
       if (header->opcode == OPCODE_SCORE_UPDATE) {
         response = *reinterpret_cast<HitResponsePacket*>(buffer);
         Serial.print(F("✅ Hit acknowledged. Updated score: "));
-        Serial.println(response.score);
+        Serial.println(response.value);
         break;
       }
     }
@@ -80,6 +82,25 @@ HitResponsePacket Receive::hitResponse() {
 }
 
 const String Receive::entityColor(const byte* buffer) {
-  EntityColorRequestPacket* request = reinterpret_cast<EntityColorRequestPacket*>(const_cast<byte*>(buffer));
-  return request->name;
+  const EntityColorRequestPacket* request = reinterpret_cast<const EntityColorRequestPacket*>(buffer);
+
+  Serial.print(F("📦 Received opcode: "));
+  Serial.println(request->opcode);
+
+  Serial.print(F("📦 Raw name bytes: "));
+  for (int i = 0; i < sizeof(request->name); ++i) {
+    Serial.print((char)request->name[i]);
+  }
+  Serial.println();
+
+  Serial.print(F("📦 Interpreted name: '"));
+  Serial.print(request->name);
+  Serial.println("'");
+
+  if (request->opcode != OPCODE_ENTITY_COLOR || strlen(request->name) == 0) {
+    Serial.println(F("❌ Invalid or empty entity color packet"));
+    return "";
+  }
+
+  return String(request->name);
 }

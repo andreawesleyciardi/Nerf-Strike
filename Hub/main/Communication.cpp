@@ -57,13 +57,13 @@ const bool Communication::hit(const byte* buffer) {
   HitRequestPacket request = receive.hitRequest(buffer);
   const uint8_t* pipe = verifyPipeForID(request.id);
   if (pipe) {
-    uint8_t newScore = gameLogic.updateEntityScore(request.id);
-    return send.hitResponse(request.id, pipe, newScore);
+    ScoreUpdated result = gameLogic.updateEntityScore(request.id);
+    return send.hitResponse(request.id, pipe, result);
   }
   return false;
 }
 
-const bool Communication::entityColor(uint8_t targetId, String colorName) {
+const bool Communication::entityColor(uint8_t targetId, char colorName[16]) {
   Serial.println(F("Communication::entityColor"));
   return send.entityColorRequest(targetId, colorName);
 }

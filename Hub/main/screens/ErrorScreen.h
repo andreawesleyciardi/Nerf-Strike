@@ -7,9 +7,9 @@
 #include "../ButtonLabels.h"
 #include "../HubStateManager.h"
 #include "Screen.h"
-#include "../GameSessionState.h"
+#include "../GameSessionManager.h"
 
-extern GameSessionState session;
+extern GameSessionManager sessionManager;
 
 // - Error screen:
 // Show error messages or failed actions.

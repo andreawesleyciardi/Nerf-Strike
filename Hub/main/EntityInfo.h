@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "Color.h"
 
-#define MAX_TARGETS_PER_ENTITY 4
+#define MAX_TARGETS_PER_ENTITY 10
 
 enum class EntityType {
   Player,

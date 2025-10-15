@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <RF24.h>
 #include <TargetType.h>
+#include <Score.h>
 #include "PairingRegistry.h"
 
 class Send {
@@ -18,9 +19,9 @@ public:
   void blinkAll(PairingRegistry& registry);
   void heartbeatAll(PairingRegistry& registry);
 
-  const bool hitResponse(uint8_t id, const uint8_t* pipe, uint8_t newScore);
+  const bool hitResponse(uint8_t id, const uint8_t* pipe, ScoreUpdated result);
 
-  const bool entityColorRequest(uint8_t id, String colorName);
+  const bool entityColorRequest(uint8_t id, char colorName[16]);
   
 private:
   RF24& radio;

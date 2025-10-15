@@ -9,12 +9,12 @@
 #include "../ButtonLabels.h"
 #include "../GameLogic.h"
 #include "../PairingRegistry.h"
-#include "../GameSessionState.h"
+#include "../GameSessionManager.h"
 #include "../HubPins.h"
 #include "../ScreenRenderer.h"
 #include "Screen.h"
 
-extern GameSessionState session;
+extern GameSessionManager sessionManager;
 extern ScreenRequest request;
 extern SevenSegmentDisplay timeDisplay;
 extern ScreenRenderer screenRenderer;
@@ -26,6 +26,10 @@ public:
 
   void onEnter() override {
     // ✅ Push entity colors to targets
+    GameSession& session = sessionManager.getSession();
+    Serial.print(F("session.getSelectedGameMode().getName(): "));
+    Serial.println(sessionManager.getSelectedGameMode().getName());
+    
     Serial.println(F("Playing onEnter"));
     Serial.print(F("session.entityCount: "));
     Serial.println(session.entityCount);
@@ -40,7 +44,11 @@ public:
         Serial.print(color.name);
         Serial.print(F(" to targetId "));
         Serial.println(targetId);
-        communication.entityColor(targetId, color.name);
+
+        char colorName[16];
+        strncpy(colorName, color.name.c_str(), sizeof(colorName));
+        colorName[sizeof(colorName) - 1] = '\0';
+        communication.entityColor(targetId, colorName);
       }
     }
 

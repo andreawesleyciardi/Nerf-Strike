@@ -11,13 +11,13 @@ enum class ModeType {
 
 struct ModeName {
   static constexpr const char* Training       = "Training";
-  static constexpr const char* ToNumber       = "To number";
+  static constexpr const char* ToNumber       = "ToNumber";
   static constexpr const char* Timer          = "Timer";
-  static constexpr const char* TimeForShots   = "Time for shots";
-  static constexpr const char* TwoTargets     = "Two targets";
+  static constexpr const char* TimeForShots   = "TimeForShots";
+  static constexpr const char* TwoTargets     = "TwoTargets";
   static constexpr const char* Team           = "Team";
   static constexpr const char* Battle         = "Battle";
-  static constexpr const char* CrazyTargets   = "Crazy targets";
+  static constexpr const char* CrazyTargets   = "CrazyTargets";
 };
 
 struct ModeDescription {
@@ -31,6 +31,8 @@ struct ModeDescription {
     return playerCount > 1 ? multiPlayerText : singlePlayerText;
   }
 };
+
+#define MAX_SETTINGS 5
 
 struct ModeSetting {
   String label;
@@ -51,6 +53,7 @@ public:
   ModeType getType() const;
   const ModeDescription& getDescription() const;
   const ModeSetting& getSetting(uint8_t index) const;
+  const ModeSetting (&getAllSettings() const)[MAX_SETTINGS];
   uint8_t getSettingCount() const;
 
   bool isPlayableWith(uint8_t pairedTargets) const;
@@ -60,7 +63,7 @@ private:
   String name;
   ModeType type;
   ModeDescription description;
-  ModeSetting modeSettings[5];
+  ModeSetting modeSettings[MAX_SETTINGS];
   uint8_t settingCount;
 };
 

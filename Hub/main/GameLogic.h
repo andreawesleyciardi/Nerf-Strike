@@ -2,18 +2,20 @@
 #define GAME_LOGIC_H
 
 #include <Arduino.h>
+#include <Score.h>
 #include "PairingRegistry.h"
-#include "GameSessionState.h"
+#include "GameSessionManager.h"
 
 class GameLogic {
 public:
-  GameLogic(GameSessionState& session);
+  GameLogic(GameSessionManager& sessionManager);
   void reset();
-  uint8_t updateEntityScore(uint8_t targetId);
-  int calculateDeltaScore(String gameModeName, int currentScore);
+  ScoreUpdated updateEntityScore(uint8_t targetId);
+  int calculateScore(String gameModeName, int currentScore);
+  ScoreStatus evaluateScoreStatus(String gameModeName, const GameMode& gameMode, int score = 0);
 
 private:
-  GameSessionState& session;
+  GameSessionManager& sessionManager;
 };
 
 extern GameLogic gameLogic;

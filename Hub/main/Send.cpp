@@ -109,17 +109,18 @@ void Send::heartbeatAll(PairingRegistry& registry) {
   }
 }
 
-const bool Send::hitResponse(uint8_t id, const uint8_t* pipe, uint8_t newScore) {
+const bool Send::hitResponse(uint8_t id, const uint8_t* pipe, ScoreUpdated result) {
   HitResponsePacket packet = {
     OPCODE_SCORE_UPDATE,
-    newScore
+    result.newScore,
+    result.status
   };
 
   if (toTargetPipe(id, pipe, &packet, sizeof(packet))) {
     Serial.print(F("📤 Score update sent to target ID "));
     Serial.print(id);
     Serial.print(F(": "));
-    Serial.println(newScore);
+    Serial.println(result.newScore);
     return true;
   }
   else {
@@ -127,11 +128,16 @@ const bool Send::hitResponse(uint8_t id, const uint8_t* pipe, uint8_t newScore) 
   }
 }
 
-const bool Send::entityColorRequest(uint8_t id, String colorName) {
-  EntityColorRequestPacket packet = {
-    OPCODE_ENTITY_COLOR,
-    colorName
-  };
+const bool Send::entityColorRequest(uint8_t id, char colorName[16]) {
+  // EntityColorRequestPacket packet = {
+  //   OPCODE_ENTITY_COLOR,
+  //   colorName
+  // };
+
+  EntityColorRequestPacket packet;
+  packet.opcode = OPCODE_ENTITY_COLOR;
+  strncpy(packet.name, colorName, sizeof(packet.name));
+  packet.name[sizeof(packet.name) - 1] = '\0';
 
   const uint8_t* pipe = registry.getPipeForID(id);
   if (id != 0xFF && pipe) {

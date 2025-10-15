@@ -1,6 +1,7 @@
 #include <Color.h>
 #include <OPCodes.h>
 #include <DisplayFeedback.h>
+#include <Score.h>
 #include "TargetConfig.h"
 #include "TargetPins.h"
 #include "WirelessTarget.h"
@@ -96,6 +97,7 @@ void loop() {
           String colorName = communication.entityColor(buffer);
           if (colorName != "") {
             rgbRing.chase(colorName, 30);
+            statusRgbLed.on(colorName);                     // TEMPORARLY: To add an "entityRgbLed"
             Serial.println(F("🌈 Entity color is set to: "));
             Serial.println(colorName);
           } else {
@@ -126,13 +128,22 @@ void loop() {
       // TO CREATE CONDITIONS: if (gameStatus == PLAYING) {
         Serial.println(F("✅ Target got hit."));
         HitResponsePacket response = communication.hit();
-        if (response.score != 0xFF) {
+        if (response.value != 0xFF) {
           rgbRing.blink("Green");
-          scoreDisplay.updateScore(response.score);
+          scoreDisplay.updateScore(response.value);
           buzzer.beep(2);
           Serial.print(F("🎯 New score received: "));
-          Serial.println(response.score);
+          Serial.println(response.value);
           // feedback.updateScore(response.score);
+          if (response.status == ScoreStatus::Win || response.status == ScoreStatus::Even) {
+            rgbRing.chase("Green");
+            rgbRing.chase("Green");
+            rgbRing.chase("Green");
+          } else if (response.status == ScoreStatus::Lost) {
+            rgbRing.chase("Red");
+            rgbRing.chase("Red");
+            rgbRing.chase("Red");
+          }
         } else {
           showStatus(statusRgbLed, STATUS_ERROR);
           Serial.print(F("🎯 Was not possible to update the score"));
