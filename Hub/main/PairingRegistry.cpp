@@ -82,12 +82,25 @@ void PairingRegistry::setActive(uint8_t id, bool active) {
   }
 }
 
-uint8_t PairingRegistry::getPairedTargetCount(uint8_t* outArray) {
+uint8_t PairingRegistry::getPairedTargetCount() const {
   uint8_t count = 0;
   for (uint8_t i = 0; i < MAX_TARGETS; ++i) {
-    if (entries[i].active && count < MAX_TARGETS) {
-      outArray[count++] = entries[i].id;
+    if (entries[i].active) {
+      ++count;
     }
   }
   return count;
+}
+
+const uint8_t* PairingRegistry::getAllPairedTargetIds() const {
+  static uint8_t pairedIds[MAX_TARGETS];
+  uint8_t index = 0;
+
+  for (uint8_t i = 0; i < MAX_TARGETS; ++i) {
+    if (entries[i].active && index < MAX_TARGETS) {
+      pairedIds[index++] = entries[i].id;
+    }
+  }
+
+  return pairedIds;
 }

@@ -32,7 +32,7 @@ GameModeRegistry gameModeRegistry;
 TargetTypeManager targetTypeManager;
 LcdDisplay display(lcdI2CAddress, 20, 4);
 
-GameSessionManager sessionManager;
+GameSessionManager sessionManager(registry);
 
 GameLogic gameLogic(sessionManager);
 

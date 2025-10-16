@@ -8,13 +8,12 @@
 
 class GameSessionManager {
 public:
-  GameSessionManager();
+  GameSessionManager(PairingRegistry& registry);
 
-  // void initializeDefault(PairingRegistry& registry);
-  void assignEntitiesBalanced(const uint8_t* pairedTargetIds, uint8_t totalTargets, uint8_t entityCount, bool useTeams, PairingRegistry& registry);
+  void assignEntitiesBalanced(bool useTeams = false);
   void restart();
 
-  uint8_t calculateTargetsPerEntity(uint8_t totalPaired = 1, uint8_t totalPlayers = 1, uint8_t totalTeams = 0) const;
+  uint8_t calculateTargetsPerEntity(uint8_t totalPaired, uint8_t totalEntities) const;
   bool isMultiplayer() const;
   int getScoreForEntity(uint8_t entityId) const;
   void setScoreForEntity(uint8_t entityId, int value);
@@ -35,6 +34,7 @@ public:
   const GameSession& getSession() const;
 
 private:
+  PairingRegistry& registry;
   GameSession session;
 };
 

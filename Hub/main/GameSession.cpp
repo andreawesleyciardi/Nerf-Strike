@@ -6,28 +6,28 @@
 extern GameModeRegistry gameModeRegistry;
 
 GameSession createDefaultSession(PairingRegistry& registry) {
-  GameSession s;
-  s.status = GameSessionStatus::Playing;
-  // s.gameMode = gameModeRegistry.getModeByName("Training");
-  s.gameMode = gameModeRegistry.getModeByName(ModeName::ToNumber);
+  GameSession newSession;
+  newSession.status = GameSessionStatus::Playing;
+  // newSession.gameMode = gameModeRegistry.getModeByName("Training");                      // TO UNCOMMENT
+  newSession.gameMode = gameModeRegistry.getModeByName(ModeName::Battle);                 // TO REMOVE
 
-  EntityInfo e;
-  e.entityId = 0;
-  e.type = EntityType::Player;
-  e.color = getColorForIndex(0);
+  EntityInfo newEntity;
+  newEntity.entityId = 0;
+  newEntity.type = EntityType::Player;
+  newEntity.color = getColorForIndex(0);
 
-  uint8_t pairedIds[MAX_TARGETS_PER_ENTITY];
-  uint8_t totalPaired = registry.getPairedTargetCount(pairedIds);
+  // Assignes all the targets to the only entity
+    uint8_t totalPaired = registry.getPairedTargetCount();
+    const uint8_t* pairedTargetIds = registry.getAllPairedTargetIds();
+    for (uint8_t i = 0; i < totalPaired && newEntity.targetCount < MAX_TARGETS_PER_ENTITY; ++i) {
+      newEntity.addTarget(pairedTargetIds[i]);
+      registry.setActive(pairedTargetIds[i], true);
+    }
 
-  for (uint8_t i = 0; i < totalPaired && e.targetCount < MAX_TARGETS_PER_ENTITY; ++i) {
-    e.addTarget(pairedIds[i]);
-    registry.setActive(pairedIds[i], true);
-  }
+  newSession.entities[0] = newEntity;
+  newSession.entityCount = 1;
 
-  s.entities[0] = e;
-  s.entityCount = 1;
-
-  return s;
+  return newSession;
 }
 
 GameSession getDefaultSession(PairingRegistry& registry) {

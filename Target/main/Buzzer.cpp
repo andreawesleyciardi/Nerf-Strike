@@ -10,7 +10,7 @@ void Buzzer::setup() {
 }
 
 void Buzzer::beep(unsigned int durationMs) {
-  tone(pin, 1000);  // 1kHz tone
+  tone(pin, 100);  // 1kHz tone
   delay(durationMs);
   noTone(pin);
 }

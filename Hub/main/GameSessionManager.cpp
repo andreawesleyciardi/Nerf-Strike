@@ -5,72 +5,49 @@
 
 extern GameModeRegistry gameModeRegistry;
 
-GameSessionManager::GameSessionManager() {
-  session.reset();
-}
+GameSessionManager::GameSessionManager(PairingRegistry& registry) :
+  registry(registry) {
+    session.reset();
+  }
 
-// void GameSessionManager::initializeDefault(PairingRegistry& registry) {
-//   session.reset();
-//   setSelectedGameMode(gameModeRegistry.getModeByName("ToNumber"));
-//   // setSelectedGameMode(gameModeRegistry.getModeByName("Training"));
-//   session.status = GameSessionStatus::Playing;
+void GameSessionManager::assignEntitiesBalanced(bool useTeams) {
+  uint8_t totalTargets = registry.getPairedTargetCount();
+  const uint8_t* pairedTargetIds = registry.getAllPairedTargetIds();
 
-//   uint8_t pairedIds[MAX_ENTITIES * MAX_TARGETS_PER_ENTITY];
-//   uint8_t totalPaired = registry.getPairedTargetCount(pairedIds);
+  // Ensure entity count is within bounds
+  if (session.entityCount == 0 || session.entityCount > totalTargets) {
+    session.entityCount = 1;  // fallback to minimum valid value
+  }
 
-//   if (totalPaired == 0) {
-//     Serial.println(F("⚠️ No paired targets found. Skipping entity assignment."));
-//     return;
-//   }
+  uint8_t targetsPerEntity = calculateTargetsPerEntity(totalTargets, session.entityCount);
+  uint8_t targetIndex = 0;
 
-//   EntityInfo e;
-//   e.entityId = 0;
-//   e.type = EntityType::Player;
-//   e.color = getColorForIndex(0);
+  for (uint8_t entityIndex = 0; entityIndex < session.entityCount && entityIndex < MAX_ENTITIES; ++entityIndex) {
+    EntityInfo newEntity;
+    newEntity.entityId = entityIndex;
+    newEntity.type = useTeams ? EntityType::Team : EntityType::Player;
+    newEntity.color = getColorForIndex(entityIndex);
 
-//   for (uint8_t i = 0; i < totalPaired && e.targetCount < MAX_TARGETS_PER_ENTITY; ++i) {
-//     e.addTarget(pairedIds[i]);
-//     registry.setActive(pairedIds[i], true);
-//   }
-
-//   session.entities[0] = e;
-//   session.entityCount = 1;
-// }
-
-void GameSessionManager::assignEntitiesBalanced(const uint8_t* pairedTargetIds, uint8_t totalTargets, uint8_t entityCountInput, bool useTeams, PairingRegistry& registry) {
-  session.entityCount = 0;
-  uint8_t targetsPerEntity = calculateTargetsPerEntity(totalTargets, entityCountInput, useTeams ? entityCountInput : 0);
-
-  for (uint8_t i = 0; i < entityCountInput && session.entityCount < MAX_ENTITIES; ++i) {
-    EntityInfo e;
-    e.entityId = i;
-    e.type = useTeams ? EntityType::Team : EntityType::Player;
-    e.color = getColorForIndex(i);
-
-    for (uint8_t j = 0; j < targetsPerEntity && e.targetCount < MAX_TARGETS_PER_ENTITY; ++j) {
-      uint8_t targetIndex = i * targetsPerEntity + j;
+    for (uint8_t j = 0; j < targetsPerEntity && newEntity.targetCount < MAX_TARGETS_PER_ENTITY; ++j) {
       if (targetIndex < totalTargets) {
-        uint8_t tid = pairedTargetIds[targetIndex];
-        e.addTarget(tid);
-        registry.setActive(tid, true);
+        uint8_t targetId = pairedTargetIds[targetIndex++];
+        newEntity.addTarget(targetId);
+        registry.setActive(targetId, true);
       }
     }
 
-    session.entities[session.entityCount++] = e;
+    session.entities[entityIndex] = newEntity;
   }
 
-  for (uint8_t i = entityCountInput * targetsPerEntity; i < totalTargets; ++i) {
-    registry.setActive(pairedTargetIds[i], false);
+  // Deactivate leftover targets
+  for (; targetIndex < totalTargets; ++targetIndex) {
+    registry.setActive(pairedTargetIds[targetIndex], false);
   }
 }
 
-uint8_t GameSessionManager::calculateTargetsPerEntity(uint8_t totalPaired, uint8_t totalPlayers, uint8_t totalTeams) const {
-  if (totalTeams == 0) {
-    return (totalPaired - (totalPaired % totalPlayers)) / totalPlayers;
-  } else if (totalTeams == 1) {
-    return totalPaired;
-  }
-  return (totalPaired - (totalPaired % totalTeams)) / totalTeams;
+uint8_t GameSessionManager::calculateTargetsPerEntity(uint8_t totalPaired, uint8_t totalEntities) const {
+  if (totalEntities == 0) return 0;
+  return (totalPaired - (totalPaired % totalEntities)) / totalEntities;
 }
 
 bool GameSessionManager::isMultiplayer() const {
@@ -93,10 +70,10 @@ int GameSessionManager::getScoreForEntity(uint8_t entityId) const {
 void GameSessionManager::setScoreForEntity(uint8_t entityId, int value) {
   Serial.print(F("Inside SETScoreForEntity. entityId: "));
   Serial.print(entityId);
-  Serial.print(F("Inside SETScoreForEntity. value: "));
+  Serial.print(F(" - value: "));
   Serial.print(value);
-  Serial.print(F("Inside SETScoreForEntity. session.entityCount: "));
-  Serial.print(session.entityCount);
+  Serial.print(F(" - session.entityCount: "));
+  Serial.println(session.entityCount);
   if (entityId < session.entityCount) {
     session.entities[entityId].score = value;
   }

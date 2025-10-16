@@ -43,15 +43,16 @@ public:
       Serial.println("encoder has changed");
       int delta = encoder.getDelta();  // +1 or -1 depending on rotation
       uint8_t current = sessionManager.getEntityCount();
-      uint8_t pairedIds[MAX_TARGETS_PER_ENTITY];
-      uint8_t maxEntities = registry.getPairedTargetCount(pairedIds);  // You need this method
+      uint8_t maxEntities = registry.getPairedTargetCount();  // You need this method
       uint8_t updated = constrain(current + delta, 1, maxEntities);
       Serial.print("updated value: ");
       Serial.println(updated);
       sessionManager.setEntityCount(updated);
     }
     if (right.wasPressed()) {
-      request = ScreenRequest::to(ScreenType::GameModeList);
+      sessionManager.assignEntitiesBalanced();
+      // request = ScreenRequest::to(ScreenType::GameModeList);         // TO UNCOMMENT
+      request = ScreenRequest::to(ScreenType::Playing);                 // TO REMOVE
     }
   }
 

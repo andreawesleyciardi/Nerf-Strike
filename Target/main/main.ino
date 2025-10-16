@@ -110,36 +110,35 @@ void loop() {
           HitResponsePacket* packet = reinterpret_cast<HitResponsePacket*>(buffer);
           uint8_t newScore = packet->value;
           if (packet->value != 0xFF) {
-          rgbRing.blink("Green");
-          scoreDisplay.updateScore(packet->value);
-          buzzer.beep(2);
-          Serial.print(F("🎯 New score received: "));
-          Serial.print(packet->value);
-          Serial.print(F(" with status: "));
-          Serial.println(static_cast<uint8_t>(packet->status));
-          // feedback.updateScore(response.score);
-          if (packet->status == ScoreStatus::Won || packet->status == ScoreStatus::Even) {
-            rgbRing.chase("Green");
-            rgbRing.chase("Green");
-            rgbRing.chase("Green");
-          } else if (packet->status == ScoreStatus::Lost) {
-            rgbRing.chase("Red");
-            rgbRing.chase("Red");
-            rgbRing.chase("Red");
-          } else if (packet->status == ScoreStatus::Subtract) {
-            rgbRing.chase("Orange");
-            rgbRing.chase("Orange");
-            rgbRing.chase("Orange");
+            Serial.print(F("🎯 New score received: "));
+            Serial.print(packet->value);
+            Serial.print(F(" with status: "));
+            Serial.println(static_cast<uint8_t>(packet->status));
+            if ((packet->status == ScoreStatus::Add) || (packet->status == ScoreStatus::Subtract)) {
+              if (packet->status == ScoreStatus::Add) {
+                rgbRing.blink("Green");
+              } else if (packet->status == ScoreStatus::Subtract) {
+                rgbRing.blink("Orange");
+              }
+              scoreDisplay.updateScore(packet->value, false);
+            }
+            else {
+              scoreDisplay.updateScore(packet->value, true);
+              if (packet->status == ScoreStatus::Won || packet->status == ScoreStatus::Even) {
+                rgbRing.chase("Green", 25);
+                rgbRing.chase("Green", 25);
+                rgbRing.blink("Green", 3);
+              } else if (packet->status == ScoreStatus::Lost) {
+                rgbRing.chase("Red", 25);
+                rgbRing.chase("Red", 25);
+                rgbRing.blink("Red", 3);
+              }
+            }
+            buzzer.beep(1);
+          } else {
+            showStatus(statusRgbLed, STATUS_ERROR);
+            Serial.print(F("🎯 Was not possible to update the score"));
           }
-        } else {
-          showStatus(statusRgbLed, STATUS_ERROR);
-          Serial.print(F("🎯 Was not possible to update the score"));
-        }
-
-
-          // Serial.print(F("🎯 New score received: "));
-          // Serial.println(newScore);
-          // scoreDisplay.updateScore(newScore);
         break;
       }
 

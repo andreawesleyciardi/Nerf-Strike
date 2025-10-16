@@ -52,7 +52,7 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
       if (gameModeName.equals(ModeName::Battle)) {
         // In "Battle" game mode when an entity hits one of its targets subtract a point from the opponents
         int currentOpponentScore = sessionManager.getScoreForEntity(entities[i].entityId);
-        int currentOpponentUpdatedScore = currentOpponentScore - 1;
+        int currentOpponentUpdatedScore = currentOpponentScore > 0 ? currentOpponentScore - 1 : 0;
         sessionManager.setScoreForEntity(entities[i].entityId, currentOpponentUpdatedScore);
         if (entities[i].targetCount > 0) {
           for (uint8_t y = 0; y < entities[i].targetCount; ++y) {
@@ -92,6 +92,7 @@ int GameLogic::calculateScore(String gameModeName, int currentScore) {
     // Team mode logic
   } else if (gameModeName.equals(ModeName::Battle)) {
     // Battle mode logic
+    return currentScore + 1;
   } else if (gameModeName.equals(ModeName::CrazyTargets)) {
     // Crazy targets mode logic
   } else {
@@ -126,6 +127,11 @@ ScoreStatus GameLogic::evaluateScoreStatus(String gameModeName, const GameMode& 
     // Team mode logic
   } else if (gameModeName.equals(ModeName::Battle)) {
     // Battle mode logic
+    if (score == settings[0].value) {
+      return ScoreStatus::Won;
+    } else {
+      return ScoreStatus::Add;
+    }
   } else if (gameModeName.equals(ModeName::CrazyTargets)) {
     // Crazy targets mode logic
   } else {
