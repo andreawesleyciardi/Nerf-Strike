@@ -97,8 +97,6 @@ void Send::heartbeatAll(PairingRegistry& registry) {
   HeartbeatPacket packet = {
     OPCODE_HEARTBEAT
   };
-  // HeartbeatPacket packet;
-  // packet.opcode = OPCODE_HEARTBEAT;
 
   for (uint8_t i = 0; i < MAX_TARGETS; i++) {
     uint8_t id = registry.getIDAt(i);
@@ -129,11 +127,6 @@ const bool Send::hitResponse(uint8_t id, const uint8_t* pipe, ScoreUpdated resul
 }
 
 const bool Send::entityColorRequest(uint8_t id, char colorName[16]) {
-  // EntityColorRequestPacket packet = {
-  //   OPCODE_ENTITY_COLOR,
-  //   colorName
-  // };
-
   EntityColorRequestPacket packet;
   packet.opcode = OPCODE_ENTITY_COLOR;
   strncpy(packet.name, colorName, sizeof(packet.name));
@@ -145,6 +138,23 @@ const bool Send::entityColorRequest(uint8_t id, char colorName[16]) {
       Serial.print(F("🌈 Entity color \""));
       Serial.print(colorName);
       Serial.print(F("\" sent to target ID"));
+      Serial.println(id);
+      return true;
+    }
+  }
+  return false;
+}
+
+const bool Send::sessionStatusRequest(uint8_t id, GameSessionStatus status) {
+  SessionStatusPacket packet = {
+    OPCODE_SESSION_STATUS,
+    status
+  };
+
+  const uint8_t* pipe = registry.getPipeForID(id);
+  if (id != 0xFF && pipe) {
+    if (toTargetPipe(id, pipe, &packet, sizeof(packet))) {
+      Serial.print(F("📤 Status update sent to target ID "));
       Serial.println(id);
       return true;
     }

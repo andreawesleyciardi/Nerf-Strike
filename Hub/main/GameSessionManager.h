@@ -2,9 +2,12 @@
 #define GAME_SESSION_MANAGER_H
 
 #include <Arduino.h>
+#include <Statuses.h>
 #include "GameSession.h"
 #include "PairingRegistry.h"
 #include "EntityInfo.h"
+
+constexpr uint8_t TARGET_ID_NONE = 255;
 
 class GameSessionManager {
 public:
@@ -28,7 +31,11 @@ public:
 
   void setSession(const GameSession& newSession);
 
-  void setStatus(GameSessionStatus newStatus);
+  GameSessionStatus getStatus();
+  void setStatus(GameSessionStatus newStatus, bool toCommunicate = false);
+  
+  void communicateStatus(uint8_t targetId = TARGET_ID_NONE);
+  void communicateEntityColor(uint8_t targetId = TARGET_ID_NONE);
 
   GameSession& getSession();
   const GameSession& getSession() const;

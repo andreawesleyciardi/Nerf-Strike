@@ -26,31 +26,8 @@ public:
 
   void onEnter() override {
     // ✅ Push entity colors to targets
-    GameSession& session = sessionManager.getSession();
-    Serial.print(F("session.getSelectedGameMode().getName(): "));
-    Serial.println(sessionManager.getSelectedGameMode().getName());
-    
-    Serial.println(F("Playing onEnter"));
-    Serial.print(F("session.entityCount: "));
-    Serial.println(session.entityCount);
-    for (uint8_t i = 0; i < session.entityCount; ++i) {
-      const EntityInfo& entity = session.entities[i];
-      const Color& color = entity.color;
-      Serial.print(F("entity.targetCount: "));
-      Serial.println(entity.targetCount);
-      for (uint8_t j = 0; j < entity.targetCount; ++j) {
-        uint8_t targetId = entity.targetIds[j];
-        Serial.print(F("Sending entity color "));
-        Serial.print(color.name);
-        Serial.print(F(" to targetId "));
-        Serial.println(targetId);
-
-        char colorName[16];
-        strncpy(colorName, color.name.c_str(), sizeof(colorName));
-        colorName[sizeof(colorName) - 1] = '\0';
-        communication.entityColor(targetId, colorName);
-      }
-    }
+    sessionManager.communicateEntityColor();
+    sessionManager.setStatus(GameSessionStatus::Starting, true);
 
     // ✅ Start countdown
     countdownStarted = true;
@@ -68,6 +45,8 @@ public:
     } else if (countdownActive) {
       display.showLine(0, "Starting in...", "center");
       display.showLine(1, "0" + String(countdownValue), "center");
+    } else if (sessionManager.getStatus() == GameSessionStatus::Paused) {
+      display.showLine(1, "Paused", "center");
     } else {
       display.showLine(0, "Game in", "center");
       display.showLine(1, "progress...", "center");
@@ -79,7 +58,14 @@ public:
       request = ScreenRequest::to(ScreenType::Confirmation);
     }
     if (encoder.wasPressed()) {
-      // TODO: toggle pause/play
+      // Toggle pause/play
+      GameSessionStatus currentStatus = sessionManager.getStatus();
+      if (currentStatus == GameSessionStatus::Playing) {
+        sessionManager.setStatus(GameSessionStatus::Paused, true);
+      }
+      else if (currentStatus == GameSessionStatus::Paused) {
+        sessionManager.setStatus(GameSessionStatus::Playing, true);
+      }
     }
     if (right.wasPressed()) {
       request = ScreenRequest::to(ScreenType::Playing);
@@ -99,6 +85,7 @@ public:
         } else {
           timeDisplay.clear();
           countdownActive = false;
+          sessionManager.setStatus(GameSessionStatus::Playing, true);
           screenRenderer.requestRefresh();
         }
       }
@@ -118,6 +105,7 @@ public:
   }
 
   String getHash() const override {
+    if (sessionManager.getStatus() == GameSessionStatus::Paused) return "Paused";
     if (!countdownStarted) return "Playing-ready";
     if (countdownActive) return "Playing-countdown-" + String(countdownValue);
     return "Playing-active";

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <RGBLed.h>
+#include <Statuses.h>
 #include "Receive.h"
 #include "Send.h"
 #include "PairingRegistry.h"
@@ -16,6 +17,7 @@ public:
   void verification(const byte* buffer);
   const bool hit(const byte* buffer);
   const bool entityColor(uint8_t targetId, char colorName[16]);
+  const bool sessionStatus(uint8_t targetId, GameSessionStatus status);
 
 private:
   const uint8_t* verifyPipeForID(uint8_t targetId);

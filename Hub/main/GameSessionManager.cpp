@@ -2,8 +2,10 @@
 #include "GameModeRegistry.h"
 #include "EntityInfo.h"
 #include "ColorUtils.h"
+#include "Communication.h"
 
 extern GameModeRegistry gameModeRegistry;
+extern Communication communication;
 
 GameSessionManager::GameSessionManager(PairingRegistry& registry) :
   registry(registry) {
@@ -42,6 +44,7 @@ void GameSessionManager::assignEntitiesBalanced(bool useTeams) {
   // Deactivate leftover targets
   for (; targetIndex < totalTargets; ++targetIndex) {
     registry.setActive(pairedTargetIds[targetIndex], false);
+    // TODO: Send OPCODE_TARGET_DISABLE to these targets
   }
 }
 
@@ -127,6 +130,45 @@ void GameSessionManager::restart() {
   }
   setStatus(GameSessionStatus::Playing);
 }
-void GameSessionManager::setStatus(GameSessionStatus newStatus) {
+
+void GameSessionManager::communicateEntityColor(uint8_t targetId) {
+  for (uint8_t i = 0; i < session.entityCount; ++i) {
+    const EntityInfo& entity = session.entities[i];
+    const Color& color = entity.color;
+    for (uint8_t j = 0; j < entity.targetCount; ++j) {
+      uint8_t currentTargetId = entity.targetIds[j];
+      char colorName[16];
+      strncpy(colorName, color.name.c_str(), sizeof(colorName));
+      colorName[sizeof(colorName) - 1] = '\0';
+      if (((targetId != TARGET_ID_NONE) && (currentTargetId == targetId)) || (targetId == TARGET_ID_NONE)) {
+        communication.entityColor(currentTargetId, colorName);
+      }
+    }
+  }
+}
+
+GameSessionStatus GameSessionManager::getStatus() {
+  return session.status;
+}
+
+void GameSessionManager::setStatus(GameSessionStatus newStatus, bool toCommunicate) {
   session.status = newStatus;
+  if (toCommunicate) {
+    communicateStatus();
+  }
+}
+
+void GameSessionManager::communicateStatus(uint8_t targetId) {
+  if (targetId != TARGET_ID_NONE) {
+    communication.sessionStatus(targetId, session.status);
+    return;
+  }
+
+  for (uint8_t i = 0; i < session.entityCount; ++i) {
+    const EntityInfo& entity = session.entities[i];
+    for (uint8_t j = 0; j < entity.targetCount; ++j) {
+      uint8_t currentTargetId = entity.targetIds[j];
+      communication.sessionStatus(currentTargetId, session.status);
+    }
+  }
 }

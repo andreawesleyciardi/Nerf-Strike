@@ -2,6 +2,7 @@
 #include <OPCodes.h>
 #include <DisplayFeedback.h>
 #include <Score.h>
+#include <Statuses.h>
 #include "TargetConfig.h"
 #include "TargetPins.h"
 #include "WirelessTarget.h"
@@ -17,6 +18,8 @@ Receive receive(wireless.getRadio(), registry);
 Send send(wireless.getRadio(), registry);
 
 Communication communication(receive, send, registry, statusRgbLed);
+
+GameSessionStatus sessionStatus = GameSessionStatus::Setting;
 
 void setup() {
   delay(1000);
@@ -128,6 +131,7 @@ void loop() {
                 rgbRing.chase("Green", 25);
                 rgbRing.chase("Green", 25);
                 rgbRing.blink("Green", 3);
+                rgbRing.fill("Green");
               } else if (packet->status == ScoreStatus::Lost) {
                 rgbRing.chase("Red", 25);
                 rgbRing.chase("Red", 25);
@@ -142,6 +146,17 @@ void loop() {
         break;
       }
 
+      case OPCODE_SESSION_STATUS: {
+          SessionStatusPacket* packet = reinterpret_cast<SessionStatusPacket*>(buffer);
+          GameSessionStatus newStatus = packet->status;
+          Serial.println(F("🔦 New Session Status received."));
+          sessionStatus = newStatus;
+          if (newStatus == GameSessionStatus::Starting) {
+            scoreDisplay.updateScore(0, true);
+          }
+        break;
+      }
+
       default:
         Serial.print(F("⚠️ Unknown opcode received: "));
         Serial.println(header->opcode);
@@ -152,10 +167,13 @@ void loop() {
   uint8_t targetId = registry.getAssignedID();
   if (targetId != 0xFF) {
     if (sensor.isHit()) {
-      // TO CREATE CONDITIONS: if (gameStatus == PLAYING) {
+      if (sessionStatus == GameSessionStatus::Playing) {
         Serial.println(F("✅ Target got hit."));
         HitResponsePacket response = communication.hit();
-      // TO CREATE CONDITIONS: }
+      }
+      else {
+        Serial.println(F("✅ Target got hit while not playing."));
+      }
 
       
 

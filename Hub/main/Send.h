@@ -5,6 +5,7 @@
 #include <RF24.h>
 #include <TargetType.h>
 #include <Score.h>
+#include <Statuses.h>
 #include "PairingRegistry.h"
 
 class Send {
@@ -22,6 +23,8 @@ public:
   const bool hitResponse(uint8_t id, const uint8_t* pipe, ScoreUpdated result);
 
   const bool entityColorRequest(uint8_t id, char colorName[16]);
+
+  const bool sessionStatusRequest(uint8_t id, GameSessionStatus status);
   
 private:
   RF24& radio;

@@ -79,3 +79,7 @@ const bool Communication::entityColor(uint8_t targetId, char colorName[16]) {
   Serial.println(F("Communication::entityColor"));
   return send.entityColorRequest(targetId, colorName);
 }
+
+const bool Communication::sessionStatus(uint8_t targetId, GameSessionStatus status) {
+  return send.sessionStatusRequest(targetId, status);
+}
