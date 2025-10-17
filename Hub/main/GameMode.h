@@ -14,21 +14,31 @@ struct ModeName {
   static constexpr const char* ToNumber       = "ToNumber";
   static constexpr const char* Timer          = "Timer";
   static constexpr const char* TimeForShots   = "TimeForShots";
-  static constexpr const char* TwoTargets     = "TwoTargets";
-  static constexpr const char* Team           = "Team";
+  static constexpr const char* LitTarget      = "LitTarget";
   static constexpr const char* Battle         = "Battle";
   static constexpr const char* CrazyTargets   = "CrazyTargets";
 };
 
 struct ModeDescription {
-  String singlePlayerText;
-  String multiPlayerText;
+  String singlePlayerText[2];
+  String multiPlayerText[2];
 
-  ModeDescription(String singleText, String multiText)
-    : singlePlayerText(singleText), multiPlayerText(multiText) {}
+  ModeDescription() {
+    singlePlayerText[0] = "";
+    singlePlayerText[1] = "";
+    multiPlayerText[0] = "";
+    multiPlayerText[1] = "";
+  }
 
-  String getTextForPlayers(uint8_t playerCount) const {
-    return playerCount > 1 ? multiPlayerText : singlePlayerText;
+  ModeDescription(const String singleText[2], const String multiText[2]) {
+    singlePlayerText[0] = singleText[0];
+    singlePlayerText[1] = singleText[1];
+    multiPlayerText[0] = multiText[0];
+    multiPlayerText[1] = multiText[1];
+  }
+
+  const String* getDescriptionLines(uint8_t entityCount) const {
+    return entityCount > 1 ? multiPlayerText : singlePlayerText;
   }
 };
 
@@ -48,15 +58,18 @@ class GameMode {
 public:
   GameMode();
   GameMode(String name, ModeType type, ModeDescription desc, const ModeSetting* settings, uint8_t count);
+  GameMode(const GameMode& other);  // ✅ Copy constructor
 
   String getName() const;
+  void setName(const String& newName);  // ✅ Optional setter
+
   ModeType getType() const;
   const ModeDescription& getDescription() const;
   const ModeSetting& getSetting(uint8_t index) const;
   const ModeSetting (&getAllSettings() const)[MAX_SETTINGS];
   uint8_t getSettingCount() const;
 
-  bool isPlayableWith(uint8_t pairedTargets) const;
+  bool isPlayableWith(uint8_t entityCount) const;
   bool isValidPlayerTargetCombo(uint8_t players, uint8_t targets) const;
 
 private:

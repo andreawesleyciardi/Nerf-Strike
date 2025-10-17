@@ -22,6 +22,11 @@ public:
   HomeScreen(LcdDisplay& display, PairingRegistry& registry)
    : display(display), registry(registry) {}
 
+  void onEnter() override {
+    // ✅ Clear the session
+    sessionManager.resetSession();
+  }
+
   void render() override {
     display.clear();
     display.showLine(0, "Home screen");

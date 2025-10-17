@@ -14,6 +14,7 @@ public:
   GameSessionManager(PairingRegistry& registry);
 
   void assignEntitiesBalanced(bool useTeams = false);
+  void resetSession();
   void restart();
 
   uint8_t calculateTargetsPerEntity(uint8_t totalPaired, uint8_t totalEntities) const;

@@ -124,6 +124,10 @@ const GameSession& GameSessionManager::getSession() const {
   return session;
 }
 
+void GameSessionManager::resetSession() {
+  session.reset();
+}
+
 void GameSessionManager::restart() {
   for (uint8_t i = 0; i < session.entityCount; ++i) {
     session.entities[i].score = 0;

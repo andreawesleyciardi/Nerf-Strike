@@ -8,7 +8,6 @@
 #include "../EncoderMode.h"
 #include "../ButtonLabels.h"
 #include "../GameLogic.h"
-#include "../PairingRegistry.h"
 #include "../GameSessionManager.h"
 #include "../HubPins.h"
 #include "../ScreenRenderer.h"
@@ -21,8 +20,8 @@ extern ScreenRenderer screenRenderer;
 
 class PlayingScreen : public Screen {
 public:
-  PlayingScreen(LcdDisplay& display, GameLogic& gameLogic, PairingRegistry& registry, Communication& communication)
-    : display(display), gameLogic(gameLogic), registry(registry), communication(communication) {}
+  PlayingScreen(LcdDisplay& display, GameLogic& gameLogic, Communication& communication)
+    : display(display), gameLogic(gameLogic), communication(communication) {}
 
   void onEnter() override {
     // ✅ Push entity colors to targets
@@ -30,7 +29,7 @@ public:
     sessionManager.setStatus(GameSessionStatus::Starting, true);
 
     // ✅ Start countdown
-    countdownStarted = true;
+    countdownStarted = false;
     countdownActive = true;
     countdownValue = 5;
     countdownStartTime = millis();
@@ -42,6 +41,8 @@ public:
     display.clear();
     if (!countdownStarted) {
       display.showLine(1, "Ready...", "center");
+      delay(1000);
+      countdownStarted = true;
     } else if (countdownActive) {
       display.showLine(0, "Starting in...", "center");
       display.showLine(1, "0" + String(countdownValue), "center");
@@ -114,7 +115,6 @@ public:
 private:
   LcdDisplay& display;
   GameLogic& gameLogic;
-  PairingRegistry& registry;
   Communication& communication;
 
   bool countdownStarted = false;

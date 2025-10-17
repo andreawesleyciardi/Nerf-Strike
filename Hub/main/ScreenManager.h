@@ -30,7 +30,7 @@ private:
 
   LcdDisplay& display;
   HubStateManager& hubState;
-  GameModeRegistry& gameModes;
+  GameModeRegistry& gameModesRegistry;
   PairingRegistry& registry;
   GameLogic& gameLogic;
   Communication& communication;

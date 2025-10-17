@@ -13,7 +13,6 @@ enum class ScreenType {
   TargetList,
   GameModeList,
   GameModeOptions,
-  GameModeDetails,
   Playing,
   Confirmation,
   Error,

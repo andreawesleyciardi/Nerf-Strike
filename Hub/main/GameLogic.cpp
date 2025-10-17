@@ -86,10 +86,10 @@ int GameLogic::calculateScore(String gameModeName, int currentScore) {
     // Timer mode logic
   } else if (gameModeName.equals(ModeName::TimeForShots)) {
     // Time for shots mode logic
-  } else if (gameModeName.equals(ModeName::TwoTargets)) {
+  } else if (gameModeName.equals(ModeName::LitTarget)) {
     // Two targets mode logic
-  } else if (gameModeName.equals(ModeName::Team)) {
-    // Team mode logic
+  // } else if (gameModeName.equals(ModeName::Team)) {
+  //   // Team mode logic
   } else if (gameModeName.equals(ModeName::Battle)) {
     // Battle mode logic
     return currentScore + 1;
@@ -121,10 +121,10 @@ ScoreStatus GameLogic::evaluateScoreStatus(String gameModeName, const GameMode& 
     // Timer mode logic
   } else if (gameModeName.equals(ModeName::TimeForShots)) {
     // Time for shots mode logic
-  } else if (gameModeName.equals(ModeName::TwoTargets)) {
+  } else if (gameModeName.equals(ModeName::LitTarget)) {
     // Two targets mode logic
-  } else if (gameModeName.equals(ModeName::Team)) {
-    // Team mode logic
+  // } else if (gameModeName.equals(ModeName::Team)) {
+  //   // Team mode logic
   } else if (gameModeName.equals(ModeName::Battle)) {
     // Battle mode logic
     if (score == settings[0].value) {

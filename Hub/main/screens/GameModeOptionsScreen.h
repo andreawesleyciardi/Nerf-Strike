@@ -22,8 +22,8 @@ extern GameSessionManager sessionManager;
 
 class GameModeOptionsScreen : public Screen {
 public:
-  GameModeOptionsScreen(LcdDisplay& display, GameModeRegistry& gameModes)
-    : display(display), gameModes(gameModes) {}
+  GameModeOptionsScreen(LcdDisplay& display, GameModeRegistry& gameModesRegistry)
+    : display(display), gameModesRegistry(gameModesRegistry) {}
 
   void render() override {
     display.clear();
@@ -39,7 +39,7 @@ public:
       // pressed first time focuses on a field so that the value can be changed with the scrolling of the encoder, next press the focus is removed and the scrolling of the encoder is used again for scroll vertically the list of fields.
     }
     if (right.wasPressed()) {
-      request = ScreenRequest::to(ScreenType::GameModeDetails);
+      request = ScreenRequest::to(ScreenType::Playing);
     }
   }
 
@@ -53,7 +53,7 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Back", "<>", "Select"};
+    return {"Back", "<>", "Play"};
   }
 
   ScreenType getType() const override {
@@ -61,7 +61,7 @@ public:
   }
 
   String getHash() const override {
-    const GameMode& mode = gameModes.getMode(selectedIndex);
+    const GameMode& mode = gameModesRegistry.getMode(selectedIndex);
     String hash = "GameModeOptions-" + mode.getName();
     for (uint8_t i = 0; i < mode.getSettingCount(); i++) {
       const ModeSetting& setting = mode.getSetting(i);
@@ -72,7 +72,7 @@ public:
 
 private:
   LcdDisplay& display;
-  GameModeRegistry& gameModes;
+  GameModeRegistry& gameModesRegistry;
   uint8_t selectedIndex = 0;  // You can update this externally if needed
 };
 

@@ -43,6 +43,10 @@ struct EntityInfo {
     score = 0;
     targetCount = 0;
   }
+
+  uint8_t getTargetCount() const {
+    return targetCount;
+  }
 };
 
 #endif

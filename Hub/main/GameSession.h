@@ -11,17 +11,6 @@
 
 #define MAX_ENTITIES 10
 
-// enum class GameSessionStatus {
-//   Setting,
-//   Starting,
-//   Playing,
-//   Paused,
-//   Resetting,
-//   Won,
-//   Lost,
-//   Ended
-// };
-
 struct GameSession {
   GameSessionStatus status = GameSessionStatus::Setting;
   GameMode gameMode;

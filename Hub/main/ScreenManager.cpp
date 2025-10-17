@@ -9,15 +9,14 @@
 #include "screens/TargetListScreen.h"
 #include "screens/GameModeListScreen.h"
 #include "screens/GameModeOptionsScreen.h"
-#include "screens/GameModeDetailsScreen.h"
 #include "screens/PlayingScreen.h"
 #include "screens/ConfirmationScreen.h"
 #include "screens/ErrorScreen.h"
 #include "screens/WinLostScreen.h"
 #include "screens/EntitiesScreen.h"
 
-ScreenManager::ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& gameModes, PairingRegistry& registry, GameLogic& gameLogic, Communication& communication)
-  : display(display), hubState(hubState), gameModes(gameModes), registry(registry), gameLogic(gameLogic), communication(communication) {}
+ScreenManager::ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& gameModesRegistry, PairingRegistry& registry, GameLogic& gameLogic, Communication& communication)
+  : display(display), hubState(hubState), gameModesRegistry(gameModesRegistry), registry(registry), gameLogic(gameLogic), communication(communication) {}
 
 void ScreenManager::setup() {
   screens[(int)ScreenType::Splash]           = new SplashScreen(display);
@@ -26,10 +25,9 @@ void ScreenManager::setup() {
   screens[(int)ScreenType::Settings]         = new SettingsScreen(display, hubState);
   screens[(int)ScreenType::Pairing]          = new PairingScreen(display, registry);
   screens[(int)ScreenType::TargetList]       = new TargetListScreen(display, registry);
-  screens[(int)ScreenType::GameModeList]     = new GameModeListScreen(display, gameModes);
-  screens[(int)ScreenType::GameModeOptions]  = new GameModeOptionsScreen(display, gameModes);
-  screens[(int)ScreenType::GameModeDetails]  = new GameModeDetailsScreen(display, gameModes);
-  screens[(int)ScreenType::Playing]          = new PlayingScreen(display, gameLogic, registry, communication);
+  screens[(int)ScreenType::GameModeList]     = new GameModeListScreen(display, gameModesRegistry);
+  screens[(int)ScreenType::GameModeOptions]  = new GameModeOptionsScreen(display, gameModesRegistry);
+  screens[(int)ScreenType::Playing]          = new PlayingScreen(display, gameLogic, communication);
   screens[(int)ScreenType::Confirmation]     = new ConfirmationScreen(display, hubState);
   screens[(int)ScreenType::Error]            = new ErrorScreen(display, hubState);
   screens[(int)ScreenType::WinLost]          = new WinLostScreen(display, hubState, registry, gameLogic);
