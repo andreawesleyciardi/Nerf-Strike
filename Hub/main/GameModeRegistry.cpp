@@ -45,8 +45,8 @@ GameModeRegistry::GameModeRegistry() {
     );
 
   // TimeForShots
-    String singleTimeForShotsDescription[] = {"Hit the most targets", "in specific time."};
-    String multiTimeForShotsDescription[]  = {"Hit the most targets", "in specific time."};
+    String singleTimeForShotsDescription[] = {"How fast you are", "to reach the goal."};
+    String multiTimeForShotsDescription[]  = {"Who reaches the goal", "faster?"};
     ModeSetting timeForShotsSettings[] = {
       ModeSetting("Shots", 5, 1, 50)
     };
@@ -90,7 +90,7 @@ GameModeRegistry::GameModeRegistry() {
     ModeSetting battleSettings[] = {
       ModeSetting("Hits to reach", 5, 1, 20)
     };
-    modes[6] = GameMode(
+    modes[5] = GameMode(
       ModeName::Battle,
       ModeType::MULTI,
       ModeDescription(singleBattleDescription, multiBattleDescription),
@@ -104,7 +104,7 @@ GameModeRegistry::GameModeRegistry() {
     ModeSetting crazyTargetsSettings[] = {
       ModeSetting("Hits to reach", 5, 1, 50)
     };
-    modes[7] = GameMode(
+    modes[6] = GameMode(
       ModeName::CrazyTargets,
       ModeType::MULTI,
       ModeDescription(singleCrazyTargetsDescription, multiCrazyTargetsDescription),

@@ -21,6 +21,8 @@ Communication communication(receive, send, registry, statusRgbLed);
 
 GameSessionStatus sessionStatus = GameSessionStatus::Setting;
 
+String entityColorName;
+
 void setup() {
   delay(1000);
   Serial.begin(9600);
@@ -97,12 +99,12 @@ void loop() {
       }
 
       case OPCODE_ENTITY_COLOR: {
-          String colorName = communication.entityColor(buffer);
-          if (colorName != "") {
-            rgbRing.chase(colorName, 30);
-            statusRgbLed.on(colorName);                     // TEMPORARLY: To add an "entityRgbLed"
+          entityColorName = communication.entityColor(buffer);
+          if (entityColorName != "") {
+            rgbRing.chase(entityColorName, 30);
+            statusRgbLed.on(entityColorName);                     // TEMPORARLY: To add an "entityRgbLed"
             Serial.println(F("🌈 Entity color is set to: "));
-            Serial.println(colorName);
+            Serial.println(entityColorName);
           } else {
             Serial.println(F("❌ Was not possible to set the entity color"));
           }
@@ -131,7 +133,7 @@ void loop() {
                 rgbRing.chase("Green", 25);
                 rgbRing.chase("Green", 25);
                 rgbRing.blink("Green", 3);
-                rgbRing.fill("Green");
+                rgbRing.fill(entityColorName);
               } else if (packet->status == ScoreStatus::Lost) {
                 rgbRing.chase("Red", 25);
                 rgbRing.chase("Red", 25);

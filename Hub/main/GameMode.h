@@ -11,12 +11,12 @@ enum class ModeType {
 
 struct ModeName {
   static constexpr const char* Training       = "Training";
-  static constexpr const char* ToNumber       = "ToNumber";
+  static constexpr const char* ToNumber       = "To Number";
   static constexpr const char* Timer          = "Timer";
-  static constexpr const char* TimeForShots   = "TimeForShots";
-  static constexpr const char* LitTarget      = "LitTarget";
+  static constexpr const char* TimeForShots   = "Time For Shots";
+  static constexpr const char* LitTarget      = "Lit Target";
   static constexpr const char* Battle         = "Battle";
-  static constexpr const char* CrazyTargets   = "CrazyTargets";
+  static constexpr const char* CrazyTargets   = "Crazy Targets";
 };
 
 struct ModeDescription {
@@ -42,7 +42,7 @@ struct ModeDescription {
   }
 };
 
-#define MAX_SETTINGS 5
+#define MAX_SETTINGS 2
 
 struct ModeSetting {
   String label;

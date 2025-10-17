@@ -24,7 +24,7 @@ public:
 
   void onEnter() override {
     // ✅ Clear the session
-    sessionManager.resetSession();
+    // sessionManager.resetSession();
   }
 
   void render() override {

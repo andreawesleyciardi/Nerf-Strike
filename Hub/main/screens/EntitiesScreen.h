@@ -51,8 +51,8 @@ public:
     }
     if (right.wasPressed()) {
       sessionManager.assignEntitiesBalanced();
-      // request = ScreenRequest::to(ScreenType::GameModeList);         // TO UNCOMMENT
-      request = ScreenRequest::to(ScreenType::Playing);                 // TO REMOVE
+      request = ScreenRequest::to(ScreenType::GameModeList);         // TO UNCOMMENT
+      // request = ScreenRequest::to(ScreenType::Playing);                 // TO REMOVE
     }
   }
 

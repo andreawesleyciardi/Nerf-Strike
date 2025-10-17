@@ -84,10 +84,13 @@ int GameLogic::calculateScore(String gameModeName, int currentScore) {
     return currentScore + 1;
   } else if (gameModeName.equals(ModeName::Timer)) {
     // Timer mode logic
+    return currentScore + 1;
   } else if (gameModeName.equals(ModeName::TimeForShots)) {
     // Time for shots mode logic
+    return currentScore + 1;
   } else if (gameModeName.equals(ModeName::LitTarget)) {
     // Two targets mode logic
+    return currentScore + 1;
   // } else if (gameModeName.equals(ModeName::Team)) {
   //   // Team mode logic
   } else if (gameModeName.equals(ModeName::Battle)) {
@@ -95,6 +98,7 @@ int GameLogic::calculateScore(String gameModeName, int currentScore) {
     return currentScore + 1;
   } else if (gameModeName.equals(ModeName::CrazyTargets)) {
     // Crazy targets mode logic
+    return currentScore + 1;
   } else {
     // Unknown or fallback mode logic
   }
@@ -121,6 +125,11 @@ ScoreStatus GameLogic::evaluateScoreStatus(String gameModeName, const GameMode& 
     // Timer mode logic
   } else if (gameModeName.equals(ModeName::TimeForShots)) {
     // Time for shots mode logic
+    if (score == settings[0].value) {
+      return ScoreStatus::Won;
+    } else {
+      return ScoreStatus::Add;
+    }
   } else if (gameModeName.equals(ModeName::LitTarget)) {
     // Two targets mode logic
   // } else if (gameModeName.equals(ModeName::Team)) {

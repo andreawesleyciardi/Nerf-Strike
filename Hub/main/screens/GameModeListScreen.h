@@ -21,6 +21,8 @@ extern ScreenRenderer screenRenderer;
 // Button left label "Exit": navigates to the "Home screen".
 // Button right label "Play" or "Options": if the game mode selected has no extra options the label is "Select" and navigates to the "Playing screen", if the game mode selected needs more options to be set the label is "Options" and navigates to "GameMode Options screen".
 
+GameMode filteredModes[GameModeRegistry::MAX_MODES];
+
 class GameModeListScreen : public Screen {
 public:
   GameModeListScreen(LcdDisplay& display, GameModeRegistry& gameModesRegistry)
@@ -68,11 +70,27 @@ public:
     }
     if (encoder.hasChanged()) {
       int direction = encoder.getDirection();
-      if (direction > 0 && currentIndex < filteredModesCount - 1) {
+      // if (direction > 0 && currentIndex < filteredModesCount - 1) {
+      if (direction > 0) {
         currentIndex++;
+        Serial.print(F("+ filteredModesCount: "));
+        Serial.print(filteredModesCount);
+        Serial.print(F(" currentIndex: "));
+        Serial.println(currentIndex);
+        if (filteredModesCount == currentIndex) {
+          currentIndex = 0;
+        }
       }
-      if (direction < 0 && currentIndex > 0) {
+      // if (direction < 0 && currentIndex > 0) {
+      if (direction < 0) {
         currentIndex--;
+        Serial.print(F("- filteredModesCount: "));
+        Serial.print(filteredModesCount);
+        Serial.print(F(" currentIndex: "));
+        Serial.println(currentIndex);
+        if (currentIndex == 255) {
+          currentIndex = filteredModesCount - 1;
+        }
       }
       screenRenderer.requestRefresh();
     }
@@ -81,7 +99,8 @@ public:
       sessionManager.setSelectedGameMode(selectedMode);
 
       if (selectedMode.getSettingCount() > 0) {
-        request = ScreenRequest::to(ScreenType::GameModeOptions);
+        // request = ScreenRequest::to(ScreenType::GameModeOptions);
+        request = ScreenRequest::to(ScreenType::Playing);
       } else {
         request = ScreenRequest::to(ScreenType::Playing);
       }
@@ -111,7 +130,6 @@ private:
   LcdDisplay& display;
   GameModeRegistry& gameModesRegistry;
 
-  GameMode filteredModes[GameModeRegistry::MAX_MODES];
   uint8_t filteredModesCount = 0;
   uint8_t currentIndex = 0;
 };
