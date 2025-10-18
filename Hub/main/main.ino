@@ -81,8 +81,8 @@ void loop() {
 
   if (batteryButton.wasPressed()) {
     Serial.println(F("🔋 Battery check triggered"));
-    showStatus(batteryRgbLed, STATUS_OK);
-    batteryRgbLed.pulse("Yellow", 10, 20);
+    // showStatus(batteryRgbLed, STATUS_OK);                  // TO FIX BATTERY CHECK
+    // batteryRgbLed.pulse("Yellow", 10, 20);
   }
 
   if (millis() - lastHeartbeat > 3000) {
@@ -103,13 +103,9 @@ void loop() {
     case OPCODE_VERIFICATION_REQUEST: communication.verification(buffer); break;
     case OPCODE_PAIRING_REQUEST:      communication.pairing(buffer); break;
     case OPCODE_HIT_REQUEST: {
-        // TO CREATE CONDITIONS: if (gameStatus == PLAYING) {
-          if (communication.hit(buffer)) {
-            // ADD SUCCESSFUL FEEDBACK
-          } else {
-            // ADD ERROR FEEDBACK
-          }
-        // TO CREATE CONDITIONS: }
+        if (sessionManager.getStatus() == GameSessionStatus::Playing) {
+          communication.hit(buffer);
+        }
       break;
     }
   }

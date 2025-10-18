@@ -31,6 +31,10 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
   ScoreStatus status = evaluateScoreStatus(gameModeName, gameMode, updatedScore);
   // To add a function that updates the session with the status if win or lost
 
+  if (status == ScoreStatus::Won) {
+    sessionManager.setStatus(GameSessionStatus::Ended);
+  }
+
   const EntityInfo* entities = sessionManager.getAllEntities();
   uint8_t entitiesCount = sessionManager.getEntityCount();
 
@@ -49,12 +53,12 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
       }
     }
     else {
-      if (gameModeName.equals(ModeName::Battle)) {
-        // In "Battle" game mode when an entity hits one of its targets subtract a point from the opponents
-        int currentOpponentScore = sessionManager.getScoreForEntity(entities[i].entityId);
-        int currentOpponentUpdatedScore = currentOpponentScore > 0 ? currentOpponentScore - 1 : 0;
-        sessionManager.setScoreForEntity(entities[i].entityId, currentOpponentUpdatedScore);
-        if (entities[i].targetCount > 0) {
+      if (entities[i].targetCount > 0) {
+        if (gameModeName.equals(ModeName::Battle)) {
+          // In "Battle" game mode when an entity hits one of its targets subtract a point from the opponents
+          int currentOpponentScore = sessionManager.getScoreForEntity(entities[i].entityId);
+          int currentOpponentUpdatedScore = currentOpponentScore > 0 ? currentOpponentScore - 1 : 0;
+          sessionManager.setScoreForEntity(entities[i].entityId, currentOpponentUpdatedScore);
           for (uint8_t y = 0; y < entities[i].targetCount; ++y) {
             // I add to the batch array the targets that need to be notified that a point is substracted
             batch.updates[batch.count++] = {
@@ -62,6 +66,19 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
               static_cast<uint8_t>(currentOpponentUpdatedScore),
               status == ScoreStatus::Won ? ScoreStatus::Lost : ScoreStatus::Subtract
             };
+          }
+        }
+        else {
+          if (status == ScoreStatus::Won) {
+            int currentOpponentScore = sessionManager.getScoreForEntity(entities[i].entityId);
+            for (uint8_t y = 0; y < entities[i].targetCount; ++y) {
+              // I add to the batch array the targets that need to be notified that have lost
+              batch.updates[batch.count++] = {
+                entities[i].targetIds[y],
+                static_cast<uint8_t>(currentOpponentScore),
+                ScoreStatus::Lost
+              };
+            }
           }
         }
       }
@@ -72,79 +89,49 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
 }
 
 int GameLogic::calculateScore(String gameModeName, int currentScore) {
-  Serial.print(F("gameModeName in calculateScore: "));
-  Serial.println(gameModeName);
-  Serial.print(F("currentScore: "));
-  Serial.println(currentScore);
-  if (gameModeName.equals(ModeName::Training)) {
-    // Training mode logic
+  // Serial.print(F("gameModeName in calculateScore: "));
+  // Serial.println(gameModeName);
+  // Serial.print(F("currentScore: "));
+  // Serial.println(currentScore);
+  if (
+    gameModeName.equals(ModeName::Training) ||
+    gameModeName.equals(ModeName::ToNumber) ||
+    gameModeName.equals(ModeName::Timer) ||
+    gameModeName.equals(ModeName::TimeForShots) ||
+    gameModeName.equals(ModeName::LitTarget) ||
+    gameModeName.equals(ModeName::Battle) ||
+    gameModeName.equals(ModeName::CrazyTargets)
+  ) {
     return currentScore + 1;
-  } else if (gameModeName.equals(ModeName::ToNumber)) {
-    // To number mode logic
-    return currentScore + 1;
-  } else if (gameModeName.equals(ModeName::Timer)) {
-    // Timer mode logic
-    return currentScore + 1;
-  } else if (gameModeName.equals(ModeName::TimeForShots)) {
-    // Time for shots mode logic
-    return currentScore + 1;
-  } else if (gameModeName.equals(ModeName::LitTarget)) {
-    // Two targets mode logic
-    return currentScore + 1;
-  // } else if (gameModeName.equals(ModeName::Team)) {
-  //   // Team mode logic
-  } else if (gameModeName.equals(ModeName::Battle)) {
-    // Battle mode logic
-    return currentScore + 1;
-  } else if (gameModeName.equals(ModeName::CrazyTargets)) {
-    // Crazy targets mode logic
-    return currentScore + 1;
-  } else {
-    // Unknown or fallback mode logic
   }
   return 0;
 }
 
 ScoreStatus GameLogic::evaluateScoreStatus(String gameModeName, const GameMode& gameMode, int score) {
   const ModeSetting* settings = gameMode.getAllSettings();
-  // for (int i = 0; i < MAX_SETTINGS; ++i) {
-  //   Serial.println(settings[i]);
-  // }
-  Serial.print("gameModeName: ");
-  Serial.println(gameModeName);
+  // Serial.print("gameModeName in evaluateScoreStatus: ");
+  // Serial.println(gameModeName);
   if (gameModeName.equals(ModeName::Training)) {
-    // Training mode logic
-  } else if (gameModeName.equals(ModeName::ToNumber)) {
-    // To number mode logic
+    return ScoreStatus::Add;
+  }
+  else if (
+    gameModeName.equals(ModeName::ToNumber) ||
+    gameModeName.equals(ModeName::Battle) ||
+    gameModeName.equals(ModeName::LitTarget) ||
+    gameModeName.equals(ModeName::TimeForShots)
+  ) {
     if (score == settings[0].value) {
       return ScoreStatus::Won;
     } else {
       return ScoreStatus::Add;
     }
-  } else if (gameModeName.equals(ModeName::Timer)) {
+  }
+  else if (gameModeName.equals(ModeName::Timer)) {
     // Timer mode logic
-  } else if (gameModeName.equals(ModeName::TimeForShots)) {
-    // Time for shots mode logic
-    if (score == settings[0].value) {
-      return ScoreStatus::Won;
-    } else {
-      return ScoreStatus::Add;
-    }
-  } else if (gameModeName.equals(ModeName::LitTarget)) {
-    // Two targets mode logic
-  // } else if (gameModeName.equals(ModeName::Team)) {
-  //   // Team mode logic
-  } else if (gameModeName.equals(ModeName::Battle)) {
-    // Battle mode logic
-    if (score == settings[0].value) {
-      return ScoreStatus::Won;
-    } else {
-      return ScoreStatus::Add;
-    }
-  } else if (gameModeName.equals(ModeName::CrazyTargets)) {
+  }
+
+  else if (gameModeName.equals(ModeName::CrazyTargets)) {
     // Crazy targets mode logic
-  } else {
-    // Unknown or fallback mode logic
   }
   return ScoreStatus::OnGoing;
 }

@@ -28,7 +28,7 @@ void TargetController::blinkEntityColor(String colorName, uint8_t delayTime, uin
 }
 
 void TargetController::pulseEntityColor(String colorName, uint8_t steps, uint16_t delayMs) {
-  entityLed.pulse(colorName, steps, delayMs);
+  entityLed.startPulse(colorName, steps, delayMs);
 }
 
 void TargetController::updateVisualState(bool isAssigned, bool isActive) {
@@ -38,7 +38,7 @@ void TargetController::updateVisualState(bool isAssigned, bool isActive) {
       entityLed.on(lastColor);
     } else {
       entityLed.setBrightness(80);
-      entityLed.pulse(lastColor, 20, 20);
+      entityLed.startPulse(lastColor, 20, 20);
     }
   } else {
     entityLed.setBrightness(50);

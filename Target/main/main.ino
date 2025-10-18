@@ -50,6 +50,8 @@ void loop() {
   static bool awaitingAck = false;
   static bool heartbeatLost = false;
 
+  // statusRgbLed.updatePulse();
+
   battery.autoCheck(batteryVerificationFeedback);
   if (batteryButton.wasPressed()) {
     battery.check(batteryVerificationFeedback);
@@ -102,7 +104,8 @@ void loop() {
           entityColorName = communication.entityColor(buffer);
           if (entityColorName != "") {
             rgbRing.chase(entityColorName, 30);
-            statusRgbLed.on(entityColorName);                     // TEMPORARLY: To add an "entityRgbLed"
+            statusRgbLed.on(entityColorName, true);                     // TEMPORARLY: To add an "entityRgbLed"
+            sessionStatus = GameSessionStatus::Setting;
             Serial.println(F("🌈 Entity color is set to: "));
             Serial.println(entityColorName);
           } else {
@@ -139,6 +142,7 @@ void loop() {
                 rgbRing.chase("Red", 25);
                 rgbRing.blink("Red", 3);
               }
+              sessionStatus = GameSessionStatus::Ended;
             }
             buzzer.beep(1);
           } else {
@@ -151,11 +155,21 @@ void loop() {
       case OPCODE_SESSION_STATUS: {
           SessionStatusPacket* packet = reinterpret_cast<SessionStatusPacket*>(buffer);
           GameSessionStatus newStatus = packet->status;
-          Serial.println(F("🔦 New Session Status received."));
-          sessionStatus = newStatus;
+          Serial.print(F("🔦 New Session Status received: "));
           if (newStatus == GameSessionStatus::Starting) {
             scoreDisplay.updateScore(0, true);
+            Serial.println(F("GameSessionStatus::Starting"));
           }
+          if (newStatus == GameSessionStatus::Paused) {
+            statusRgbLed.startPulse(entityColorName);
+            Serial.println(F("GameSessionStatus::Paused"));
+          }
+          if (sessionStatus == GameSessionStatus::Paused && (newStatus == GameSessionStatus::Playing || newStatus == GameSessionStatus::Ended)) {
+            statusRgbLed.stopPulse();
+            statusRgbLed.on();
+            Serial.println(F("from GameSessionStatus::Paused to GameSessionStatus::Playing"));
+          }
+          sessionStatus = newStatus;
         break;
       }
 

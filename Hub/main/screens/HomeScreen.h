@@ -24,7 +24,8 @@ public:
 
   void onEnter() override {
     // ✅ Clear the session
-    // sessionManager.resetSession();
+    GameSession defaultSession = createDefaultSession(registry);
+    sessionManager.setSession(defaultSession);
   }
 
   void render() override {
@@ -37,13 +38,9 @@ public:
       request = ScreenRequest::to(ScreenType::Settings);
     }
     if (encoder.wasPressed()) {
-      GameSession defaultSession = createDefaultSession(registry);
-      sessionManager.setSession(defaultSession);
       request = ScreenRequest::to(ScreenType::Playing);
     }
     if (right.wasPressed()) {
-      GameSession defaultSession = createDefaultSession(registry);
-      sessionManager.setSession(defaultSession);
       request = ScreenRequest::to(ScreenType::Entities);
     }
   }

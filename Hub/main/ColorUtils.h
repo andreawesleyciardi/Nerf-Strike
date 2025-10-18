@@ -1,7 +1,7 @@
 #ifndef COLOR_UTILS_H
 #define COLOR_UTILS_H
 
-#include "Color.h"
+#include <Color.h>
 
 const Color EntityColorSequence[] = {
   Color(0, 255, 255, "Cyan"),

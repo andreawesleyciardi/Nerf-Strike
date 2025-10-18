@@ -48,6 +48,8 @@ public:
       display.showLine(1, "0" + String(countdownValue), "center");
     } else if (sessionManager.getStatus() == GameSessionStatus::Paused) {
       display.showLine(1, "Paused", "center");
+    } else if (sessionManager.getStatus() == GameSessionStatus::Ended) {
+      display.showLine(1, "Finished", "center");
     } else {
       display.showLine(0, "Game in", "center");
       display.showLine(1, "progress...", "center");
@@ -56,16 +58,26 @@ public:
 
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
     if (left.wasPressed()) {
-      request = ScreenRequest::to(ScreenType::Confirmation);
+      Serial.print(F("left.wasPressed() -> "));
+      if (sessionManager.getStatus() == GameSessionStatus::Ended) {
+        Serial.println(F("GameSessionStatus::Ended -> Goind to Home"));
+        request = ScreenRequest::to(ScreenType::Home);                                                      // INVESTIGATE WHY DOESN'T GO TO HOME
+      }
+      else {
+        Serial.println(F("GameSessionStatus::Ended -> Goind to Confirmation"));
+        request = ScreenRequest::to(ScreenType::Confirmation);
+      }
     }
     if (encoder.wasPressed()) {
-      // Toggle pause/play
       GameSessionStatus currentStatus = sessionManager.getStatus();
-      if (currentStatus == GameSessionStatus::Playing) {
-        sessionManager.setStatus(GameSessionStatus::Paused, true);
-      }
-      else if (currentStatus == GameSessionStatus::Paused) {
-        sessionManager.setStatus(GameSessionStatus::Playing, true);
+      if (currentStatus != GameSessionStatus::Ended) {
+        // Toggle pause/play
+        if (currentStatus == GameSessionStatus::Playing) {
+          sessionManager.setStatus(GameSessionStatus::Paused, true);
+        }
+        else if (currentStatus == GameSessionStatus::Paused) {
+          sessionManager.setStatus(GameSessionStatus::Playing, true);
+        }
       }
     }
     if (right.wasPressed()) {
@@ -98,7 +110,7 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Exit", "<>", "Reset"};
+    return {"Exit", sessionManager.getStatus() == GameSessionStatus::Ended ? "" : "<>", "Reset"};
   }
 
   ScreenType getType() const override {
@@ -107,6 +119,7 @@ public:
 
   String getHash() const override {
     if (sessionManager.getStatus() == GameSessionStatus::Paused) return "Paused";
+    if (sessionManager.getStatus() == GameSessionStatus::Ended) return "Ended";
     if (!countdownStarted) return "Playing-ready";
     if (countdownActive) return "Playing-countdown-" + String(countdownValue);
     return "Playing-active";
