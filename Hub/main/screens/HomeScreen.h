@@ -1,6 +1,8 @@
 #ifndef HOME_SCREEN_H
 #define HOME_SCREEN_H
 
+#include <Statuses.h>
+
 #include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
@@ -8,8 +10,10 @@
 #include "Screen.h"
 #include "../GameSessionManager.h"
 #include "../GameSession.h"
+#include "../ScreenRenderer.h"
 
 extern GameSessionManager sessionManager;
+extern ScreenRenderer screenRenderer;
 
 // - Home screen:
 // I want to show a message (for now just "Welcome").
@@ -24,8 +28,17 @@ public:
 
   void onEnter() override {
     // ✅ Clear the session
+    Serial.println(F("Entered HomeScreen"));
     GameSession defaultSession = createDefaultSession(registry);
     sessionManager.setSession(defaultSession);
+    sessionManager.setStatus(GameSessionStatus::Setting, true);
+    Serial.print(F("GameSessionStatus: "));
+    Serial.println(GameSessionStatusToString(sessionManager.getStatus()));
+    screenRenderer.requestRefresh();
+  }
+
+  void onExit() override {
+    display.clear();
   }
 
   void render() override {
@@ -38,9 +51,12 @@ public:
       request = ScreenRequest::to(ScreenType::Settings);
     }
     if (encoder.wasPressed()) {
+      Serial.println(F("encoder.wasPressed"));
       request = ScreenRequest::to(ScreenType::Playing);
     }
     if (right.wasPressed()) {
+      Serial.print(F("right.wasPressed ->GameSessionStatus: "));
+      Serial.println(GameSessionStatusToString(sessionManager.getStatus()));
       request = ScreenRequest::to(ScreenType::Entities);
     }
   }
@@ -58,7 +74,8 @@ public:
   }
 
   String getHash() const {
-    return "Home";
+    // return "Home-" + String(millis());
+    return "Home-" + String(GameSessionStatusToString(sessionManager.getStatus()));
   }
 
 private:

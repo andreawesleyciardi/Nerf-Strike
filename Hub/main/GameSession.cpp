@@ -7,9 +7,8 @@ extern GameModeRegistry gameModeRegistry;
 
 GameSession createDefaultSession(PairingRegistry& registry) {
   GameSession newSession;
-  newSession.status = GameSessionStatus::Playing;
-  newSession.gameMode = gameModeRegistry.getModeByName("Training");                      // TO UNCOMMENT
-  // newSession.gameMode = gameModeRegistry.getModeByName(ModeName::Battle);                 // TO REMOVE
+  newSession.status = GameSessionStatus::Setting;
+  newSession.gameMode = gameModeRegistry.getModeByName("Training");
 
   EntityInfo newEntity;
   newEntity.entityId = 0;

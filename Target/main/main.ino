@@ -137,12 +137,14 @@ void loop() {
                 rgbRing.chase("Green", 25);
                 rgbRing.blink("Green", 3);
                 rgbRing.fill(entityColorName);
+                delay(2000);
+                rgbRing.off();
               } else if (packet->status == ScoreStatus::Lost) {
                 rgbRing.chase("Red", 25);
                 rgbRing.chase("Red", 25);
                 rgbRing.blink("Red", 3);
               }
-              sessionStatus = GameSessionStatus::Ended;
+              // sessionStatus = GameSessionStatus::Ended;
             }
             buzzer.beep(1);
           } else {
@@ -155,19 +157,21 @@ void loop() {
       case OPCODE_SESSION_STATUS: {
           SessionStatusPacket* packet = reinterpret_cast<SessionStatusPacket*>(buffer);
           GameSessionStatus newStatus = packet->status;
-          Serial.print(F("🔦 New Session Status received: "));
+          Serial.print(F("🔦 New GameSessionStatus received: "));
+          Serial.println(GameSessionStatusToString(newStatus));
           if (newStatus == GameSessionStatus::Starting) {
             scoreDisplay.updateScore(0, true);
-            Serial.println(F("GameSessionStatus::Starting"));
           }
           if (newStatus == GameSessionStatus::Paused) {
-            statusRgbLed.startPulse(entityColorName);
-            Serial.println(F("GameSessionStatus::Paused"));
+            statusRgbLed.startPulse(entityColorName);           // entityRgbLed
           }
           if (sessionStatus == GameSessionStatus::Paused && (newStatus == GameSessionStatus::Playing || newStatus == GameSessionStatus::Ended)) {
-            statusRgbLed.stopPulse();
-            statusRgbLed.on();
-            Serial.println(F("from GameSessionStatus::Paused to GameSessionStatus::Playing"));
+            statusRgbLed.stopPulse();                           // entityRgbLed
+            statusRgbLed.on();                                  // entityRgbLed
+          } else if (newStatus == GameSessionStatus::Ended || newStatus == GameSessionStatus::Setting) {
+            // sessionStatus = GameSessionStatus::Ended;
+            statusRgbLed.off();                                 // entityRgbLed
+            rgbRing.off();
           }
           sessionStatus = newStatus;
         break;

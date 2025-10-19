@@ -112,7 +112,7 @@ const GameMode& GameSessionManager::getSelectedGameMode() const {
 }
 
 void GameSessionManager::setSession(const GameSession& newSession) {
-  session.reset();
+  // session.reset();
   session = newSession;
 }
 

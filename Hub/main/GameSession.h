@@ -18,7 +18,7 @@ struct GameSession {
   uint8_t entityCount = 0;
 
   void reset() {
-    for (uint8_t i = 0; i < MAX_ENTITIES; ++i) {
+    for (uint8_t i = 0; i < entityCount; ++i) {
       entities[i].reset();
     }
     entityCount = 0;

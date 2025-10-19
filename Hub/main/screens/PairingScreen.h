@@ -24,7 +24,7 @@ public:
 
   void render() override {
     display.clear();
-    display.printAligned("Pairing...", 1, "center");
+    display.showLine(1, "Pairing...", "center");
   }
 
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
@@ -32,7 +32,8 @@ public:
       request = ScreenRequest::to(ScreenType::TargetList);
     }
     if (right.wasPressed()) {
-      request = ScreenRequest::to(ScreenType::GameModeList);
+      // request = ScreenRequest::to(ScreenType::GameModeList);
+      request = ScreenRequest::to(ScreenType::Settings);
     }
   }
 

@@ -3,8 +3,8 @@
 #include <OPCodes.h>
 #include <DisplayFeedback.h>
 
-Communication::Communication(Receive& receive, Send& send, PairingRegistry& registry, GameLogic& gameLogic, RGBLed& statusRgbLed)
-  : receive(receive), send(send), registry(registry), gameLogic(gameLogic), statusRgbLed(statusRgbLed) {}
+Communication::Communication(Receive& receive, Send& send, PairingRegistry& registry, GameLogic& gameLogic, RGBLed& statusRgbLed, GameSessionManager& sessionManager)
+  : receive(receive), send(send), registry(registry), gameLogic(gameLogic), statusRgbLed(statusRgbLed), sessionManager(sessionManager) {}
 
 const uint8_t* Communication::verifyPipeForID(uint8_t targetId) {
   const uint8_t* pipe = registry.getPipeForID(targetId);
@@ -59,18 +59,22 @@ const bool Communication::hit(const byte* buffer) {
   if (pipe) {
     ScoreUpdateBatch batch = gameLogic.updateEntityScore(request.id);
 
-    bool success = false;
+    bool sent = false;
+    // bool hasWon = false;
     for (uint8_t i = 0; i < batch.count; ++i) {
       const ScoreUpdatedPerTarget& result = batch.updates[i];
       const uint8_t* targetPipe = verifyPipeForID(result.targetId);
       if (targetPipe) {
         const bool wasSent = send.hitResponse(result.targetId, targetPipe, {result.newScore, result.status});
         if (result.targetId == request.id) {
-          success = wasSent;
+          sent = wasSent;
         }
       }
     }
-    return success;
+    // if (hasWon) {
+    //   sessionManager.setStatus(GameSessionStatus::Ended, true);
+    // }
+    return sent;
   }
   return false;
 }

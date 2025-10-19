@@ -15,10 +15,15 @@
 #include "screens/WinLostScreen.h"
 #include "screens/EntitiesScreen.h"
 
-ScreenManager::ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& gameModesRegistry, PairingRegistry& registry, GameLogic& gameLogic, Communication& communication)
-  : display(display), hubState(hubState), gameModesRegistry(gameModesRegistry), registry(registry), gameLogic(gameLogic), communication(communication) {}
+ScreenManager::ScreenManager(LcdDisplay& display, HubStateManager& hubState,
+                             GameModeRegistry& gameModesRegistry, PairingRegistry& registry,
+                             GameLogic& gameLogic, Communication& communication)
+  : display(display), hubState(hubState), gameModesRegistry(gameModesRegistry),
+    registry(registry), gameLogic(gameLogic), communication(communication) {}
 
 void ScreenManager::setup() {
+  destroyScreens();  // 🧹 Ensure clean state
+
   screens[(int)ScreenType::Splash]           = new SplashScreen(display);
   screens[(int)ScreenType::Home]             = new HomeScreen(display, registry);
   screens[(int)ScreenType::Help]             = new HelpScreen(display);
@@ -33,16 +38,21 @@ void ScreenManager::setup() {
   screens[(int)ScreenType::WinLost]          = new WinLostScreen(display, hubState, registry, gameLogic);
   screens[(int)ScreenType::Entities]         = new EntitiesScreen(display, registry);
 
-  replace(ScreenType::Splash);  // Start with Splash screen
+  replace(ScreenType::Splash);  // 🚀 Start with Splash screen
 }
 
 void ScreenManager::replace(ScreenType screen) {
+  Screen* previous = getActive();
+  if (previous) {
+    previous->onExit();  // 🧹 Clean up previous screen
+  }
+
   activeScreen = screen;
   updateContext(screen);
 
   Screen* active = getActive();
   if (active) {
-    active->onEnter();
+    active->onEnter();  // 🚪 Initialize new screen
   }
 }
 
@@ -70,5 +80,14 @@ void ScreenManager::updateContext(ScreenType screen) {
   } else {
     encoderMode = EncoderMode::None;
     labels = {"", "", ""};
+  }
+}
+
+void ScreenManager::destroyScreens() {
+  for (uint8_t i = 0; i < screenCount; ++i) {
+    if (screens[i]) {
+      delete screens[i];
+      screens[i] = nullptr;
+    }
   }
 }

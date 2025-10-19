@@ -15,7 +15,8 @@
 
 class ScreenManager {
 public:
-  ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& modes, PairingRegistry& registry, GameLogic& logic, Communication& communication);
+  ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& modes,
+                PairingRegistry& registry, GameLogic& logic, Communication& communication);
 
   void setup();
   void replace(ScreenType screen);
@@ -27,6 +28,7 @@ public:
 
 private:
   void updateContext(ScreenType screen);
+  void destroyScreens();
 
   LcdDisplay& display;
   HubStateManager& hubState;
@@ -36,7 +38,7 @@ private:
   Communication& communication;
 
   static const uint8_t screenCount = 15;
-  Screen* screens[screenCount];
+  Screen* screens[screenCount] = {nullptr};
   ScreenType activeScreen = ScreenType::Splash;
 
   EncoderMode encoderMode = EncoderMode::None;

@@ -8,8 +8,10 @@
 #include "Screen.h"
 #include "../GameSessionManager.h"
 #include "../GameSession.h"
+#include "../ScreenRenderer.h"
 
 extern GameSessionManager sessionManager;
+extern ScreenRenderer screenRenderer;
 
 // - Entities screen:
 // The user can decide the number of players/teams (entities).
@@ -24,6 +26,7 @@ public:
 
   void onEnter() override {
     Serial.println("Entered the EntitiesScreen");
+    screenRenderer.requestRefresh();
   }
 
   void render() override {
@@ -37,7 +40,7 @@ public:
 
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
     if (left.wasPressed()) {
-      request = ScreenRequest::to(ScreenType::Pairing);
+      request = ScreenRequest::to(ScreenType::Home);
     }
     if (encoder.hasChanged()) {
       Serial.println("encoder has changed");

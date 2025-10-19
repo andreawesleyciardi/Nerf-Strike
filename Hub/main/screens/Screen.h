@@ -33,34 +33,21 @@ class Screen {
 public:
   virtual ~Screen() {}
 
-  // Called every frame to render the screen
   virtual void render() = 0;
-
-  // Called every frame to handle input
   virtual void handleInput(RotaryEncoder& encoder, Button& left, Button& right) = 0;
-
   virtual void onEnter() {}
+  virtual void onExit() {}
 
-  // Returns a requested screen transition (if any)
   virtual ScreenRequest getRequestedScreen() const {
     return request;
   }
 
-  // Metadata and UI hints
+  void clearRequest() { request = ScreenRequest::none(); }  // ✅ NEW
+
   virtual ScreenType getType() const = 0;
-
-  virtual EncoderMode getEncoderMode() const {
-    return EncoderMode::None;
-  }
-
-  virtual ButtonLabels getButtonLabels() const {
-    return {"", "", ""};
-  }
-
-  virtual String getHash() const {
-    return "";
-  }
-
+  virtual EncoderMode getEncoderMode() const { return EncoderMode::None; }
+  virtual ButtonLabels getButtonLabels() const { return {"", "", ""}; }
+  virtual String getHash() const { return ""; }
   virtual void loop() {}
 
 protected:

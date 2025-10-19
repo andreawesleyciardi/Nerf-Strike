@@ -13,6 +13,7 @@ void ScreenRenderer::render() {
   Screen* screen = manager.getActive();
 
   if (!screen) {
+    display.clear();
     display.showText("Screen not implemented");
     lastRenderedHash = "error";
     lastRenderedScreen = currentScreen;
@@ -21,27 +22,38 @@ void ScreenRenderer::render() {
 
   String currentHash = screen->getHash();
 
-  // ✅ Skip rendering if screen and content haven't changed
-  if (!forceRender && currentScreen == lastRenderedScreen && currentHash == lastRenderedHash) {
-    return;
+  // 🔍 Detect screen change or forced refresh
+  bool screenChanged = (currentScreen != lastRenderedScreen);
+  bool hashChanged = (currentHash != lastRenderedHash);
+
+  if (!forceRender && !screenChanged && !hashChanged) {
+    return;  // ✅ Skip rendering if nothing changed
   }
 
-  forceRender = false;  // Reset flag after use
-
-  display.clear();
-  screen->render();
+  // 🧹 Reset render flag and update tracking
+  forceRender = false;
   lastRenderedHash = currentHash;
   lastRenderedScreen = currentScreen;
 
-  // ✅ Button labels
+  // 🧼 Full redraw
+  display.clear();
+  screen->render();
+
+  // 🎯 Button labels
   ButtonLabels labels = manager.getButtonLabels();
   display.showButtonLabels(labels);
 
-  // ✅ Encoder hint
+  // 🎛 Encoder hint
   EncoderMode mode = manager.getEncoderMode();
   if (mode == EncoderMode::SelectItem || mode == EncoderMode::AdjustField) {
     display.printAligned("<>", display.getRowCount() - 1, "center");
   }
+
+  // 🧪 Debug trace (optional)
+  Serial.print(F("Rendered screen: "));
+  Serial.println((int)currentScreen);
+  Serial.print(F("Hash: "));
+  Serial.println(currentHash);
 }
 
 void ScreenRenderer::requestRefresh() {

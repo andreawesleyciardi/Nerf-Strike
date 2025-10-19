@@ -40,7 +40,7 @@ CommandConsole console(registry, send, encoder, leftButton, rightButton, targetT
 
 Receive receive(targetTypeManager, registry);
 Send send(wireless.getRadio(), registry);
-Communication communication(receive, send, registry, gameLogic, statusRgbLed);
+Communication communication(receive, send, registry, gameLogic, statusRgbLed, sessionManager);
 
 ScreenManager screenManager(display, hubState, gameModeRegistry, registry, gameLogic, communication);
 ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);

@@ -8,28 +8,18 @@ ScreenController::ScreenController(ScreenManager& sm, HubStateManager& hsm, Pair
     encoder(enc), leftButton(left), rightButton(right) {}
 
 void ScreenController::update() {
-  ScreenType current = screenManager.current();
-
-  // General input handling via active screen
   Screen* activeScreen = screenManager.getActive();
   if (activeScreen) {
     activeScreen->handleInput(encoder, leftButton, rightButton);
-
     activeScreen->loop();
 
-    // Check if the screen requested a transition
     ScreenRequest request = activeScreen->getRequestedScreen();
     if (request.hasRequest) {
       screenManager.replace(request.target);
+      activeScreen = screenManager.getActive();  // ✅ Refresh pointer
+      activeScreen->clearRequest();              // ✅ Clear request
     }
   }
-
-  // Optional: screen-specific overrides
-  // if (current == ScreenType::GameModeList) {
-  //   handleGameModeList();  // Custom logic layered on top
-  // }
-
-  // Add other screen-specific handlers here
 }
 
 // void ScreenController::handleGameModeList() {

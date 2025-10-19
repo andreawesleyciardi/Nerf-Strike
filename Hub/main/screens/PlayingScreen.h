@@ -37,6 +37,10 @@ public:
     screenRenderer.requestRefresh();
   }
 
+  void onExit() override {
+    timeDisplay.clear();
+  }
+
   void render() override {
     display.clear();
     if (!countdownStarted) {
@@ -55,22 +59,22 @@ public:
       display.showLine(1, "progress...", "center");
     }
   }
-
+  
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
     if (left.wasPressed()) {
       Serial.print(F("left.wasPressed() -> "));
       if (sessionManager.getStatus() == GameSessionStatus::Ended) {
-        Serial.println(F("GameSessionStatus::Ended -> Goind to Home"));
-        request = ScreenRequest::to(ScreenType::Home);                                                      // INVESTIGATE WHY DOESN'T GO TO HOME
-      }
-      else {
-        Serial.println(F("GameSessionStatus::Ended -> Goind to Confirmation"));
+        Serial.println(F("GameSessionStatus::Ended -> Going to Home"));
+        sessionManager.communicateStatus();
+        request = ScreenRequest::to(ScreenType::Home);
+      } else {
+        Serial.println(F("GameSessionStatus::Playing -> Going to Confirmation"));
         request = ScreenRequest::to(ScreenType::Confirmation);
       }
     }
     if (encoder.wasPressed()) {
       GameSessionStatus currentStatus = sessionManager.getStatus();
-      if (currentStatus != GameSessionStatus::Ended) {
+      if (currentStatus == GameSessionStatus::Playing || currentStatus == GameSessionStatus::Paused) {
         // Toggle pause/play
         if (currentStatus == GameSessionStatus::Playing) {
           sessionManager.setStatus(GameSessionStatus::Paused, true);
@@ -81,6 +85,7 @@ public:
       }
     }
     if (right.wasPressed()) {
+      sessionManager.restart();
       request = ScreenRequest::to(ScreenType::Playing);
     }
   }
