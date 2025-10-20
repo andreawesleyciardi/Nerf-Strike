@@ -32,10 +32,12 @@ public:
   void render() override {
     display.clear();
     display.showLine(0, "Choose the number of", "center");
-    display.showLine(1, "Players / Teams:", "center");
+    display.showLine(1, "Players or Teams:", "center");
+    uint8_t maxEntities = registry.getPairedTargetCount();
+    String maxEntitiesFormatted = maxEntities < 10 ? "0" + String(maxEntities) : String(maxEntities);
     uint8_t count = sessionManager.getEntityCount();
-    String formatted = count < 10 ? "0" + String(count) : String(count);
-    display.showLine(2, formatted, "center");
+    String countFormatted = count < 10 ? "0" + String(count) : String(count);
+    display.showLine(2, countFormatted + " / " + maxEntitiesFormatted, "center");
   }
 
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
@@ -46,7 +48,7 @@ public:
       Serial.println("encoder has changed");
       int delta = encoder.getDelta();  // +1 or -1 depending on rotation
       uint8_t current = sessionManager.getEntityCount();
-      uint8_t maxEntities = registry.getPairedTargetCount();  // You need this method
+      uint8_t maxEntities = registry.getPairedTargetCount();
       uint8_t updated = constrain(current + delta, 1, maxEntities);
       Serial.print("updated value: ");
       Serial.println(updated);

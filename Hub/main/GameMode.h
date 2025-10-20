@@ -19,10 +19,34 @@ struct ModeName {
   static constexpr const char* CrazyTargets   = "Crazy Targets";
 };
 
+// struct ModeDescription {
+//   String singlePlayerText[2];
+//   String multiPlayerText[2];
+
+//   ModeDescription() {
+//     singlePlayerText[0] = "";
+//     singlePlayerText[1] = "";
+//     multiPlayerText[0] = "";
+//     multiPlayerText[1] = "";
+//   }
+
+//   ModeDescription(const String singleText[2], const String multiText[2]) {
+//     singlePlayerText[0] = singleText[0];
+//     singlePlayerText[1] = singleText[1];
+//     multiPlayerText[0] = multiText[0];
+//     multiPlayerText[1] = multiText[1];
+//   }
+
+//   const String* getDescriptionLines(uint8_t entityCount) const {
+//     return entityCount > 1 ? multiPlayerText : singlePlayerText;
+//   }
+// };
+
 struct ModeDescription {
   String singlePlayerText[2];
   String multiPlayerText[2];
 
+  // Default constructor
   ModeDescription() {
     singlePlayerText[0] = "";
     singlePlayerText[1] = "";
@@ -30,17 +54,39 @@ struct ModeDescription {
     multiPlayerText[1] = "";
   }
 
+  // Constructor from two arrays of two strings each
   ModeDescription(const String singleText[2], const String multiText[2]) {
-    singlePlayerText[0] = singleText[0];
-    singlePlayerText[1] = singleText[1];
-    multiPlayerText[0] = multiText[0];
-    multiPlayerText[1] = multiText[1];
+    for (uint8_t i = 0; i < 2; ++i) {
+      singlePlayerText[i] = singleText[i];
+      multiPlayerText[i] = multiText[i];
+    }
   }
 
+  // Copy constructor
+  ModeDescription(const ModeDescription& other) {
+    for (uint8_t i = 0; i < 2; ++i) {
+      singlePlayerText[i] = other.singlePlayerText[i];
+      multiPlayerText[i] = other.multiPlayerText[i];
+    }
+  }
+
+  // Assignment operator
+  ModeDescription& operator=(const ModeDescription& other) {
+    if (this != &other) {
+      for (uint8_t i = 0; i < 2; ++i) {
+        singlePlayerText[i] = other.singlePlayerText[i];
+        multiPlayerText[i] = other.multiPlayerText[i];
+      }
+    }
+    return *this;
+  }
+
+  // Accessor based on entity count
   const String* getDescriptionLines(uint8_t entityCount) const {
-    return entityCount > 1 ? multiPlayerText : singlePlayerText;
+    return (entityCount > 1) ? multiPlayerText : singlePlayerText;
   }
 };
+
 
 #define MAX_SETTINGS 2
 

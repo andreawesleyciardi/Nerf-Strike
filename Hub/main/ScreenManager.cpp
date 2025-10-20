@@ -48,11 +48,11 @@ void ScreenManager::replace(ScreenType screen) {
   }
 
   activeScreen = screen;
-  updateContext(screen);
 
   Screen* active = getActive();
   if (active) {
-    active->onEnter();  // 🚪 Initialize new screen
+    active->onEnter();         // 🚪 Initialize new screen
+    updateContext(screen);     // ✅ Now safe to query labels and encoder mode
   }
 }
 
@@ -68,18 +68,18 @@ EncoderMode ScreenManager::getEncoderMode() const {
   return encoderMode;
 }
 
-ButtonLabels ScreenManager::getButtonLabels() const {
-  return labels;
-}
+// ButtonLabels ScreenManager::getButtonLabels() const {
+//   return labels;
+// }
 
 void ScreenManager::updateContext(ScreenType screen) {
   Screen* active = getActive();
   if (active) {
     encoderMode = active->getEncoderMode();
-    labels = active->getButtonLabels();
+    // labels = active->getButtonLabels();
   } else {
     encoderMode = EncoderMode::None;
-    labels = {"", "", ""};
+    // labels = {"", "", ""};
   }
 }
 

@@ -40,7 +40,7 @@ void ScreenRenderer::render() {
   screen->render();
 
   // 🎯 Button labels
-  ButtonLabels labels = manager.getButtonLabels();
+  ButtonLabels labels = screen->getButtonLabels();
   display.showButtonLabels(labels);
 
   // 🎛 Encoder hint
@@ -50,10 +50,10 @@ void ScreenRenderer::render() {
   }
 
   // 🧪 Debug trace (optional)
-  Serial.print(F("Rendered screen: "));
-  Serial.println((int)currentScreen);
-  Serial.print(F("Hash: "));
-  Serial.println(currentHash);
+  // Serial.print(F("Rendered screen: "));
+  // Serial.println((int)currentScreen);
+  // Serial.print(F("Hash: "));
+  // Serial.println(currentHash);
 }
 
 void ScreenRenderer::requestRefresh() {

@@ -5,7 +5,7 @@
 #include "LcdDisplay.h"
 #include "ScreenTypes.h"
 #include "EncoderMode.h"
-#include "ButtonLabels.h"
+// #include "ButtonLabels.h"
 #include "HubStateManager.h"
 #include "GameModeRegistry.h"
 #include "PairingRegistry.h"
@@ -24,7 +24,7 @@ public:
   ScreenType current() const;
   Screen* getActive() const;
   EncoderMode getEncoderMode() const;
-  ButtonLabels getButtonLabels() const;
+  // ButtonLabels getButtonLabels() const;
 
 private:
   void updateContext(ScreenType screen);
@@ -42,7 +42,7 @@ private:
   ScreenType activeScreen = ScreenType::Splash;
 
   EncoderMode encoderMode = EncoderMode::None;
-  ButtonLabels labels = {"", "", ""};
+  // ButtonLabels labels = {"", "", ""};
 };
 
 #endif
