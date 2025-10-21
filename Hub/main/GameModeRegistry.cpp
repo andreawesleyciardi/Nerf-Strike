@@ -59,8 +59,8 @@ GameModeRegistry::GameModeRegistry() {
     );
 
   // LitTarget
-    String singleLitTargetDescription[] = {"Hit the lighted", "target quickly."};
-    String multiLitTargetDescription[]  = {"", ""};
+    String singleLitTargetDescription[] = {"Hit the lighted", "target quick."};
+    String multiLitTargetDescription[]  = {"Hit the lighted", "target quickly."};
     ModeSetting LitTargetsSettings[] = {
       ModeSetting("Time limit (s)", 5, 1, 20)
     };
@@ -99,18 +99,18 @@ GameModeRegistry::GameModeRegistry() {
     );
 
   // CrazyTargets
-    String singleCrazyTargetsDescription[] = {"", ""};
-    String multiCrazyTargetsDescription[]  = {"Targets can randomly", "change color."};
-    ModeSetting crazyTargetsSettings[] = {
-      ModeSetting("Hits to reach", 5, 1, 50)
-    };
-    modes[6] = GameMode(
-      ModeName::CrazyTargets,
-      ModeType::MULTI,
-      ModeDescription(singleCrazyTargetsDescription, multiCrazyTargetsDescription),
-      crazyTargetsSettings,
-      1
-    );
+    // String singleCrazyTargetsDescription[] = {"", ""};
+    // String multiCrazyTargetsDescription[]  = {"Targets can randomly", "change color."};
+    // ModeSetting crazyTargetsSettings[] = {
+    //   ModeSetting("Hits to reach", 5, 1, 50)
+    // };
+    // modes[6] = GameMode(
+    //   ModeName::CrazyTargets,
+    //   ModeType::MULTI,
+    //   ModeDescription(singleCrazyTargetsDescription, multiCrazyTargetsDescription),
+    //   crazyTargetsSettings,
+    //   1
+    // );
 }
 
 const GameMode& GameModeRegistry::getMode(uint8_t index) const {

@@ -99,8 +99,8 @@ int GameLogic::calculateScore(String gameModeName, int currentScore) {
     gameModeName.equals(ModeName::Timer) ||
     gameModeName.equals(ModeName::TimeForShots) ||
     gameModeName.equals(ModeName::LitTarget) ||
-    gameModeName.equals(ModeName::Battle) ||
-    gameModeName.equals(ModeName::CrazyTargets)
+    gameModeName.equals(ModeName::Battle)
+    // || gameModeName.equals(ModeName::CrazyTargets)
   ) {
     return currentScore + 1;
   }
@@ -129,9 +129,8 @@ ScoreStatus GameLogic::evaluateScoreStatus(String gameModeName, const GameMode& 
   else if (gameModeName.equals(ModeName::Timer)) {
     // Timer mode logic
   }
-
-  else if (gameModeName.equals(ModeName::CrazyTargets)) {
-    // Crazy targets mode logic
-  }
+  // else if (gameModeName.equals(ModeName::CrazyTargets)) {
+  //   // Crazy targets mode logic
+  // }
   return ScoreStatus::OnGoing;
 }

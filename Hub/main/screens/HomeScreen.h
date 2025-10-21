@@ -50,14 +50,22 @@ public:
     if (left.wasPressed()) {
       request = ScreenRequest::to(ScreenType::Settings);
     }
+
     if (encoder.wasPressed()) {
       Serial.println(F("encoder.wasPressed"));
       request = ScreenRequest::to(ScreenType::Playing);
     }
+    
     if (right.wasPressed()) {
-      Serial.print(F("right.wasPressed ->GameSessionStatus: "));
-      Serial.println(GameSessionStatusToString(sessionManager.getStatus()));
-      request = ScreenRequest::to(ScreenType::Entities);
+      // Serial.print(F("right.wasPressed ->GameSessionStatus: "));
+      // Serial.println(GameSessionStatusToString(sessionManager.getStatus()));
+      uint8_t maxEntities = registry.getPairedTargetCount();
+      if (maxEntities > 0) {
+        request = ScreenRequest::to(ScreenType::Entities);
+      }
+      else {
+        request = ScreenRequest::to(ScreenType::Pairing);
+      }
     }
   }
 
@@ -66,7 +74,8 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Help", "<>", "Start"};
+    uint8_t maxEntities = registry.getPairedTargetCount();
+    return {"Help", "<>", maxEntities > 0 ? "Start" : "Pair"};
   }
 
   ScreenType getType() const override {

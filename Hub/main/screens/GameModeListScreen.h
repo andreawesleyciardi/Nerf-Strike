@@ -46,14 +46,6 @@ public:
         GameMode copy(mode);
         filteredModes[filteredModesCount] = copy;
         filteredModesCount = filteredModesCount + 1;
-        if (filteredModesCount == 6) {
-          Serial.print(F("XXX mode.getName(): "));
-          Serial.println(copy.getName());
-          Serial.print(F("XXX copy.getName(): "));
-          Serial.println(mode.getName());
-          Serial.print(F("XXX filteredModes[5].getName(): "));
-          Serial.println(filteredModes[5].getName());
-        }
         // Serial.print(F("Valid Game Mode: "));
         // Serial.println(mode.getName());
       // }
@@ -89,6 +81,7 @@ public:
     if (left.wasPressed()) {
       request = ScreenRequest::to(ScreenType::Home);
     }
+
     if (encoder.hasChanged()) {
       int delta = encoder.getDirection();  // +1 or -1 depending on rotation
       Serial.print(F("delta: "));
@@ -128,6 +121,7 @@ public:
       // }
       // screenRenderer.requestRefresh();
     }
+    
     if (right.wasPressed() && filteredModesCount > 0) {
       const GameMode& selectedMode = filteredModes[currentIndex];
       sessionManager.setSelectedGameMode(selectedMode);

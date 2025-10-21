@@ -16,7 +16,7 @@ struct ModeName {
   static constexpr const char* TimeForShots   = "Time For Shots";
   static constexpr const char* LitTarget      = "Lit Target";
   static constexpr const char* Battle         = "Battle";
-  static constexpr const char* CrazyTargets   = "Crazy Targets";
+  // static constexpr const char* CrazyTargets   = "Crazy Targets";
 };
 
 // struct ModeDescription {

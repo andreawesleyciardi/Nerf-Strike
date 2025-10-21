@@ -13,7 +13,7 @@ public:
 
   const GameMode& getModeByName(const String& name) const;
 
-  static const uint8_t MAX_MODES = 7;
+  static const uint8_t MAX_MODES = 6;
 
 private:
   GameMode modes[MAX_MODES];
