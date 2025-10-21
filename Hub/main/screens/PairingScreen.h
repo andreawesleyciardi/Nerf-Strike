@@ -31,21 +31,27 @@ public:
 
   void render() override {
     display.clear();
-    display.showLine(1, "Paired Targets:", "center");
+    uint8_t targetsCount = registry.getPairedTargetCount();
+    String targetsCountFormatted = targetsCount < 10 ? "0" + String(targetsCount) : String(targetsCount);
+    display.showLine(1, "Paired Targets (" + targetsCountFormatted + "):", "center");
 
-    uint8_t count = registry.getPairedTargetCount();
     const uint8_t* ids = registry.getAllPairedTargetIds();
 
-    if (count == 0) {
-      String dots = String(".").repeat((millis() / 500) % 4);
+    if (targetsCount == 0) {
+      // Manual dot animation (Arduino String has no .repeat())
+      uint8_t dotCount = (millis() / 500) % 4;
+      String dots = "";
+      for (uint8_t i = 0; i < dotCount; ++i) {
+        dots += ".";
+      }
       display.showLine(2, "Searching" + dots, "center");
       display.showLine(3, "", "center");
     } else {
-      if (scrollIndex >= count) scrollIndex = count - 1;
+      if (scrollIndex >= targetsCount) scrollIndex = targetsCount - 1;
 
       for (uint8_t i = 0; i < 2; ++i) {
         uint8_t idx = scrollIndex + i;
-        if (idx < count) {
+        if (idx < targetsCount) {
           String label = "Target " + String(ids[idx]);
           display.showLine(2 + i, label);
         } else {
@@ -60,10 +66,10 @@ public:
       request = ScreenRequest::to(ScreenType::Home);
     }
 
-    uint8_t count = registry.getPairedTargetCount();
-    if (encoder.hasChanged() && count > 2) {
+    uint8_t targetsCount = registry.getPairedTargetCount();
+    if (encoder.hasChanged() && targetsCount > 2) {
       int delta = encoder.getDelta();
-      scrollIndex = constrain(scrollIndex + delta, 0, count - 2);
+      scrollIndex = constrain(scrollIndex + delta, 0, targetsCount - 2);
       screenRenderer.requestRefresh();
     }
 
