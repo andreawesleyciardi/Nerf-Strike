@@ -28,7 +28,7 @@ void GameSessionManager::assignEntitiesBalanced(bool useTeams) {
     EntityInfo newEntity;
     newEntity.entityId = entityIndex;
     newEntity.type = useTeams ? EntityType::Team : EntityType::Player;
-    newEntity.color = getColorForIndex(entityIndex);
+    newEntity.setColor(entityIndex);
 
     for (uint8_t j = 0; j < targetsPerEntity && newEntity.targetCount < MAX_TARGETS_PER_ENTITY; ++j) {
       if (targetIndex < totalTargets) {

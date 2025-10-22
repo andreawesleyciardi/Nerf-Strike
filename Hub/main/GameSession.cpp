@@ -13,7 +13,7 @@ GameSession createDefaultSession(PairingRegistry& registry) {
   EntityInfo newEntity;
   newEntity.entityId = 0;
   newEntity.type = EntityType::Player;
-  newEntity.color = getColorForIndex(0);
+  newEntity.setColor(0);
 
   // Assignes all the targets to the only entity
     uint8_t totalPaired = registry.getPairedTargetCount();

@@ -10,6 +10,7 @@ public:
   PairingRegistry();
 
   uint8_t assignID(uint32_t token);
+  uint8_t assignColor(uint8_t index);
   void storePipeForID(uint8_t id, const uint8_t* pipe);
   const uint8_t* getPipeForID(uint8_t id);
   uint8_t getIDAt(uint8_t index);
@@ -19,18 +20,19 @@ public:
   const uint8_t* getAllPairedTargetIds() const;
 
 private:
-  struct Entry {
+  struct Target {
     uint8_t id;
     uint32_t token;
     uint8_t pipe[6];
+    uint8_t colorIndex = 0xFF;
     bool active;
   };
 
-  Entry entries[MAX_TARGETS];
+  Target targets[MAX_TARGETS];
   uint8_t nextID;
 
-  int findEntryByToken(uint32_t token);
-  int findEntryByID(uint8_t id);
+  int findTargetByToken(uint32_t token);
+  int findTargetByID(uint8_t id);
 };
 
 #endif

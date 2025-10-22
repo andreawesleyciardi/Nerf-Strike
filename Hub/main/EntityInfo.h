@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "Color.h"
+#include "ColorUtils.h"
 
 #define MAX_TARGETS_PER_ENTITY 10
 
@@ -46,6 +47,11 @@ struct EntityInfo {
 
   uint8_t getTargetCount() const {
     return targetCount;
+  }
+
+  void setColor(uint8_t index) {
+    uint8_t i = index % (sizeof(EntityColorIndexesPalette) / sizeof(uint8_t));
+    color = ColorPalette::getByIndex(EntityColorIndexesPalette[i]);
   }
 };
 

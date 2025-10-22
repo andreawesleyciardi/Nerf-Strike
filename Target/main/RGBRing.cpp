@@ -1,3 +1,6 @@
+#include <Color.h>
+#include <ColorPalette.h>
+
 #include "RGBRing.h"
 
 RGBRing::RGBRing(uint8_t pin, uint16_t numPixels)
@@ -14,7 +17,7 @@ void RGBRing::off() {
 }
 
 void RGBRing::fill(String colorName) {
-  Color c = getColorByName(colorName);
+  Color c = ColorPalette::getByName(colorName);
   for (uint16_t i = 0; i < pixelCount; i++) {
     ring.setPixelColor(i, ring.Color(c.red, c.green, c.blue));
   }
@@ -31,7 +34,7 @@ void RGBRing::blink(String colorName, uint8_t times, uint16_t delayMs) {
 }
 
 void RGBRing::pulse(String colorName, uint8_t steps, uint16_t delayMs) {
-  Color c = getColorByName(colorName);
+  Color c = ColorPalette::getByName(colorName);
   for (uint8_t i = 0; i <= steps; i++) {
     uint8_t r = (c.red * i) / steps;
     uint8_t g = (c.green * i) / steps;
@@ -55,7 +58,7 @@ void RGBRing::pulse(String colorName, uint8_t steps, uint16_t delayMs) {
 }
 
 void RGBRing::chase(String colorName, uint8_t speed, bool holdLast) {
-  Color c = getColorByName(colorName);
+  Color c = ColorPalette::getByName(colorName);
   for (uint16_t i = 0; i < pixelCount; i++) {
     ring.clear();
     ring.setPixelColor(i, ring.Color(c.red, c.green, c.blue));

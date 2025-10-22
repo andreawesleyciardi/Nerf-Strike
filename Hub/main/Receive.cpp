@@ -24,6 +24,7 @@ const uint8_t Receive::pairingRequest(const byte* buffer) {
   }
 
   const uint8_t assignedID = registry.assignID(token);
+  // To add assignement of the color
   return assignedID;
 }
 
