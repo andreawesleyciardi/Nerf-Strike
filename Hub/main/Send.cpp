@@ -27,10 +27,11 @@ const bool Send::toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packe
   return true;
 }
 
-void Send::pairingResponse(uint8_t assignedID) {
+void Send::pairingResponse(const TargetInfo& target) {
   PairingResponsePacket response = {
     OPCODE_PAIRING_RESPONSE,
-    assignedID
+    target.id,
+    target.colorIndex
   };
 
   Serial.print(F("📡 Hub sending pairing response on pairing pipe: 0x"));
@@ -50,7 +51,9 @@ void Send::pairingResponse(uint8_t assignedID) {
   }
 
   Serial.print(F("✅ Sent pairing response with ID: "));
-  Serial.println(assignedID);
+  Serial.print(target.id);
+  Serial.print(F(" and color index: "));
+  Serial.println(target.colorIndex);
 }
 
 void Send::verificationResponse(uint8_t id) {
@@ -60,9 +63,9 @@ void Send::verificationResponse(uint8_t id) {
   };
 
   const uint8_t* pipe = registry.getPipeForID(id);
-  Serial.print("📤 Trying to send verification response to target ID ");
+  Serial.print(F("📤 Trying to send verification response to target ID "));
   Serial.print(id);
-  Serial.print(" via pipe ");
+  Serial.print(F(" via pipe "));
   Serial.println((char*)pipe);
   bool success = toTargetPipe(id, pipe, &response, sizeof(response));
 
@@ -99,7 +102,12 @@ void Send::heartbeatAll(PairingRegistry& registry) {
   };
 
   for (uint8_t i = 0; i < MAX_TARGETS; i++) {
+    // Serial.print(F("Index: "));
+    // Serial.print(i);
+    
     uint8_t id = registry.getIDAt(i);
+    // Serial.print(F(" - id: "));
+    // Serial.println(id);
     const uint8_t* pipe = registry.getPipeForID(id);
     if (id != 0xFF && pipe) {
       toTargetPipe(id, pipe, &packet, sizeof(packet));

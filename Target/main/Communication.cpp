@@ -6,19 +6,20 @@
 Communication::Communication(Receive& receive, Send& send, PairingRegistry& registry, RGBLed& statusRgbLed)
   : receive(receive), send(send), registry(registry), statusRgbLed(statusRgbLed) {}
 
-const uint8_t Communication::verifyAssignedID() {
-  uint8_t assignedID = registry.getAssignedID();
-  if (assignedID == 0xFF) {
-    Serial.println(F("⚠️ Cannot verify — no assigned ID."));
+TargetInfo Communication::verifyAssignedTarget() {
+  TargetInfo target = registry.getTargetInfo();
+  if (!target.isValid()) {
+    Serial.println(F("⚠️ Cannot verify — no valid assigned target."));
     showStatus(statusRgbLed, STATUS_ERROR);
   }
-  return assignedID;
+  return target;
 }
 
-void Communication::pairing() {
+const bool Communication::activePairing() {
   showStatus(statusRgbLed, STATUS_PAIRING);
   uint32_t token = registry.loadTokenFromEEPROM();
 
+  bool result = false;
   if (token == 0xFFFFFFFF || token == 0) {
     token = random(100000, 999999);
     registry.saveTokenToEEPROM(token);
@@ -35,36 +36,48 @@ void Communication::pairing() {
     Serial.print(attempt);
     Serial.println(F(" to pair..."));
 
-    send.pairingRequest(token);
-
-    const uint8_t assignedID = receive.pairingResponse();
-    if (assignedID != 0xFF) {
-      registry.setAssignedID(assignedID);
-      // wireless.switchToTargetPipe(assignedID);
-      Serial.print(F("✅ Paired successfully with ID: "));
-      Serial.println(assignedID);
-      return;
+    if (send.pairingRequest(token)) {
+      Serial.println(F("✅ Pairing request sent."));
+      TargetInfo target = receive.pairingResponse();
+      if (target.isValid()) {
+        target.token = token;
+        registry.setTargetInfo(target);
+        Serial.print(F("✅ Paired successfully with ID: "));
+        Serial.print(target.id);
+        Serial.print(F(" and color index: "));
+        Serial.println(target.colorIndex);
+        return true;
+      }
+      else {
+        Serial.println(F("❌ No valid pairing response received."));
+      }
+    }
+    else {
+      Serial.println(F("❌ Failed to send pairing request."));
     }
 
     delay(500);
   }
 
   Serial.println(F("❌ Pairing failed after multiple attempts."));
-  registry.setAssignedID(0xFF);
+  TargetInfo failed;
+  failed.id = 0xFF;
+  registry.setTargetInfo(failed);
+  return result;
 }
 
 const bool Communication::verification() {
-  uint8_t assignedID = verifyAssignedID();
-  if (assignedID != 0xFF) {
-    if (!send.verificationRequest(assignedID)) {
+  TargetInfo target = verifyAssignedTarget();
+  if (target.isValid()) {
+    if (!send.verificationRequest(target.id)) {
       showStatus(statusRgbLed, STATUS_ERROR);
       return false;
     }
 
-    if (!receive.verificationResponse(assignedID)) {
+    if (!receive.verificationResponse(target.id)) {
       Serial.println(F("❌ Verification failed. Re-pairing..."));
       showStatus(statusRgbLed, STATUS_ERROR);
-      pairing();
+      activePairing();
       return false;
     }
 
@@ -76,9 +89,9 @@ const bool Communication::verification() {
 }
 
 HitResponsePacket Communication::hit() {
-  uint8_t assignedID = verifyAssignedID();
-  if (assignedID != 0xFF) {
-    if (!send.hitRequest(assignedID)) {
+  TargetInfo target = verifyAssignedTarget();
+  if (target.isValid()) {
+    if (!send.hitRequest(target.id)) {
       return { OPCODE_SCORE_UPDATE, 0xFF, ScoreStatus::Error };
     }
     return receive.hitResponse();
@@ -89,4 +102,3 @@ HitResponsePacket Communication::hit() {
 const String Communication::entityColor(const byte* buffer) {
   return receive.entityColor(buffer);
 }
-

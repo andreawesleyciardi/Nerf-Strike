@@ -31,7 +31,7 @@ void WirelessTarget::setup() {
   radio.openReadingPipe(1, pairingPipe);
   radio.startListening();
 
-  Serial.println(F("📡 Radio listening on pairing pipe."));
+  Serial.println(F("📡 Radio listening on active pairing pipe."));
 }
 
 // void WirelessTarget::sendVerificationRequest(uint8_t id) {

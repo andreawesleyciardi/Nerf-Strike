@@ -6,6 +6,8 @@
 #include <TargetType.h>
 #include <Score.h>
 #include <Statuses.h>
+#include <TargetInfo.h>
+
 #include "PairingRegistry.h"
 
 class Send {
@@ -14,7 +16,8 @@ public:
 
   const bool toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length);
 
-  void pairingResponse(uint8_t assignedID);
+  // void pairingResponse(uint8_t assignedID);
+  void pairingResponse(const TargetInfo& target);
   void verificationResponse(uint8_t id);
   
   void blinkAll(PairingRegistry& registry);

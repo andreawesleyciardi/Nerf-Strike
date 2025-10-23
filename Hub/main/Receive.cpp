@@ -5,7 +5,8 @@
 Receive::Receive(TargetTypeManager& targetTypeManager, PairingRegistry& registry)
   : targetTypeManager(targetTypeManager), registry(registry) {}
 
-const uint8_t Receive::pairingRequest(const byte* buffer) {
+
+TargetInfo Receive::pairingRequest(const byte* buffer) {
   const PairingRequestPacket* request = reinterpret_cast<const PairingRequestPacket*>(buffer);
   const uint32_t token = request->token;
   const TargetType incomingType = request->type;
@@ -20,12 +21,20 @@ const uint8_t Receive::pairingRequest(const byte* buffer) {
     Serial.print(targetTypeToString(targetTypeManager.getAllowedType()));
     Serial.print(F(", but got "));
     Serial.println(targetTypeToString(incomingType));
-    return 0xFF;
+    return TargetInfo();  // Return default (invalid)
   }
 
-  const uint8_t assignedID = registry.assignID(token);
-  // To add assignement of the color
-  return assignedID;
+  TargetInfo target = registry.setTarget(token);  // ✅ Assign ID and color
+  if (!target.isValid()) {
+    Serial.println(F("❌ Failed to assign target info."));
+  } else {
+    Serial.print(F("✅ Assigned ID: "));
+    Serial.print(target.id);
+    Serial.print(F(" with color index: "));
+    Serial.println(target.colorIndex);
+  }
+
+  return target;
 }
 
 const uint8_t* Receive::verificationRequest(const byte* buffer) {

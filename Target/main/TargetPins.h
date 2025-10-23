@@ -16,6 +16,8 @@ extern SevenSegmentDisplay scoreDisplay;
 // 🌈 RGB LED Instances
 extern RGBLed statusRgbLed;
 extern RGBLed batteryRgbLed;
+extern RGBLed targetRgbLed;
+extern RGBLed entityRgbLed;
 extern RGBRing rgbRing;
 
 // Sensor Instance

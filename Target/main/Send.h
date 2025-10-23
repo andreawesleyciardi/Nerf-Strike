@@ -13,7 +13,7 @@ public:
   
   const bool toHub(const byte* data, uint8_t length, bool onTargetPipe = false);
 
-  void pairingRequest(uint32_t token);
+  const bool pairingRequest(uint32_t token);
   const bool verificationRequest(uint8_t assignedID);
 
   const bool hitRequest(uint8_t targetId);

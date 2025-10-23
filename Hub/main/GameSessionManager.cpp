@@ -34,7 +34,6 @@ void GameSessionManager::assignEntitiesBalanced(bool useTeams) {
       if (targetIndex < totalTargets) {
         uint8_t targetId = pairedTargetIds[targetIndex++];
         newEntity.addTarget(targetId);
-        registry.setActive(targetId, true);
       }
     }
 
@@ -43,7 +42,7 @@ void GameSessionManager::assignEntitiesBalanced(bool useTeams) {
 
   // Deactivate leftover targets
   for (; targetIndex < totalTargets; ++targetIndex) {
-    registry.setActive(pairedTargetIds[targetIndex], false);
+    // registry.setActive(pairedTargetIds[targetIndex], false);
     // TODO: Send OPCODE_TARGET_DISABLE to these targets
   }
 }

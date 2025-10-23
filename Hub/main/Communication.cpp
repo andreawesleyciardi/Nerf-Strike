@@ -2,6 +2,7 @@
 #include <Protocol.h>
 #include <OPCodes.h>
 #include <DisplayFeedback.h>
+#include <TargetInfo.h>
 
 Communication::Communication(Receive& receive, Send& send, PairingRegistry& registry, GameLogic& gameLogic, RGBLed& statusRgbLed, GameSessionManager& sessionManager)
   : receive(receive), send(send), registry(registry), gameLogic(gameLogic), statusRgbLed(statusRgbLed), sessionManager(sessionManager) {}
@@ -16,22 +17,49 @@ const uint8_t* Communication::verifyPipeForID(uint8_t targetId) {
   return pipe;
 }
 
+// void Communication::pairing(const byte* buffer) {
+//   const uint8_t assignedID = receive.pairingRequest(buffer);
+//   if (assignedID == 0xFF) {
+//     Serial.println(F("❌ Failed to assign ID."));
+//     showStatus(statusRgbLed, STATUS_ERROR, 2);
+//     return;
+//   }
+
+//   send.pairingResponse(assignedID);
+
+//   char pipeName[6];
+//   sprintf(pipeName, "TGT%d", assignedID);
+//   registry.storePipeForID(assignedID, reinterpret_cast<uint8_t*>(pipeName));
+
+//   Serial.print(F("📡 Stored pipe for ID "));
+//   Serial.print(assignedID);
+//   Serial.print(F(": "));
+//   Serial.println(pipeName);
+
+//   showStatus(statusRgbLed, STATUS_PAIRING, 2);
+//   delay(100);
+// }
 void Communication::pairing(const byte* buffer) {
-  const uint8_t assignedID = receive.pairingRequest(buffer);
-  if (assignedID == 0xFF) {
+  TargetInfo target = receive.pairingRequest(buffer);
+  if (!target.isValid()) {
     Serial.println(F("❌ Failed to assign ID."));
     showStatus(statusRgbLed, STATUS_ERROR, 2);
     return;
   }
 
-  send.pairingResponse(assignedID);
-
+  // Assign pipe name and copy into target.pipe
   char pipeName[6];
-  sprintf(pipeName, "TGT%d", assignedID);
-  registry.storePipeForID(assignedID, reinterpret_cast<uint8_t*>(pipeName));
+  sprintf(pipeName, "TGT%d", target.id);
+  memcpy(target.pipe, reinterpret_cast<uint8_t*>(pipeName), 6);  // ✅ Fill pipe field
+
+  // Store full target info (pipe + color)
+  registry.storeTargetInfo(target);
+
+  // Send pairing response with full TargetInfo
+  send.pairingResponse(target);
 
   Serial.print(F("📡 Stored pipe for ID "));
-  Serial.print(assignedID);
+  Serial.print(target.id);
   Serial.print(F(": "));
   Serial.println(pipeName);
 

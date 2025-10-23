@@ -14,6 +14,8 @@ Button batteryButton(batteryButtonPin);
 // 🌈 RGB LED Instances
 RGBLed statusRgbLed(statusRedLedPin, statusGreenLedPin, statusBlueLedPin);
 RGBLed batteryRgbLed(batteryRedLedPin, batteryGreenLedPin, batteryBlueLedPin);
+RGBLed targetRgbLed(statusRedLedPin, statusGreenLedPin, statusBlueLedPin);
+RGBLed entityRgbLed(batteryRedLedPin, batteryGreenLedPin, batteryBlueLedPin);
 RGBRing rgbRing(ledRingPin, 24);
 
 // Sensor Instance
@@ -37,6 +39,8 @@ void initializeTargetPins() {
   // RGB LEDs
   statusRgbLed.setup();
   batteryRgbLed.setup();
+  targetRgbLed.setup();
+  entityRgbLed.setup();
   rgbRing.setup();
 
   // Buzzer

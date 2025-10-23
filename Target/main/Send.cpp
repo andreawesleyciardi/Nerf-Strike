@@ -30,23 +30,17 @@ const bool Send::toHub(const byte* data, uint8_t length, bool onTargetPipe) {
   return true;
 }
 
-void Send::pairingRequest(uint32_t token) {
+const bool Send::pairingRequest(uint32_t token) {
   PairingRequestPacket request = {
     OPCODE_PAIRING_REQUEST,
     token,
     targetType  // from TargetConfig.h
   };
 
-  Serial.print(F("📨 Sending pairing request with token: "));
+  Serial.print(F("📨 Sending active pairing request with token: "));
   Serial.println(token);
 
-  bool success = toHub(reinterpret_cast<const byte*>(&request), sizeof(request), false);
-
-  if (!success) {
-    Serial.println(F("❌ Failed to send pairing request."));
-    return;
-  }
-  Serial.println(F("✅ Pairing request sent."));
+  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), false);
 }
 
 const bool Send::verificationRequest(uint8_t id) {

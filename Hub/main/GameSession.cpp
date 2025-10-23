@@ -20,7 +20,6 @@ GameSession createDefaultSession(PairingRegistry& registry) {
     const uint8_t* pairedTargetIds = registry.getAllPairedTargetIds();
     for (uint8_t i = 0; i < totalPaired && newEntity.targetCount < MAX_TARGETS_PER_ENTITY; ++i) {
       newEntity.addTarget(pairedTargetIds[i]);
-      registry.setActive(pairedTargetIds[i], true);
     }
 
   newSession.entities[0] = newEntity;

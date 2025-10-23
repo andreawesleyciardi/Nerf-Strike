@@ -3,6 +3,7 @@
 #include <DisplayFeedback.h>
 #include <Score.h>
 #include <Statuses.h>
+
 #include "TargetConfig.h"
 #include "TargetPins.h"
 #include "WirelessTarget.h"
@@ -35,11 +36,14 @@ void setup() {
 
   Serial.println(F("✅ Radio initialized and chip connected."));
   Serial.println(F("Radio listening on pairing pipe."));
+  
+  Serial.println(F("✅ Starting active pairing"));
+  if (communication.activePairing()) {
+    TargetInfo info = registry.getTargetInfo();
+    targetRgbLed.blink(info.getColorName());
+  }
 
-  // registry.pair();  // Stateless pairing
-  communication.pairing();
-
-  showAssignedIDBriefly(registry.getAssignedID());
+  showAssignedIDBriefly(registry.getTargetInfo().id);
 
   Serial.println(F("Setup complete."));
 }
@@ -50,8 +54,6 @@ void loop() {
   static bool awaitingAck = false;
   static bool heartbeatLost = false;
 
-  // statusRgbLed.updatePulse();
-
   battery.autoCheck(batteryVerificationFeedback);
   if (batteryButton.wasPressed()) {
     battery.check(batteryVerificationFeedback);
@@ -60,7 +62,7 @@ void loop() {
   if (statusButton.wasPressed()) {
     Serial.println(F("🔍 Verifying connection with hub..."));
     if (communication.verification()) {
-      showAssignedIDBriefly(registry.getAssignedID());
+      showAssignedIDBriefly(registry.getTargetInfo().id);
     }
   }
 
@@ -69,11 +71,11 @@ void loop() {
     registry.resetToken();
     showStatus(statusRgbLed, STATUS_OK, 3);
     delay(500);
-    communication.pairing();
+    communication.activePairing();
     awaitingAck = false;
     lastHeartbeat = millis();
     heartbeatLost = false;
-    showAssignedIDBriefly(registry.getAssignedID());
+    showAssignedIDBriefly(registry.getTargetInfo().id);
   }
 
   if (wireless.available()) {
@@ -83,7 +85,6 @@ void loop() {
 
     switch (header->opcode) {
       case OPCODE_HEARTBEAT: {
-          // Serial.println(F("💓 Heartbeat received from hub."));                  // To restore
           lastHeartbeat = millis();
           heartbeatLost = false;
         break;
@@ -91,7 +92,7 @@ void loop() {
 
       case OPCODE_BLINK_COMMAND: {
           Serial.println(F("🔦 Blink command received."));
-          uint8_t assignedID = registry.getAssignedID();
+          uint8_t assignedID = registry.getTargetInfo().id;
           scoreDisplay.showScore(assignedID);
           showStatus(statusRgbLed, STATUS_PAIRING);
           rgbRing.chase("Blue", 30);
@@ -104,7 +105,7 @@ void loop() {
           entityColorName = communication.entityColor(buffer);
           if (entityColorName != "") {
             rgbRing.chase(entityColorName, 30);
-            statusRgbLed.on(entityColorName, true);                     // TEMPORARLY: To add an "entityRgbLed"
+            statusRgbLed.on(entityColorName, true);  // TEMPORARY: To add an "entityRgbLed"
             sessionStatus = GameSessionStatus::Setting;
             Serial.println(F("🌈 Entity color is set to: "));
             Serial.println(entityColorName);
@@ -144,7 +145,6 @@ void loop() {
                 rgbRing.chase("Red", 25);
                 rgbRing.blink("Red", 3);
               }
-              // sessionStatus = GameSessionStatus::Ended;
             }
             buzzer.beep(1);
           } else {
@@ -155,6 +155,7 @@ void loop() {
       }
 
       case OPCODE_SESSION_STATUS: {
+          // TO ADD AN ID TO THE SESSION AND THE LAST ON GOING SESSION CAN BE KEPT IN MEMORY SO IF IS LOST THE CONNECTION, ONCE FIXED CAN CHECK IF THE SESSION ON GOING IS STILL THE PREVIOUS ONE AND CAN THEN CATCH UP WHAT LOST.
           SessionStatusPacket* packet = reinterpret_cast<SessionStatusPacket*>(buffer);
           GameSessionStatus newStatus = packet->status;
           Serial.print(F("🔦 New GameSessionStatus received: "));
@@ -163,14 +164,13 @@ void loop() {
             scoreDisplay.updateScore(0, true);
           }
           if (newStatus == GameSessionStatus::Paused) {
-            statusRgbLed.startPulse(entityColorName);           // entityRgbLed
+            entityRgbLed.startPulse(entityColorName);
           }
           if (sessionStatus == GameSessionStatus::Paused && (newStatus == GameSessionStatus::Playing || newStatus == GameSessionStatus::Ended)) {
-            statusRgbLed.stopPulse();                           // entityRgbLed
-            statusRgbLed.on();                                  // entityRgbLed
+            entityRgbLed.stopPulse();
+            entityRgbLed.on();
           } else if (newStatus == GameSessionStatus::Ended || newStatus == GameSessionStatus::Setting) {
-            // sessionStatus = GameSessionStatus::Ended;
-            statusRgbLed.off();                                 // entityRgbLed
+            entityRgbLed.off();
             rgbRing.off();
           }
           sessionStatus = newStatus;
@@ -184,48 +184,46 @@ void loop() {
     }
   }
 
-  uint8_t targetId = registry.getAssignedID();
+  //   if (wireless.send HitPacket(targetId)) {
+  //     Serial.println(F("📡 Hit packet sent to hub."));
+  //     awaitingAck = false;
+  //   } else {
+  //     Serial.println(F("⚠️ No response from hub. Will retry pairing."));
+  //     awaitingAck = true;
+  //   }
+  //   lastHitTime = millis();
+  // }
+
+  // if (awaitingAck && millis() - lastHitTime > 5000) {
+  //   Serial.println(F("🔄 Signal lost after hit. Re-pairing..."));
+  //   communication.activePairing();
+  //   awaitingAck = false;
+  //   lastHeartbeat = millis();
+  //   heartbeatLost = false;
+
+  //   showAssignedIDBriefly(registry.getAssignedID());
+  // }
+
+  // if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {                  // TO CHECK HOW TO REACTIVATE
+  //   Serial.println(F("💔 No heartbeat. Re-pairing..."));
+  //   heartbeatLost = true;
+  //   showStatus(statusRgbLed, STATUS_DISCONNECTED);
+  //   communication.activePairing();
+  //   lastHeartbeat = millis();
+
+  //   showAssignedIDBriefly(registry.getAssignedID());
+  // }
+
+  uint8_t targetId = registry.getTargetInfo().id;
   if (targetId != 0xFF) {
     if (sensor.isHit()) {
       if (sessionStatus == GameSessionStatus::Playing) {
         Serial.println(F("✅ Target got hit."));
         HitResponsePacket response = communication.hit();
-      }
-      else {
+      } else {
         Serial.println(F("✅ Target got hit while not playing."));
       }
-
-      
-
-    //   if (wireless.send HitPacket(targetId)) {
-    //     Serial.println(F("📡 Hit packet sent to hub."));
-    //     awaitingAck = false;
-    //   } else {
-    //     Serial.println(F("⚠️ No response from hub. Will retry pairing."));
-    //     awaitingAck = true;
-    //   }
-    //   lastHitTime = millis();
     }
-
-    // if (awaitingAck && millis() - lastHitTime > 5000) {
-    //   Serial.println(F("🔄 Signal lost after hit. Re-pairing..."));
-    //   communication.pairing();
-    //   awaitingAck = false;
-    //   lastHeartbeat = millis();
-    //   heartbeatLost = false;
-
-    //   showAssignedIDBriefly(registry.getAssignedID());
-    // }
-
-    // if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {                  // TO CHECK HOW TO REACTIVATE
-    //   Serial.println(F("💔 No heartbeat. Re-pairing..."));
-    //   heartbeatLost = true;
-    //   showStatus(statusRgbLed, STATUS_DISCONNECTED);
-    //   communication.pairing();
-    //   lastHeartbeat = millis();
-
-    //   showAssignedIDBriefly(registry.getAssignedID());
-    // }
   }
 }
 

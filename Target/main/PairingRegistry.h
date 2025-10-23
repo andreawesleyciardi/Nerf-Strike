@@ -2,28 +2,30 @@
 #define PAIRING_REGISTRY_H
 
 #include <Arduino.h>
+#include <EEPROM.h>
+#include <TargetInfo.h>
+
 #include "WirelessTarget.h"
 
 class PairingRegistry {
 public:
   PairingRegistry(RF24& radio);
 
-  void setAssignedID(uint8_t newAssignedID);
-  uint8_t getAssignedID();
-  void setToken(uint32_t newToken);
+  void setTargetInfo(const TargetInfo& info);
+  TargetInfo getTargetInfo() const;
+
+  void setToken(uint32_t token);
   void resetToken();
 
   uint32_t loadTokenFromEEPROM();
-  void saveTokenToEEPROM(uint32_t newToken);
+  void saveTokenToEEPROM(uint32_t token);
 
   void switchToTargetPipe(uint8_t id);
-  const uint8_t* getTargetPipe();
+  const uint8_t* getTargetPipe() const;
 
 private:
   RF24& radio;
-  uint32_t token;
-  uint8_t assignedID;
-  uint8_t targetPipe[6];
+  TargetInfo target;
 };
 
 #endif
