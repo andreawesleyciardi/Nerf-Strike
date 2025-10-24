@@ -24,11 +24,11 @@ ScreenManager::ScreenManager(LcdDisplay& display, HubStateManager& hubState,
 void ScreenManager::setup() {
   destroyScreens();  // 🧹 Ensure clean state
 
-  screens[(int)ScreenType::Splash]           = new SplashScreen(display);
+  screens[(int)ScreenType::Splash]           = new SplashScreen(display, registry);
   screens[(int)ScreenType::Home]             = new HomeScreen(display, registry);
   screens[(int)ScreenType::Help]             = new HelpScreen(display);
   screens[(int)ScreenType::Settings]         = new SettingsScreen(display, hubState);
-  screens[(int)ScreenType::Pairing]          = new PairingScreen(display, registry);
+  screens[(int)ScreenType::Pairing]          = new PairingScreen(display, registry, communication);
   screens[(int)ScreenType::TargetList]       = new TargetListScreen(display, registry);
   screens[(int)ScreenType::GameModeList]     = new GameModeListScreen(display, gameModesRegistry);
   screens[(int)ScreenType::GameModeOptions]  = new GameModeOptionsScreen(display, gameModesRegistry);

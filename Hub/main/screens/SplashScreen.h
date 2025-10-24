@@ -9,11 +9,11 @@
 
 class SplashScreen : public Screen {
 public:
-  SplashScreen(LcdDisplay& display, unsigned long durationMs = 6000)
-    : display(display), duration(durationMs), startTime(0), initialized(false) {}
+  SplashScreen(LcdDisplay& display, PairingRegistry& registry, unsigned long durationMs = 6000)
+    : display(display), registry(registry), duration(durationMs), startTime(0), initialized(false) {}
 
   void render() override {
-    Serial.println(F(" dSplashScreen rendered"));
+    Serial.println(F("SplashScreen rendered"));
     if (!initialized) {
       startTime = millis();
       initialized = true;
@@ -26,7 +26,13 @@ public:
 
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
     if (millis() - startTime >= duration) {
-      request = ScreenRequest::to(ScreenType::Home);
+      uint8_t targetsCount = registry.getPairedTargetCount();
+      if (targetsCount > 0) {
+        request = ScreenRequest::to(ScreenType::Home);
+      }
+      else {
+        request = ScreenRequest::to(ScreenType::Pairing);
+      }
     }
   }
 
@@ -48,6 +54,7 @@ public:
 
 private:
   LcdDisplay& display;
+  PairingRegistry& registry;
   unsigned long duration;
   unsigned long startTime;
   bool initialized;

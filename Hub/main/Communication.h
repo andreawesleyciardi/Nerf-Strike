@@ -18,6 +18,7 @@ public:
   void verification(const byte* buffer);
   const bool hit(const byte* buffer);
   const bool entityColor(uint8_t targetId, char colorName[16]);
+  const bool showTargetColor(uint8_t targetId, bool switchOn = true);
   const bool sessionStatus(uint8_t targetId, GameSessionStatus status);
 
 private:

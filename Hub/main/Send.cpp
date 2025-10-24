@@ -153,6 +153,23 @@ const bool Send::entityColorRequest(uint8_t id, char colorName[16]) {
   return false;
 }
 
+const bool Send::showTargetColorRequest(uint8_t id, bool switchOn) {
+  ShowTargetColorRequestPacket packet = {
+    OPCODE_SHOW_TARGET_COLOR,
+    switchOn
+  };
+
+  const uint8_t* pipe = registry.getPipeForID(id);
+  if (id != 0xFF && pipe) {
+    if (toTargetPipe(id, pipe, &packet, sizeof(packet))) {
+      Serial.print(F("🌈 Target color is "));
+      Serial.println(switchOn == true ? "ON" : "OFF");
+      return true;
+    }
+  }
+  return false;
+}
+
 const bool Send::sessionStatusRequest(uint8_t id, GameSessionStatus status) {
   SessionStatusPacket packet = {
     OPCODE_SESSION_STATUS,

@@ -1,6 +1,8 @@
 #ifndef PAIRING_SCREEN_H
 #define PAIRING_SCREEN_H
 
+#include <TargetInfo.h>
+
 #include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
 #include "../EncoderMode.h"
@@ -21,19 +23,32 @@ extern ScreenRenderer screenRenderer;
 
 class PairingScreen : public Screen {
 public:
-  PairingScreen(LcdDisplay& display, PairingRegistry& registry)
-    : display(display), registry(registry) {}
+  PairingScreen(LcdDisplay& display, PairingRegistry& registry, Communication& communication)
+    : display(display), registry(registry), communication(communication) {}
 
   void onEnter() override {
     scrollIndex = 0;
+    uint8_t targetsCount = registry.getPairedTargetCount();
+    const uint8_t* ids = registry.getAllPairedTargetIds();
+    for (uint8_t i = 0; i < targetsCount; ++i) {
+      communication.showTargetColor(ids[i], true);
+    }
     screenRenderer.requestRefresh();
+  }
+
+  void onExit() override {
+    uint8_t targetsCount = registry.getPairedTargetCount();
+    const uint8_t* ids = registry.getAllPairedTargetIds();
+    for (uint8_t i = 0; i < targetsCount; ++i) {
+      communication.showTargetColor(ids[i], false);
+    }
   }
 
   void render() override {
     display.clear();
     uint8_t targetsCount = registry.getPairedTargetCount();
     String targetsCountFormatted = targetsCount < 10 ? "0" + String(targetsCount) : String(targetsCount);
-    display.showLine(1, "Paired Targets (" + targetsCountFormatted + "):", "center");
+    display.showLine(0, "Paired Targets (" + targetsCountFormatted + "):", "center");
 
     const uint8_t* ids = registry.getAllPairedTargetIds();
 
@@ -52,10 +67,12 @@ public:
       for (uint8_t i = 0; i < 2; ++i) {
         uint8_t idx = scrollIndex + i;
         if (idx < targetsCount) {
-          String label = "Target " + String(ids[idx]);
-          display.showLine(2 + i, label);
+          String countFormatted = ids[idx] < 10 ? "0" + String(ids[idx]) : String(ids[idx]);
+          TargetInfo target = registry.getTargetByID(ids[idx]);
+          String label = "Target" + countFormatted + "-" + target.getColorName();
+          display.showLine(1 + i, label);
         } else {
-          display.showLine(2 + i, "");
+          display.showLine(1 + i, "");
         }
       }
     }
@@ -83,7 +100,7 @@ public:
   }
 
   ButtonLabels getButtonLabels() const override {
-    return {"Home", "", "Pair"};
+    return {"Home", registry.getPairedTargetCount() > 2 ? "<>" : "", "Pair"};
   }
 
   ScreenType getType() const override {
@@ -91,12 +108,14 @@ public:
   }
 
   String getHash() const override {
-    return "Pairing-" + String(scrollIndex);
+    return "Pairing-" + String(scrollIndex) + "-" + String(registry.getPairedTargetCount());
   }
 
 private:
   LcdDisplay& display;
   PairingRegistry& registry;
+  Communication& communication;
+
   uint8_t scrollIndex = 0;
 };
 

@@ -35,7 +35,7 @@ public:
       request = ScreenRequest::to(ScreenType::Pairing);
     }
     if (encoder.wasPressed()) {
-      // ends a blink command (OPCODE_BLINK_COMMAND) to the currently selected target. Would be nice if the target replies to the Blink command sending to the hub it's battery level so can be shown next to the ID.
+      // Sends a blink command (OPCODE_BLINK_COMMAND) to the currently selected target. Would be nice if the target replies to the Blink command sending to the hub it's battery level so can be shown next to the ID.
     }
     if (right.wasPressed()) {
       request = ScreenRequest::to(ScreenType::GameModeList);

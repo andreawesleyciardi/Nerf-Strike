@@ -92,7 +92,7 @@ GameModeRegistry::GameModeRegistry() {
     };
     modes[5] = GameMode(
       ModeName::Battle,
-      ModeType::MULTI,
+      ModeType::MULTI,                                                                          // TO CHECK WHY IS VISIBLE ALSO WHEN ModeType is SINGLE
       ModeDescription(singleBattleDescription, multiBattleDescription),
       battleSettings,
       1

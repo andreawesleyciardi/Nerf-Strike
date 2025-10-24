@@ -17,28 +17,6 @@ const uint8_t* Communication::verifyPipeForID(uint8_t targetId) {
   return pipe;
 }
 
-// void Communication::pairing(const byte* buffer) {
-//   const uint8_t assignedID = receive.pairingRequest(buffer);
-//   if (assignedID == 0xFF) {
-//     Serial.println(F("❌ Failed to assign ID."));
-//     showStatus(statusRgbLed, STATUS_ERROR, 2);
-//     return;
-//   }
-
-//   send.pairingResponse(assignedID);
-
-//   char pipeName[6];
-//   sprintf(pipeName, "TGT%d", assignedID);
-//   registry.storePipeForID(assignedID, reinterpret_cast<uint8_t*>(pipeName));
-
-//   Serial.print(F("📡 Stored pipe for ID "));
-//   Serial.print(assignedID);
-//   Serial.print(F(": "));
-//   Serial.println(pipeName);
-
-//   showStatus(statusRgbLed, STATUS_PAIRING, 2);
-//   delay(100);
-// }
 void Communication::pairing(const byte* buffer) {
   TargetInfo target = receive.pairingRequest(buffer);
   if (!target.isValid()) {
@@ -108,8 +86,12 @@ const bool Communication::hit(const byte* buffer) {
 }
 
 const bool Communication::entityColor(uint8_t targetId, char colorName[16]) {
-  Serial.println(F("Communication::entityColor"));
   return send.entityColorRequest(targetId, colorName);
+}
+
+const bool Communication::showTargetColor(uint8_t targetId, bool switchOn) {
+  Serial.println(F("Communication::showTargetColor"));
+  return send.showTargetColorRequest(targetId, switchOn);
 }
 
 const bool Communication::sessionStatus(uint8_t targetId, GameSessionStatus status) {

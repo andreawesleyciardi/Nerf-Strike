@@ -146,3 +146,8 @@ const String Receive::entityColor(const byte* buffer) {
 
   return String(request->name);
 }
+
+const bool Receive::showTargetColorRequest(const byte* buffer) {
+  const ShowTargetColorRequestPacket* request = reinterpret_cast<const ShowTargetColorRequestPacket*>(buffer);
+  return request->switchOn;
+}

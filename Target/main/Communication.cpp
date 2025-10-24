@@ -102,3 +102,7 @@ HitResponsePacket Communication::hit() {
 const String Communication::entityColor(const byte* buffer) {
   return receive.entityColor(buffer);
 }
+
+const bool Communication::showTargetColor(const byte* buffer) {
+  return receive.showTargetColorRequest(buffer);
+}

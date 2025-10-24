@@ -42,7 +42,7 @@ public:
 
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
     if (left.wasPressed()) {
-      request = ScreenRequest::to(ScreenType::Home);
+      request = ScreenRequest::to(ScreenType::Pairing);
     }
     if (encoder.hasChanged()) {
       Serial.println("encoder has changed");

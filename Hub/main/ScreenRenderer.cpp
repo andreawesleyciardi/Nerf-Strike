@@ -46,7 +46,10 @@ void ScreenRenderer::render() {
   // 🎛 Encoder hint
   EncoderMode mode = manager.getEncoderMode();
   if (mode == EncoderMode::SelectItem || mode == EncoderMode::AdjustField) {
-    display.printAligned("<>", display.getRowCount() - 1, "center");
+    // display.printAligned("<>", display.getRowCount() - 1, "center");
+    display.setCursor(9, 3);
+    display.write(1);
+    display.write(2);
   }
 
   // 🧪 Debug trace (optional)

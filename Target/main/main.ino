@@ -40,7 +40,8 @@ void setup() {
   Serial.println(F("✅ Starting active pairing"));
   if (communication.activePairing()) {
     TargetInfo info = registry.getTargetInfo();
-    targetRgbLed.blink(info.getColorName());
+    targetRgbLed.setPrimaryColorName(info.getColorName());
+    targetRgbLed.blink();
   }
 
   showAssignedIDBriefly(registry.getTargetInfo().id);
@@ -105,12 +106,24 @@ void loop() {
           entityColorName = communication.entityColor(buffer);
           if (entityColorName != "") {
             rgbRing.chase(entityColorName, 30);
-            statusRgbLed.on(entityColorName, true);  // TEMPORARY: To add an "entityRgbLed"
+            entityRgbLed.on(entityColorName, true);  // TEMPORARY: To add an "entityRgbLed"
             sessionStatus = GameSessionStatus::Setting;
             Serial.println(F("🌈 Entity color is set to: "));
             Serial.println(entityColorName);
           } else {
             Serial.println(F("❌ Was not possible to set the entity color"));
+          }
+        break;
+      }
+
+      case OPCODE_SHOW_TARGET_COLOR: {
+          bool switchOn = communication.showTargetColor(buffer);
+          if (switchOn == true) {
+            targetRgbLed.on();
+            Serial.println(F("🌈 Target rgb led is ON."));
+          } else {
+            targetRgbLed.off();
+            Serial.println(F("❌ Target rgb led is OFF."));
           }
         break;
       }

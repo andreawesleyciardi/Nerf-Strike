@@ -26,6 +26,7 @@ public:
   const bool hitResponse(uint8_t id, const uint8_t* pipe, ScoreUpdated result);
 
   const bool entityColorRequest(uint8_t id, char colorName[16]);
+  const bool showTargetColorRequest(uint8_t id, bool switchOn);
 
   const bool sessionStatusRequest(uint8_t id, GameSessionStatus status);
   
