@@ -173,7 +173,7 @@ void loop() {
           GameSessionStatus newStatus = packet->status;
           Serial.print(F("🔦 New GameSessionStatus received: "));
           Serial.println(GameSessionStatusToString(newStatus));
-          if (newStatus == GameSessionStatus::Starting) {
+          if (newStatus == GameSessionStatus::Starting || newStatus == GameSessionStatus::Resetting) {
             scoreDisplay.updateScore(0, true);
           }
           if (newStatus == GameSessionStatus::Paused) {
@@ -182,11 +182,16 @@ void loop() {
           if (sessionStatus == GameSessionStatus::Paused && (newStatus == GameSessionStatus::Playing || newStatus == GameSessionStatus::Ended)) {
             entityRgbLed.stopPulse();
             entityRgbLed.on();
-          } else if (newStatus == GameSessionStatus::Ended || newStatus == GameSessionStatus::Setting) {
+          } else if (newStatus == GameSessionStatus::Ended || newStatus == GameSessionStatus::Setting || newStatus == GameSessionStatus::Resetting) {
             entityRgbLed.off();
             rgbRing.off();
           }
           sessionStatus = newStatus;
+        break;
+      }
+
+      case OPCODE_TARGET_DISABLE: {
+          
         break;
       }
 
@@ -227,10 +232,11 @@ void loop() {
   //   showAssignedIDBriefly(registry.getAssignedID());
   // }
 
-  uint8_t targetId = registry.getTargetInfo().id;
-  if (targetId != 0xFF) {
+  // uint8_t targetId = registry.getTargetInfo().id;
+  TargetInfo info = registry.getTargetInfo();
+  if (info.id != 0xFF) {
     if (sensor.isHit()) {
-      if (sessionStatus == GameSessionStatus::Playing) {
+      if (sessionStatus == GameSessionStatus::Playing && info.enabled == true) {
         Serial.println(F("✅ Target got hit."));
         HitResponsePacket response = communication.hit();
       } else {

@@ -34,6 +34,11 @@ void GameSessionManager::assignEntitiesBalanced(bool useTeams) {
       if (targetIndex < totalTargets) {
         uint8_t targetId = pairedTargetIds[targetIndex++];
         newEntity.addTarget(targetId);
+
+        // ✅ Assign indexInEntity to the target
+        TargetInfo target = registry.getTargetByID(targetId);
+        target.indexInEntity = j;  // 1-based index
+        // registry.updateTarget(target);                                                            // <-- TO DO
       }
     }
 
@@ -42,7 +47,10 @@ void GameSessionManager::assignEntitiesBalanced(bool useTeams) {
 
   // Deactivate leftover targets
   for (; targetIndex < totalTargets; ++targetIndex) {
-    // registry.setActive(pairedTargetIds[targetIndex], false);
+    uint8_t targetId = pairedTargetIds[targetIndex];
+    TargetInfo target = registry.getTargetByID(targetId);
+    target.enabled = false;  // ✅ Mark as temporarily disabled
+    // registry.updateTarget(target);                                                                 // <-- TO DO
     // TODO: Send OPCODE_TARGET_DISABLE to these targets
   }
 }
@@ -131,7 +139,9 @@ void GameSessionManager::restart() {
   for (uint8_t i = 0; i < session.entityCount; ++i) {
     session.entities[i].score = 0;
   }
-  setStatus(GameSessionStatus::Playing);
+  setStatus(GameSessionStatus::Resetting, true);
+  delay(100);
+  setStatus(GameSessionStatus::Playing, true);
 }
 
 void GameSessionManager::communicateEntityColor(uint8_t targetId) {

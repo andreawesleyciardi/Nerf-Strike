@@ -34,21 +34,21 @@ public:
     uint8_t entityCount = sessionManager.getEntityCount();
     for (uint8_t i = 0; i < GameModeRegistry::MAX_MODES; ++i) {
       const GameMode& mode = gameModesRegistry.getMode(i);
-      // ModeType type = mode.getType();
-      // bool isValid = (entityCount == 1 && (type == ModeType::SINGLE || type == ModeType::ALL)) || (entityCount > 1 && (type == ModeType::MULTI || type == ModeType::ALL));
+      ModeType type = mode.getType();
+      bool isValid = (entityCount == 1 && (type == ModeType::SINGLE || type == ModeType::ALL)) || (entityCount > 1 && (type == ModeType::MULTI || type == ModeType::ALL));
       // if (mode.getName() == ModeName::LitTarget) {
       //   const EntityInfo* entity = sessionManager.getAllEntities();
       //   uint8_t entityTargetsCount = entity[0].getTargetCount();
       //   isValid = entityTargetsCount > 1;
       // }
 
-      // if (isValid) {
+      if (isValid) {
         GameMode copy(mode);
         filteredModes[filteredModesCount] = copy;
         filteredModesCount = filteredModesCount + 1;
         // Serial.print(F("Valid Game Mode: "));
         // Serial.println(mode.getName());
-      // }
+      }
     }
     Serial.print(F("Filtered count: "));
     Serial.println(filteredModesCount);
