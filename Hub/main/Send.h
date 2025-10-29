@@ -3,10 +3,9 @@
 
 #include <Arduino.h>
 #include <RF24.h>
-#include <TargetType.h>
 #include <Score.h>
 #include <Statuses.h>
-#include <TargetInfo.h>
+#include <Target.h>
 
 #include "PairingRegistry.h"
 
@@ -25,7 +24,8 @@ public:
 
   const bool hitResponse(uint8_t id, const uint8_t* pipe, ScoreUpdated result);
 
-  const bool entityColorRequest(uint8_t id, char colorName[16]);
+  // const bool entityColorRequest(uint8_t id, char colorName[16]);
+  const bool targetSessionInfoRequest(uint8_t id, const TargetSessionInfo& sessionInfo);
   const bool showTargetColorRequest(uint8_t id, bool switchOn);
 
   const bool sessionStatusRequest(uint8_t id, GameSessionStatus status);

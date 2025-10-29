@@ -1,8 +1,4 @@
 #include "WirelessTarget.h"
-#include <TargetType.h>
-#include <OPCodes.h>
-#include <Protocol.h>
-#include "TargetConfig.h"
 
 WirelessTarget::WirelessTarget() : radio(transmitterCEPin, transmitterCSNPin) {}
 

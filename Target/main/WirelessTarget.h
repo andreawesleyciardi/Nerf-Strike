@@ -4,8 +4,10 @@
 #include <Arduino.h>
 #include <RF24.h>
 #include <Protocol.h>
-#include <TargetType.h>
+#include <Target.h>
 #include <OPCodes.h>
+
+#include "TargetConfig.h"
 
 class WirelessTarget {
 public:

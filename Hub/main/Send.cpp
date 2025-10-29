@@ -134,18 +134,34 @@ const bool Send::hitResponse(uint8_t id, const uint8_t* pipe, ScoreUpdated resul
   }
 }
 
-const bool Send::entityColorRequest(uint8_t id, char colorName[16]) {
-  EntityColorRequestPacket packet;
-  packet.opcode = OPCODE_ENTITY_COLOR;
-  strncpy(packet.name, colorName, sizeof(packet.name));
-  packet.name[sizeof(packet.name) - 1] = '\0';
+// const bool Send::entityColorRequest(uint8_t id, char colorName[16]) {
+//   EntityColorRequestPacket packet;
+//   packet.opcode = OPCODE_ENTITY_COLOR;
+//   strncpy(packet.name, colorName, sizeof(packet.name));
+//   packet.name[sizeof(packet.name) - 1] = '\0';
+
+//   const uint8_t* pipe = registry.getPipeForID(id);
+//   if (id != 0xFF && pipe) {
+//     if (toTargetPipe(id, pipe, &packet, sizeof(packet))) {
+//       Serial.print(F("🌈 Entity color \""));
+//       Serial.print(colorName);
+//       Serial.print(F("\" sent to target ID"));
+//       Serial.println(id);
+//       return true;
+//     }
+//   }
+//   return false;
+// }
+const bool Send::targetSessionInfoRequest(uint8_t id, const TargetSessionInfo& sessionInfo) {
+  TargetSessionInfoRequestPacket packet = {
+    OPCODE_TARGET_SESSION_INFO,
+    sessionInfo
+  };
 
   const uint8_t* pipe = registry.getPipeForID(id);
   if (id != 0xFF && pipe) {
     if (toTargetPipe(id, pipe, &packet, sizeof(packet))) {
-      Serial.print(F("🌈 Entity color \""));
-      Serial.print(colorName);
-      Serial.print(F("\" sent to target ID"));
+      Serial.print(F("🌈 Target Session Infos sent to target ID: "));
       Serial.println(id);
       return true;
     }

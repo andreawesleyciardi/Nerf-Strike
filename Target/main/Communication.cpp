@@ -99,9 +99,9 @@ HitResponsePacket Communication::hit() {
   return { OPCODE_SCORE_UPDATE, 0xFF, ScoreStatus::Error };
 }
 
-const String Communication::entityColor(const byte* buffer) {
-  return receive.entityColor(buffer);
-}
+// const String Communication::entityColor(const byte* buffer) {
+//   return receive.entityColor(buffer);
+// }
 
 const bool Communication::showTargetColor(const byte* buffer) {
   return receive.showTargetColorRequest(buffer);

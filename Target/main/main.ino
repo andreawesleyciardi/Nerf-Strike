@@ -1,8 +1,10 @@
 #include <Color.h>
+#include <ColorPalette.h>
 #include <OPCodes.h>
 #include <DisplayFeedback.h>
 #include <Score.h>
 #include <Statuses.h>
+#include <Target.h>
 
 #include "TargetConfig.h"
 #include "TargetPins.h"
@@ -22,7 +24,7 @@ Communication communication(receive, send, registry, statusRgbLed);
 
 GameSessionStatus sessionStatus = GameSessionStatus::Setting;
 
-String entityColorName;
+// String entityColorName;
 
 void setup() {
   delay(1000);
@@ -102,16 +104,52 @@ void loop() {
         break;
       }
 
-      case OPCODE_ENTITY_COLOR: {
-          entityColorName = communication.entityColor(buffer);
-          if (entityColorName != "") {
-            rgbRing.chase(entityColorName, 30);
-            entityRgbLed.on(entityColorName, true);  // TEMPORARY: To add an "entityRgbLed"
-            sessionStatus = GameSessionStatus::Setting;
-            Serial.println(F("🌈 Entity color is set to: "));
-            Serial.println(entityColorName);
-          } else {
-            Serial.println(F("❌ Was not possible to set the entity color"));
+      // case OPCODE_ENTITY_COLOR: {
+      //     entityColorName = communication.entityColor(buffer);
+      //     if (entityColorName != "") {
+      //       rgbRing.chase(entityColorName, 30);
+      //       entityRgbLed.on(entityColorName, true);  // TEMPORARY: To add an "entityRgbLed"
+      //       sessionStatus = GameSessionStatus::Setting;
+      //       Serial.println(F("🌈 Entity color is set to: "));
+      //       Serial.println(entityColorName);
+      //     } else {
+      //       Serial.println(F("❌ Was not possible to set the entity color"));
+      //     }
+      //   break;
+      // }
+      case OPCODE_TARGET_SESSION_INFO: {
+          TargetSessionInfoRequestPacket* packet = reinterpret_cast<TargetSessionInfoRequestPacket*>(buffer);
+          TargetSessionInfo sessionInfo = packet->sessionInfo;
+
+          TargetInfo info = registry.getTargetInfo();
+          info.enabled = sessionInfo.enabled;
+          info.indexInEntity = sessionInfo.indexInEntity;
+          info.entityColorIndex = sessionInfo.entityColorIndex;
+
+          registry.setTargetInfo(info);
+
+          // ✅ Debug print
+          Serial.print(F("📤 Received TargetSessionInfo in Target ID: "));
+          Serial.println(info.id);
+          Serial.print(F("  - enabled: "));
+          Serial.println(info.enabled ? "true" : "false");
+          Serial.print(F("  - indexInEntity: "));
+          Serial.println(info.indexInEntity);
+          Serial.print(F("  - entityColorIndex: "));
+          Serial.println(info.entityColorIndex);
+
+          if (info.enabled == true) {
+            Color entityColor = ColorPalette::getByIndex(info.entityColorIndex);
+            scoreDisplay.showScore(info.indexInEntity);
+            rgbRing.chase(entityColor.name, 30);
+            entityRgbLed.on(entityColor.name, true);
+            Serial.println(F("✅ The Target is enabled and correctly set."));
+          }
+          else {
+            entityRgbLed.off();
+            targetRgbLed.off();
+            statusRgbLed.on("White");
+            Serial.println(F("❌ The Target is disabled."));
           }
         break;
       }
@@ -147,10 +185,12 @@ void loop() {
             else {
               scoreDisplay.updateScore(packet->value, true);
               if (packet->status == ScoreStatus::Won || packet->status == ScoreStatus::Even) {
+                TargetInfo info = registry.getTargetInfo();
+                Color entityColor = ColorPalette::getByIndex(info.entityColorIndex);
                 rgbRing.chase("Green", 25);
                 rgbRing.chase("Green", 25);
                 rgbRing.blink("Green", 3);
-                rgbRing.fill(entityColorName);
+                rgbRing.fill(entityColor.name);
                 delay(2000);
                 rgbRing.off();
               } else if (packet->status == ScoreStatus::Lost) {
@@ -177,7 +217,9 @@ void loop() {
             scoreDisplay.updateScore(0, true);
           }
           if (newStatus == GameSessionStatus::Paused) {
-            entityRgbLed.startPulse(entityColorName);
+            TargetInfo info = registry.getTargetInfo();
+            Color entityColor = ColorPalette::getByIndex(info.entityColorIndex);
+            entityRgbLed.startPulse(entityColor.name);
           }
           if (sessionStatus == GameSessionStatus::Paused && (newStatus == GameSessionStatus::Playing || newStatus == GameSessionStatus::Ended)) {
             entityRgbLed.stopPulse();
@@ -185,6 +227,8 @@ void loop() {
           } else if (newStatus == GameSessionStatus::Ended || newStatus == GameSessionStatus::Setting || newStatus == GameSessionStatus::Resetting) {
             entityRgbLed.off();
             rgbRing.off();
+            delay(500);
+            scoreDisplay.updateScore(0, true);
           }
           sessionStatus = newStatus;
         break;

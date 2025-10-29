@@ -2,8 +2,8 @@
 #define ENTITY_INFO_H
 
 #include <Arduino.h>
+#include <Entity.h>
 #include "Color.h"
-#include "ColorUtils.h"
 
 #define MAX_TARGETS_PER_ENTITY 10
 

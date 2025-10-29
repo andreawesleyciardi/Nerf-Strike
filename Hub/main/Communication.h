@@ -4,6 +4,11 @@
 #include <Arduino.h>
 #include <RGBLed.h>
 #include <Statuses.h>
+#include <Protocol.h>
+#include <OPCodes.h>
+#include <DisplayFeedback.h>
+#include <Target.h>
+
 #include "Receive.h"
 #include "Send.h"
 #include "PairingRegistry.h"
@@ -17,7 +22,8 @@ public:
   void pairing(const byte* buffer);
   void verification(const byte* buffer);
   const bool hit(const byte* buffer);
-  const bool entityColor(uint8_t targetId, char colorName[16]);
+  // const bool entityColor(uint8_t targetId, char colorName[16]);
+  const bool targetSessionInfo(uint8_t targetId, const TargetSessionInfo& sessionInfo);
   const bool showTargetColor(uint8_t targetId, bool switchOn = true);
   const bool sessionStatus(uint8_t targetId, GameSessionStatus status);
 

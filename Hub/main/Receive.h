@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <Protocol.h>
-#include <TargetInfo.h>
+#include <Target.h>
 
 #include "TargetTypeManager.h"
 #include "PairingRegistry.h"

@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <EEPROM.h>
-#include <TargetInfo.h>
+#include <Target.h>
 
 #include "WirelessTarget.h"
 

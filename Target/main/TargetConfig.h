@@ -2,7 +2,7 @@
 #define TARGET_CONFIG_H
 
 #include <stdint.h>
-#include <TargetType.h>
+#include <Target.h>
 
 extern TargetType targetType;
 

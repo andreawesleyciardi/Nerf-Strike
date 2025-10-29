@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <RGBLed.h>
-#include <TargetInfo.h>
+#include <Target.h>
 
 #include "Receive.h"
 #include "Send.h"
@@ -16,7 +16,7 @@ public:
   const bool activePairing();
   const bool verification();
   HitResponsePacket hit();
-  const String entityColor(const byte* buffer);
+  // const String entityColor(const byte* buffer);
   const bool showTargetColor(const byte* buffer);
 
 private:

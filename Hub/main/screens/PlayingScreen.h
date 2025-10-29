@@ -25,7 +25,8 @@ public:
 
   void onEnter() override {
     // ✅ Push entity colors to targets
-    sessionManager.communicateEntityColor();                                    // <-- To communicate also the indexInEntity and the enabled status
+    // sessionManager.communicateEntityColor();                                    // <-- To communicate also the indexInEntity and the enabled status
+    sessionManager.communicateTargetSessionInfo();
     sessionManager.setStatus(GameSessionStatus::Starting, true);
 
     // ✅ Start countdown
@@ -63,7 +64,7 @@ public:
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
     if (left.wasPressed()) {
       Serial.println(F("GameSessionStatus::Ended -> Going to Home"));
-      sessionManager.communicateStatus();
+      sessionManager.setStatus(GameSessionStatus::Ended, true);
       request = ScreenRequest::to(ScreenType::Home);
     }
     if (encoder.wasPressed()) {

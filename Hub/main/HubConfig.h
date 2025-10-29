@@ -2,7 +2,6 @@
 #define HUB_CONFIG_H
 
 #include <stdint.h>
-#include <TargetType.h>
 
 #define MAX_TARGETS 10
 

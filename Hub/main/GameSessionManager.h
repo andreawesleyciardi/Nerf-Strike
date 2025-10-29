@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <Statuses.h>
+#include <ColorPalette.h>
 #include "GameSession.h"
 #include "PairingRegistry.h"
 #include "EntityInfo.h"
@@ -15,7 +16,7 @@ public:
 
   void assignEntitiesBalanced(bool useTeams = false);
   void resetSession();
-  void restart();
+  void restart(bool toCommunicate = true);
 
   uint8_t calculateTargetsPerEntity(uint8_t totalPaired, uint8_t totalEntities) const;
   bool isMultiplayer() const;
@@ -36,7 +37,8 @@ public:
   void setStatus(GameSessionStatus newStatus, bool toCommunicate = false);
   
   void communicateStatus(uint8_t targetId = TARGET_ID_NONE);
-  void communicateEntityColor(uint8_t targetId = TARGET_ID_NONE);
+  // void communicateEntityColor(uint8_t targetId = TARGET_ID_NONE);
+  void communicateTargetSessionInfo(uint8_t targetId = TARGET_ID_NONE);
 
   GameSession& getSession();
   const GameSession& getSession() const;

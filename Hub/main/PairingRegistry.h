@@ -2,7 +2,7 @@
 #define PAIRING_REGISTRY_H
 
 #include <Arduino.h>
-#include <TargetInfo.h>
+#include <Target.h>
 
 #define MAX_TARGETS 10
 

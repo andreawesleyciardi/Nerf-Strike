@@ -2,7 +2,7 @@
 #define RECEIVE_H
 
 #include <Arduino.h>
-#include <TargetInfo.h>
+#include <Target.h>
 
 #include "PairingRegistry.h"
 
@@ -14,7 +14,7 @@ public:
   TargetInfo pairingResponse();
   const bool verificationResponse(uint8_t id);
   HitResponsePacket hitResponse();
-  const String entityColor(const byte* buffer);
+  // const String entityColor(const byte* buffer);
   const bool showTargetColorRequest(const byte* buffer);
 
 private:

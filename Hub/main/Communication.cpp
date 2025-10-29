@@ -1,8 +1,4 @@
 #include "Communication.h"
-#include <Protocol.h>
-#include <OPCodes.h>
-#include <DisplayFeedback.h>
-#include <TargetInfo.h>
 
 Communication::Communication(Receive& receive, Send& send, PairingRegistry& registry, GameLogic& gameLogic, RGBLed& statusRgbLed, GameSessionManager& sessionManager)
   : receive(receive), send(send), registry(registry), gameLogic(gameLogic), statusRgbLed(statusRgbLed), sessionManager(sessionManager) {}
@@ -17,7 +13,7 @@ const uint8_t* Communication::verifyPipeForID(uint8_t targetId) {
   return pipe;
 }
 
-void Communication::pairing(const byte* buffer) {
+void Communication::pairing(const byte* buffer) {                 // TODO: Transform in boolean and move outside this: showStatus(statusRgbLed, STATUS_PAIRING, 2); 
   TargetInfo target = receive.pairingRequest(buffer);
   if (!target.isValid()) {
     Serial.println(F("❌ Failed to assign ID."));
@@ -85,8 +81,11 @@ const bool Communication::hit(const byte* buffer) {
   return false;
 }
 
-const bool Communication::entityColor(uint8_t targetId, char colorName[16]) {
-  return send.entityColorRequest(targetId, colorName);
+// const bool Communication::entityColor(uint8_t targetId, char colorName[16]) {
+//   return send.entityColorRequest(targetId, colorName);
+// }
+const bool Communication::targetSessionInfo(uint8_t targetId, const TargetSessionInfo& sessionInfo) {
+  return send.targetSessionInfoRequest(targetId, sessionInfo);
 }
 
 const bool Communication::showTargetColor(uint8_t targetId, bool switchOn) {

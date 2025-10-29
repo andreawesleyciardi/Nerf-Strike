@@ -1,7 +1,7 @@
 #include "GameSessionManager.h"
 #include "GameModeRegistry.h"
 #include "EntityInfo.h"
-#include "ColorUtils.h"
+// #include "ColorUtils.h"
 #include "Communication.h"
 
 extern GameModeRegistry gameModeRegistry;
@@ -38,19 +38,21 @@ void GameSessionManager::assignEntitiesBalanced(bool useTeams) {
         // ✅ Assign indexInEntity to the target
         TargetInfo target = registry.getTargetByID(targetId);
         target.indexInEntity = j;  // 1-based index
-        // registry.updateTarget(target);                                                            // <-- TO DO
+        target.entityColorIndex = entityIndex;
+        target.enabled = true;
+        registry.storeTargetInfo(target);
       }
     }
 
     session.entities[entityIndex] = newEntity;
   }
 
-  // Deactivate leftover targets
+  // Deactivate leftover targets                                                TODO -> TO TEST PROPERLY WHEN I HAVE 3 TARGETS
   for (; targetIndex < totalTargets; ++targetIndex) {
     uint8_t targetId = pairedTargetIds[targetIndex];
     TargetInfo target = registry.getTargetByID(targetId);
     target.enabled = false;  // ✅ Mark as temporarily disabled
-    // registry.updateTarget(target);                                                                 // <-- TO DO
+    registry.storeTargetInfo(target);
     // TODO: Send OPCODE_TARGET_DISABLE to these targets
   }
 }
@@ -135,27 +137,57 @@ void GameSessionManager::resetSession() {
   session.reset();
 }
 
-void GameSessionManager::restart() {
+void GameSessionManager::restart(bool toCommunicate) {
   for (uint8_t i = 0; i < session.entityCount; ++i) {
     session.entities[i].score = 0;
   }
-  setStatus(GameSessionStatus::Resetting, true);
+  setStatus(GameSessionStatus::Resetting, toCommunicate);
   delay(100);
-  setStatus(GameSessionStatus::Playing, true);
+  setStatus(GameSessionStatus::Playing, toCommunicate);
 }
 
-void GameSessionManager::communicateEntityColor(uint8_t targetId) {
+// void GameSessionManager::communicateEntityColor(uint8_t targetId) {
+//   for (uint8_t i = 0; i < session.entityCount; ++i) {
+//     const EntityInfo& entity = session.entities[i];
+//     const Color& color = entity.color;
+//     for (uint8_t j = 0; j < entity.targetCount; ++j) {
+//       uint8_t currentTargetId = entity.targetIds[j];
+//       char colorName[16];
+//       strncpy(colorName, color.name.c_str(), sizeof(colorName));
+//       colorName[sizeof(colorName) - 1] = '\0';
+//       if (((targetId != TARGET_ID_NONE) && (currentTargetId == targetId)) || (targetId == TARGET_ID_NONE)) {
+//         communication.entityColor(currentTargetId, colorName);
+//       }
+//     }
+//   }
+// }
+
+void GameSessionManager::communicateTargetSessionInfo(uint8_t targetId) {
   for (uint8_t i = 0; i < session.entityCount; ++i) {
     const EntityInfo& entity = session.entities[i];
-    const Color& color = entity.color;
+
     for (uint8_t j = 0; j < entity.targetCount; ++j) {
       uint8_t currentTargetId = entity.targetIds[j];
-      char colorName[16];
-      strncpy(colorName, color.name.c_str(), sizeof(colorName));
-      colorName[sizeof(colorName) - 1] = '\0';
-      if (((targetId != TARGET_ID_NONE) && (currentTargetId == targetId)) || (targetId == TARGET_ID_NONE)) {
-        communication.entityColor(currentTargetId, colorName);
-      }
+      if (targetId != TARGET_ID_NONE && currentTargetId != targetId) continue;
+
+      TargetInfo target = registry.getTargetByID(currentTargetId);
+
+      TargetSessionInfo sessionInfo;
+      sessionInfo.enabled = target.enabled;
+      sessionInfo.indexInEntity = target.indexInEntity;
+      sessionInfo.entityColorIndex = ColorPalette::getIndexByName(entity.color.name);
+
+      // ✅ Debug print
+      Serial.print(F("📤 Sending TargetSessionInfo to Target ID: "));
+      Serial.println(currentTargetId);
+      Serial.print(F("  - enabled: "));
+      Serial.println(sessionInfo.enabled ? "true" : "false");
+      Serial.print(F("  - indexInEntity: "));
+      Serial.println(sessionInfo.indexInEntity);
+      Serial.print(F("  - entityColorIndex: "));
+      Serial.println(sessionInfo.entityColorIndex);
+
+      communication.targetSessionInfo(currentTargetId, sessionInfo);
     }
   }
 }

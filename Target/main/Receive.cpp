@@ -123,29 +123,29 @@ HitResponsePacket Receive::hitResponse() {
   return response;
 }
 
-const String Receive::entityColor(const byte* buffer) {
-  const EntityColorRequestPacket* request = reinterpret_cast<const EntityColorRequestPacket*>(buffer);
+// const String Receive::entityColor(const byte* buffer) {
+//   const EntityColorRequestPacket* request = reinterpret_cast<const EntityColorRequestPacket*>(buffer);
 
-  Serial.print(F("📦 Received opcode: "));
-  Serial.println(request->opcode);
+//   Serial.print(F("📦 Received opcode: "));
+//   Serial.println(request->opcode);
 
-  Serial.print(F("📦 Raw name bytes: "));
-  for (int i = 0; i < sizeof(request->name); ++i) {
-    Serial.print((char)request->name[i]);
-  }
-  Serial.println();
+//   Serial.print(F("📦 Raw name bytes: "));
+//   for (int i = 0; i < sizeof(request->name); ++i) {
+//     Serial.print((char)request->name[i]);
+//   }
+//   Serial.println();
 
-  Serial.print(F("📦 Interpreted name: '"));
-  Serial.print(request->name);
-  Serial.println("'");
+//   Serial.print(F("📦 Interpreted name: '"));
+//   Serial.print(request->name);
+//   Serial.println("'");
 
-  if (request->opcode != OPCODE_ENTITY_COLOR || strlen(request->name) == 0) {
-    Serial.println(F("❌ Invalid or empty entity color packet"));
-    return "";
-  }
+//   if (request->opcode != OPCODE_ENTITY_COLOR || strlen(request->name) == 0) {
+//     Serial.println(F("❌ Invalid or empty entity color packet"));
+//     return "";
+//   }
 
-  return String(request->name);
-}
+//   return String(request->name);
+// }
 
 const bool Receive::showTargetColorRequest(const byte* buffer) {
   const ShowTargetColorRequestPacket* request = reinterpret_cast<const ShowTargetColorRequestPacket*>(buffer);

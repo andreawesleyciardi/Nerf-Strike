@@ -1,7 +1,6 @@
 #include <DisplayFeedback.h>
 #include <Protocol.h>
 #include <OPCodes.h>
-#include <TargetType.h>
 
 #include "HubConfig.h"
 #include "HubPins.h"

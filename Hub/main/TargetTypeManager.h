@@ -2,7 +2,7 @@
 #define TARGET_TYPE_MANAGER_H
 
 #include <Arduino.h>
-#include <TargetType.h>
+#include <Target.h>
 
 #define EEPROM_TARGET_TYPE_ADDR 0  // EEPROM address for storing allowed target type
 

@@ -1,7 +1,7 @@
 #ifndef PAIRING_SCREEN_H
 #define PAIRING_SCREEN_H
 
-#include <TargetInfo.h>
+#include <Target.h>
 
 #include "../LcdDisplay.h"
 #include "../ScreenTypes.h"
