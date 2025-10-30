@@ -127,8 +127,8 @@ public:
       sessionManager.setSelectedGameMode(selectedMode);
 
       if (selectedMode.getSettingCount() > 0) {
-        // request = ScreenRequest::to(ScreenType::GameModeOptions);
-        request = ScreenRequest::to(ScreenType::Playing);
+        request = ScreenRequest::to(ScreenType::GameModeOptions);
+        // request = ScreenRequest::to(ScreenType::Playing);
       } else {
         request = ScreenRequest::to(ScreenType::Playing);
       }

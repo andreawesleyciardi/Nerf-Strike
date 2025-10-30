@@ -6,7 +6,6 @@
 #include "screens/HelpScreen.h"
 #include "screens/SettingsScreen.h"
 #include "screens/PairingScreen.h"
-#include "screens/TargetListScreen.h"
 #include "screens/GameModeListScreen.h"
 #include "screens/GameModeOptionsScreen.h"
 #include "screens/PlayingScreen.h"
@@ -29,7 +28,6 @@ void ScreenManager::setup() {
   screens[(int)ScreenType::Help]             = new HelpScreen(display);
   screens[(int)ScreenType::Settings]         = new SettingsScreen(display, hubState);
   screens[(int)ScreenType::Pairing]          = new PairingScreen(display, registry, communication);
-  screens[(int)ScreenType::TargetList]       = new TargetListScreen(display, registry);
   screens[(int)ScreenType::GameModeList]     = new GameModeListScreen(display, gameModesRegistry);
   screens[(int)ScreenType::GameModeOptions]  = new GameModeOptionsScreen(display, gameModesRegistry);
   screens[(int)ScreenType::Playing]          = new PlayingScreen(display, gameLogic, communication);

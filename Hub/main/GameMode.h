@@ -13,7 +13,7 @@ struct ModeName {
   static constexpr const char* Training       = "Training";
   static constexpr const char* ToNumber       = "To Number";
   static constexpr const char* Timer          = "Timer";
-  static constexpr const char* TimeForShots   = "Time For Shots";
+  static constexpr const char* TimeForShots   = "Time For Hits";
   static constexpr const char* LitTarget      = "Lit Target";
   static constexpr const char* Battle         = "Battle";
   // static constexpr const char* CrazyTargets   = "Crazy Targets";
@@ -92,8 +92,9 @@ struct ModeDescription {
 
 enum class SettingType {
   INT,
-  TIME,     // seconds
+  TIME,           // seconds
   HITS,
+  DIFFICULTY,     // 1 Easy - 2 Medium - 3 Hard
   // Add more as needed: PERCENT, BOOL, etc.
 };
 

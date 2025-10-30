@@ -15,8 +15,7 @@
 
 class ScreenManager {
 public:
-  ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& modes,
-                PairingRegistry& registry, GameLogic& logic, Communication& communication);
+  ScreenManager(LcdDisplay& display, HubStateManager& hubState, GameModeRegistry& modes, PairingRegistry& registry, GameLogic& logic, Communication& communication);
 
   void setup();
   void replace(ScreenType screen);
@@ -37,7 +36,7 @@ private:
   GameLogic& gameLogic;
   Communication& communication;
 
-  static const uint8_t screenCount = 15;
+  static const uint8_t screenCount = 13;
   Screen* screens[screenCount] = {nullptr};
   ScreenType activeScreen = ScreenType::Splash;
 

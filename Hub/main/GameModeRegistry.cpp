@@ -20,7 +20,7 @@ GameModeRegistry::GameModeRegistry() {
     String singleToNumberDescription[] = {"Reach the goal", "number of hits."};
     String multiToNumberDescription[]  = {"Reach first the goal", "number of hits."};
     ModeSetting toNumberSettings[] = {
-      ModeSetting("Hits to reach", 5, 1, 50, SettingType::HITS)
+      ModeSetting("Hits", 5, 1, 50, SettingType::HITS)
     };
     modes[1] = GameMode(
       ModeName::ToNumber,
@@ -34,7 +34,7 @@ GameModeRegistry::GameModeRegistry() {
     String singleTimerDescription[] = {"Hit the most targets", "in specific time."};
     String multiTimerDescription[]  = {"Hit the most targets", "in specific time."};
     ModeSetting timerSettings[] = {
-      ModeSetting("Time (s)", 60, 10, 300, SettingType::TIME)
+      ModeSetting("Time", 60, 10, 300, SettingType::TIME)
     };
     modes[2] = GameMode(
       ModeName::Timer,
@@ -48,28 +48,30 @@ GameModeRegistry::GameModeRegistry() {
     String singleTimeForShotsDescription[] = {"How fast you are", "to reach the goal."};
     String multiTimeForShotsDescription[]  = {"Who reaches the goal", "faster?"};
     ModeSetting timeForShotsSettings[] = {
-      ModeSetting("Shots", 5, 1, 50, SettingType::HITS)
+      ModeSetting("Time", 60, 10, 300, SettingType::TIME),
+      ModeSetting("Hits", 5, 1, 50, SettingType::HITS)
     };
     modes[3] = GameMode(
       ModeName::TimeForShots,
       ModeType::ALL,
       ModeDescription(singleTimeForShotsDescription, multiTimeForShotsDescription),
       timeForShotsSettings,
-      1
+      2
     );
 
   // LitTarget
     String singleLitTargetDescription[] = {"Hit the lighted", "target quick."};
     String multiLitTargetDescription[]  = {"Hit the lighted", "target quickly."};
     ModeSetting LitTargetsSettings[] = {
-      ModeSetting("Time limit (s)", 5, 1, 20, SettingType::HITS)
+      ModeSetting("Difficulty", 1, 1, 3, SettingType::DIFFICULTY),
+      ModeSetting("Hits", 5, 1, 50, SettingType::HITS)
     };
     modes[4] = GameMode(
       ModeName::LitTarget,
-      ModeType::SINGLE,
+      ModeType::ALL,
       ModeDescription(singleLitTargetDescription, multiLitTargetDescription),
       LitTargetsSettings,
-      1
+      2
     );
 
   // ModeSetting teamSettings[] = {
