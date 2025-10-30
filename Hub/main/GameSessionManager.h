@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Statuses.h>
 #include <ColorPalette.h>
+#include "GameMode.h"
 #include "GameSession.h"
 #include "PairingRegistry.h"
 #include "EntityInfo.h"
@@ -39,6 +40,8 @@ public:
   void communicateStatus(uint8_t targetId = TARGET_ID_NONE);
   // void communicateEntityColor(uint8_t targetId = TARGET_ID_NONE);
   void communicateTargetSessionInfo(uint8_t targetId = TARGET_ID_NONE);
+
+  GameMode& getMutableSelectedGameMode();
 
   GameSession& getSession();
   const GameSession& getSession() const;

@@ -20,7 +20,7 @@ GameModeRegistry::GameModeRegistry() {
     String singleToNumberDescription[] = {"Reach the goal", "number of hits."};
     String multiToNumberDescription[]  = {"Reach first the goal", "number of hits."};
     ModeSetting toNumberSettings[] = {
-      ModeSetting("Hits to reach", 5, 1, 50)
+      ModeSetting("Hits to reach", 5, 1, 50, SettingType::HITS)
     };
     modes[1] = GameMode(
       ModeName::ToNumber,
@@ -34,7 +34,7 @@ GameModeRegistry::GameModeRegistry() {
     String singleTimerDescription[] = {"Hit the most targets", "in specific time."};
     String multiTimerDescription[]  = {"Hit the most targets", "in specific time."};
     ModeSetting timerSettings[] = {
-      ModeSetting("Time (s)", 60, 10, 300)
+      ModeSetting("Time (s)", 60, 10, 300, SettingType::TIME)
     };
     modes[2] = GameMode(
       ModeName::Timer,
@@ -48,7 +48,7 @@ GameModeRegistry::GameModeRegistry() {
     String singleTimeForShotsDescription[] = {"How fast you are", "to reach the goal."};
     String multiTimeForShotsDescription[]  = {"Who reaches the goal", "faster?"};
     ModeSetting timeForShotsSettings[] = {
-      ModeSetting("Shots", 5, 1, 50)
+      ModeSetting("Shots", 5, 1, 50, SettingType::HITS)
     };
     modes[3] = GameMode(
       ModeName::TimeForShots,
@@ -62,7 +62,7 @@ GameModeRegistry::GameModeRegistry() {
     String singleLitTargetDescription[] = {"Hit the lighted", "target quick."};
     String multiLitTargetDescription[]  = {"Hit the lighted", "target quickly."};
     ModeSetting LitTargetsSettings[] = {
-      ModeSetting("Time limit (s)", 5, 1, 20)
+      ModeSetting("Time limit (s)", 5, 1, 20, SettingType::HITS)
     };
     modes[4] = GameMode(
       ModeName::LitTarget,
@@ -88,7 +88,7 @@ GameModeRegistry::GameModeRegistry() {
     String singleBattleDescription[] = {"", ""};
     String multiBattleDescription[]  = {"Hit target, remove", "opponents points."};
     ModeSetting battleSettings[] = {
-      ModeSetting("Hits to reach", 5, 1, 20)
+      ModeSetting("Hits to reach", 5, 1, 20, SettingType::HITS)
     };
     modes[5] = GameMode(
       ModeName::Battle,

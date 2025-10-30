@@ -63,3 +63,7 @@ bool GameMode::isValidPlayerTargetCombo(uint8_t players, uint8_t targets) const 
   }
   return targets >= players;
 }
+
+ModeSetting& GameMode::getMutableSetting(uint8_t index) {
+  return modeSettings[index];
+}

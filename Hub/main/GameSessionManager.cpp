@@ -120,6 +120,10 @@ const GameMode& GameSessionManager::getSelectedGameMode() const {
   return session.gameMode;
 }
 
+GameMode& GameSessionManager::getMutableSelectedGameMode() {
+  return session.gameMode;
+}
+
 void GameSessionManager::setSession(const GameSession& newSession) {
   // session.reset();
   session = newSession;

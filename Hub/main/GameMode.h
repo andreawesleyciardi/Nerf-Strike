@@ -90,14 +90,22 @@ struct ModeDescription {
 
 #define MAX_SETTINGS 2
 
+enum class SettingType {
+  INT,
+  TIME,     // seconds
+  HITS,
+  // Add more as needed: PERCENT, BOOL, etc.
+};
+
 struct ModeSetting {
   String label;
   int value;
   int minValue;
   int maxValue;
+  SettingType type;
 
-  ModeSetting(String label = "", int value = 0, int minValue = 0, int maxValue = 100)
-    : label(label), value(value), minValue(minValue), maxValue(maxValue) {}
+  ModeSetting(String label = "", int value = 0, int minValue = 0, int maxValue = 100, SettingType type = SettingType::INT)
+    : label(label), value(value), minValue(minValue), maxValue(maxValue), type(type) {}
 };
 
 class GameMode {
@@ -117,6 +125,8 @@ public:
 
   bool isPlayableWith(uint8_t entityCount) const;
   bool isValidPlayerTargetCombo(uint8_t players, uint8_t targets) const;
+
+  ModeSetting& getMutableSetting(uint8_t index);
 
 private:
   String name;
