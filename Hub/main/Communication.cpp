@@ -55,31 +55,39 @@ void Communication::verification(const byte* buffer) {
   send.verificationResponse(targetId);
 }
 
+bool Communication::updateBatch(ScoreUpdateBatch batch, uint8_t id) {
+  bool sent = false;
+  for (uint8_t i = 0; i < batch.count; ++i) {
+    const ScoreUpdatedPerTarget& result = batch.updates[i];
+    const uint8_t* targetPipe = verifyPipeForID(result.targetId);
+    if (targetPipe) {
+      const bool wasSent = send.scoreUpdate(result.targetId, targetPipe, {result.newScore, result.status});
+      if (id != TARGET_ID_NONE && result.targetId == id) {
+        sent = wasSent;
+      }
+      else {
+        sent = true;
+      }
+    }
+  }
+  return sent;
+}
+
 const bool Communication::hit(const byte* buffer) {
   HitRequestPacket request = receive.hitRequest(buffer);
   const uint8_t* pipe = verifyPipeForID(request.id);
   if (pipe) {
     ScoreUpdateBatch batch = gameLogic.updateEntityScore(request.id);
-
-    bool sent = false;
-    // bool hasWon = false;
-    for (uint8_t i = 0; i < batch.count; ++i) {
-      const ScoreUpdatedPerTarget& result = batch.updates[i];
-      const uint8_t* targetPipe = verifyPipeForID(result.targetId);
-      if (targetPipe) {
-        const bool wasSent = send.hitResponse(result.targetId, targetPipe, {result.newScore, result.status});
-        if (result.targetId == request.id) {
-          sent = wasSent;
-        }
-      }
-    }
-    // if (hasWon) {
-    //   sessionManager.setStatus(GameSessionStatus::Ended, true);
-    // }
-    return sent;
+    return updateBatch(batch);
   }
   return false;
 }
+
+const bool Communication::alertGameTimerEnded(ScoreUpdateBatch batch) {
+  return updateBatch(batch);
+}
+
+
 
 // const bool Communication::entityColor(uint8_t targetId, char colorName[16]) {
 //   return send.entityColorRequest(targetId, colorName);

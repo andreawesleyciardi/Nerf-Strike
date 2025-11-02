@@ -16,8 +16,9 @@ public:
   GameLogic(GameSessionManager& sessionManager);
   void reset();
   ScoreUpdateBatch updateEntityScore(uint8_t targetId);
-  int calculateScore(String gameModeName, int currentScore);
-  ScoreStatus evaluateScoreStatus(String gameModeName, const GameMode& gameMode, int score = 0);
+  int calculateScore(const GameMode& gameMode, int currentScore);
+  ScoreStatus evaluateScoreStatus(const GameMode& gameMode, int score = 0);
+  ScoreUpdateBatch gameTimerEnded();
 
 private:
   GameSessionManager& sessionManager;

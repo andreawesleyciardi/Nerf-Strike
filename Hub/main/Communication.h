@@ -22,10 +22,10 @@ public:
   void pairing(const byte* buffer);
   void verification(const byte* buffer);
   const bool hit(const byte* buffer);
-  // const bool entityColor(uint8_t targetId, char colorName[16]);
   const bool targetSessionInfo(uint8_t targetId, const TargetSessionInfo& sessionInfo);
   const bool showTargetColor(uint8_t targetId, bool switchOn = true);
   const bool sessionStatus(uint8_t targetId, GameSessionStatus status);
+  const bool alertGameTimerEnded(ScoreUpdateBatch batch);
 
 private:
   const uint8_t* verifyPipeForID(uint8_t targetId);
@@ -35,6 +35,7 @@ private:
   GameLogic& gameLogic;
   RGBLed& statusRgbLed;
   GameSessionManager& sessionManager;
+  bool updateBatch(ScoreUpdateBatch batch, uint8_t id = TARGET_ID_NONE);
 };
 
 #endif

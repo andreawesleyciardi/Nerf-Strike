@@ -187,9 +187,9 @@ void loop() {
               if (packet->status == ScoreStatus::Won || packet->status == ScoreStatus::Even) {
                 TargetInfo info = registry.getTargetInfo();
                 Color entityColor = ColorPalette::getByIndex(info.entityColorIndex);
-                rgbRing.chase("Green", 25);
-                rgbRing.chase("Green", 25);
-                rgbRing.blink("Green", 3);
+                rgbRing.chase(packet->status == ScoreStatus::Won ? "Green" : "Orange", 25);
+                rgbRing.chase(packet->status == ScoreStatus::Won ? "Green" : "Orange", 25);
+                rgbRing.blink(packet->status == ScoreStatus::Won ? "Green" : "Orange", 3);
                 rgbRing.fill(entityColor.name);
                 delay(2000);
                 rgbRing.off();

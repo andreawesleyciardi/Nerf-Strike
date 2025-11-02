@@ -115,7 +115,7 @@ void Send::heartbeatAll(PairingRegistry& registry) {
   }
 }
 
-const bool Send::hitResponse(uint8_t id, const uint8_t* pipe, ScoreUpdated result) {
+const bool Send::scoreUpdate(uint8_t id, const uint8_t* pipe, ScoreUpdated result) {
   HitResponsePacket packet = {
     OPCODE_SCORE_UPDATE,
     result.newScore,

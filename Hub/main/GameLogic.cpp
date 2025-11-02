@@ -12,7 +12,7 @@ void GameLogic::reset() {
 }
 
 ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
-  Serial.println(F("Entered in updateEntityScore"));
+  // Serial.println(F("Entered in updateEntityScore"));
   ScoreUpdateBatch batch;
 
   if (targetId >= MAX_TARGETS) {
@@ -26,9 +26,9 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
   int currentScore = sessionManager.getScoreForEntity(entityId);
   const GameMode& gameMode = sessionManager.getSelectedGameMode();
   String gameModeName = gameMode.getName();
-  int updatedScore = calculateScore(gameModeName, currentScore);
+  int updatedScore = calculateScore(gameMode, currentScore);
   sessionManager.setScoreForEntity(entityId, updatedScore);
-  ScoreStatus status = evaluateScoreStatus(gameModeName, gameMode, updatedScore);
+  ScoreStatus status = evaluateScoreStatus(gameMode, updatedScore);
   // To add a function that updates the session with the status if win or lost
 
   if (status == ScoreStatus::Won) {
@@ -88,11 +88,8 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
   return batch;
 }
 
-int GameLogic::calculateScore(String gameModeName, int currentScore) {
-  // Serial.print(F("gameModeName in calculateScore: "));
-  // Serial.println(gameModeName);
-  // Serial.print(F("currentScore: "));
-  // Serial.println(currentScore);
+int GameLogic::calculateScore(const GameMode& gameMode, int currentScore) {
+  String gameModeName = gameMode.getName();
   if (
     gameModeName.equals(ModeName::Training) ||
     gameModeName.equals(ModeName::ToNumber) ||
@@ -107,10 +104,10 @@ int GameLogic::calculateScore(String gameModeName, int currentScore) {
   return 0;
 }
 
-ScoreStatus GameLogic::evaluateScoreStatus(String gameModeName, const GameMode& gameMode, int score) {
+ScoreStatus GameLogic::evaluateScoreStatus(const GameMode& gameMode, int score) {
   const ModeSetting* settings = gameMode.getAllSettings();
-  // Serial.print("gameModeName in evaluateScoreStatus: ");
-  // Serial.println(gameModeName);
+  String gameModeName = gameMode.getName();
+
   if (gameModeName.equals(ModeName::Training)) {
     return ScoreStatus::Add;
   }
@@ -120,17 +117,71 @@ ScoreStatus GameLogic::evaluateScoreStatus(String gameModeName, const GameMode& 
     gameModeName.equals(ModeName::LitTarget) ||
     gameModeName.equals(ModeName::TimeForShots)
   ) {
-    if (score == settings[0].value) {
-      return ScoreStatus::Won;
-    } else {
-      return ScoreStatus::Add;
+    for (uint8_t i = 0; i < gameMode.getSettingCount(); ++i) {
+      if (settings[i].type == SettingType::HITS && score == settings[i].value) {
+        return ScoreStatus::Won;
+      }
+    }
+    return ScoreStatus::Add;
+  }
+  return ScoreStatus::OnGoing;
+}
+
+ScoreUpdateBatch GameLogic::gameTimerEnded() {
+  sessionManager.setStatus(GameSessionStatus::Ended);
+
+  ScoreUpdateBatch batch;
+
+  const EntityInfo* entities = sessionManager.getAllEntities();
+  uint8_t entitiesCount = sessionManager.getEntityCount();
+
+  // Step 1: Find highest score
+  int highestScore = 0;
+  for (uint8_t i = 0; i < entitiesCount; ++i) {
+    int score = sessionManager.getScoreForEntity(entities[i].entityId);
+    if (score > highestScore) {
+      highestScore = score;
     }
   }
-  else if (gameModeName.equals(ModeName::Timer)) {
-    // Timer mode logic
+
+  // Step 2: Collect winners
+  uint8_t winners[MAX_ENTITIES];
+  uint8_t winnerCount = 0;
+  for (uint8_t i = 0; i < entitiesCount; ++i) {
+    int score = sessionManager.getScoreForEntity(entities[i].entityId);
+    if (score == highestScore) {
+      winners[winnerCount++] = entities[i].entityId;
+    }
   }
-  // else if (gameModeName.equals(ModeName::CrazyTargets)) {
-  //   // Crazy targets mode logic
-  // }
-  return ScoreStatus::OnGoing;
+
+  // Step 3: Notify all targets with correct ScoreStatus
+  for (uint8_t i = 0; i < entitiesCount; ++i) {
+    int entityScore = sessionManager.getScoreForEntity(entities[i].entityId);
+    ScoreStatus status;
+
+    if (winnerCount > 1) {
+      status = ScoreStatus::Even;
+    } else {
+      bool isWinner = false;
+      for (uint8_t w = 0; w < winnerCount; ++w) {
+        if (entities[i].entityId == winners[w]) {
+          isWinner = true;
+          break;
+        }
+      }
+      status = isWinner ? ScoreStatus::Won : ScoreStatus::Lost;
+    }
+
+    if (entities[i].targetCount > 0) {
+      for (uint8_t y = 0; y < entities[i].targetCount; ++y) {
+        batch.updates[batch.count++] = {
+          entities[i].targetIds[y],
+          static_cast<uint8_t>(entityScore),
+          status
+        };
+      }
+    }
+  }
+  
+  return batch;
 }

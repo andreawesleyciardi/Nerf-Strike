@@ -22,7 +22,7 @@ public:
   void blinkAll(PairingRegistry& registry);
   void heartbeatAll(PairingRegistry& registry);
 
-  const bool hitResponse(uint8_t id, const uint8_t* pipe, ScoreUpdated result);
+  const bool scoreUpdate(uint8_t id, const uint8_t* pipe, ScoreUpdated result);
 
   // const bool entityColorRequest(uint8_t id, char colorName[16]);
   const bool targetSessionInfoRequest(uint8_t id, const TargetSessionInfo& sessionInfo);

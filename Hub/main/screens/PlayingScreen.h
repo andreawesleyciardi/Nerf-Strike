@@ -24,8 +24,6 @@ public:
     : display(display), gameLogic(gameLogic), communication(communication) {}
 
   void onEnter() override {
-    // ✅ Push entity colors to targets
-    // sessionManager.communicateEntityColor();                                    // <-- To communicate also the indexInEntity and the enabled status
     sessionManager.communicateTargetSessionInfo();
     sessionManager.setStatus(GameSessionStatus::Starting, true);
 
@@ -36,6 +34,11 @@ public:
     countdownStartTime = millis();
     timeDisplay.showScore(countdownValue);
     screenRenderer.requestRefresh();
+
+    // Reset game timer
+    gameTimerActive = false;
+    gameTimerDuration = 0;
+    gameTimerStartTime = 0;
   }
 
   void onExit() override {
@@ -73,9 +76,20 @@ public:
         // Toggle pause/play
         if (currentStatus == GameSessionStatus::Playing) {
           sessionManager.setStatus(GameSessionStatus::Paused, true);
+          // ✅ Pause game timer
+          if (gameTimerActive) {
+            gameTimerPaused = true;
+            gameTimerPauseTime = millis();
+          }
         }
         else if (currentStatus == GameSessionStatus::Paused) {
           sessionManager.setStatus(GameSessionStatus::Playing, true);
+          // ✅ Resume game timer
+          if (gameTimerActive && gameTimerPaused) {
+            unsigned long pausedDuration = millis() - gameTimerPauseTime;
+            gameTimerStartTime += pausedDuration;
+            gameTimerPaused = false;
+          }
         }
       }
     }
@@ -100,6 +114,33 @@ public:
           countdownActive = false;
           sessionManager.setStatus(GameSessionStatus::Playing, true);
           screenRenderer.requestRefresh();
+
+          // ✅ Start game timer if TIME setting exists
+          const GameMode& gameMode = sessionManager.getSelectedGameMode();
+          const ModeSetting* settings = gameMode.getAllSettings();
+          for (uint8_t i = 0; i < gameMode.getSettingCount(); ++i) {
+            if (settings[i].type == SettingType::TIME) {
+              gameTimerDuration = settings[i].value * 1000UL;  // convert to ms
+              gameTimerStartTime = millis();
+              gameTimerActive = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    // ✅ Check game timer
+    if (gameTimerActive && sessionManager.getStatus() == GameSessionStatus::Playing) {
+      unsigned long now = millis();
+      if (now - gameTimerStartTime >= gameTimerDuration) {
+        gameTimerActive = false;
+        ScoreUpdateBatch batch = gameLogic.gameTimerEnded();
+        if (communication.alertGameTimerEnded(batch)) {
+          Serial.println(F("✅ Alerted targets of timer game ended"));
+        }
+        else {
+          Serial.println(F("❌ Not alerted targets of timer game ended"));
         }
       }
     }
@@ -134,6 +175,14 @@ private:
   bool countdownActive = false;
   uint8_t countdownValue = 0;
   unsigned long countdownStartTime = 0;
+
+  // ✅ Game timer fields
+  bool gameTimerActive = false;
+  unsigned long gameTimerStartTime = 0;
+  unsigned long gameTimerDuration = 0;
+
+  bool gameTimerPaused = false;
+  unsigned long gameTimerPauseTime = 0;
 };
 
 #endif
