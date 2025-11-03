@@ -108,7 +108,7 @@ ScoreStatus GameLogic::evaluateScoreStatus(const GameMode& gameMode, int score) 
   const ModeSetting* settings = gameMode.getAllSettings();
   String gameModeName = gameMode.getName();
 
-  if (gameModeName.equals(ModeName::Training)) {
+  if (gameModeName.equals(ModeName::Training) || gameModeName.equals(ModeName::Timer)) {
     return ScoreStatus::Add;
   }
   else if (

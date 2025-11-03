@@ -36,7 +36,7 @@ private:
   GameLogic& gameLogic;
   Communication& communication;
 
-  static const uint8_t screenCount = 13;
+  static const uint8_t screenCount = 14;
   Screen* screens[screenCount] = {nullptr};
   ScreenType activeScreen = ScreenType::Splash;
 

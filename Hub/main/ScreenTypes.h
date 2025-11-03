@@ -10,7 +10,6 @@ enum class ScreenType {
   Help,
   Settings,
   Pairing,
-  TargetList,
   GameModeList,
   GameModeOptions,
   Playing,
