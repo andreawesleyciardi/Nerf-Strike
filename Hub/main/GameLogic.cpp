@@ -89,42 +89,32 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
 }
 
 int GameLogic::calculateScore(const GameMode& gameMode, int currentScore) {
-  String gameModeName = gameMode.getName();
-  if (
-    gameModeName.equals(ModeName::Training) ||
-    gameModeName.equals(ModeName::ToNumber) ||
-    gameModeName.equals(ModeName::Timer) ||
-    gameModeName.equals(ModeName::TimeForShots) ||
-    gameModeName.equals(ModeName::LitTarget) ||
-    gameModeName.equals(ModeName::Battle)
-    // || gameModeName.equals(ModeName::CrazyTargets)
-  ) {
+  // String gameModeName = gameMode.getName();
+  // if (
+  //   gameModeName.equals(ModeName::Training) ||
+  //   gameModeName.equals(ModeName::ToNumber) ||
+  //   gameModeName.equals(ModeName::Timer) ||
+  //   gameModeName.equals(ModeName::TimeForShots) ||
+  //   gameModeName.equals(ModeName::LitTarget) ||
+  //   gameModeName.equals(ModeName::Battle)
+  //   // || gameModeName.equals(ModeName::CrazyTargets)
+  // ) {
     return currentScore + 1;
-  }
-  return 0;
+  // }
+  // return 0;
 }
 
 ScoreStatus GameLogic::evaluateScoreStatus(const GameMode& gameMode, int score) {
   const ModeSetting* settings = gameMode.getAllSettings();
-  String gameModeName = gameMode.getName();
+  uint8_t settingCount = gameMode.getSettingCount();
 
-  if (gameModeName.equals(ModeName::Training) || gameModeName.equals(ModeName::Timer)) {
-    return ScoreStatus::Add;
-  }
-  else if (
-    gameModeName.equals(ModeName::ToNumber) ||
-    gameModeName.equals(ModeName::Battle) ||
-    gameModeName.equals(ModeName::LitTarget) ||
-    gameModeName.equals(ModeName::TimeForShots)
-  ) {
-    for (uint8_t i = 0; i < gameMode.getSettingCount(); ++i) {
-      if (settings[i].type == SettingType::HITS && score == settings[i].value) {
-        return ScoreStatus::Won;
-      }
+  for (uint8_t i = 0; i < settingCount; ++i) {
+    if (settings[i].type == SettingType::HITS && score == settings[i].value) {
+      return ScoreStatus::Won;
     }
-    return ScoreStatus::Add;
   }
-  return ScoreStatus::OnGoing;
+
+  return ScoreStatus::Add;
 }
 
 ScoreUpdateBatch GameLogic::gameTimerEnded() {
