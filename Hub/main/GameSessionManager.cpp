@@ -221,3 +221,16 @@ void GameSessionManager::communicateStatus(uint8_t targetId) {
     }
   }
 }
+
+bool GameSessionManager::allEntitiesHaveSingleTarget() const {
+  const EntityInfo* entities = getAllEntities();
+  uint8_t count = getEntityCount();
+  for (uint8_t i = 0; i < count; ++i) {
+    if (entities[i].targetCount > 1) return false;
+  }
+  return true;
+}
+
+ModeLitTargetState& GameSessionManager::getLitTargetState() { return litTargetState; }
+
+ModeTimerState& GameSessionManager::getTimerState() { return timerState; }

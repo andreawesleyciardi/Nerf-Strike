@@ -33,7 +33,7 @@ LcdDisplay display(lcdI2CAddress, 20, 4);
 
 GameSessionManager sessionManager(registry);
 
-GameLogic gameLogic(sessionManager);
+GameLogic gameLogic(sessionManager, registry);
 
 CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager);
 

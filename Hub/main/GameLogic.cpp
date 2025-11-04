@@ -1,15 +1,134 @@
 #include "GameLogic.h"
 #include "GameMode.h"
 #include "EntityInfo.h"
+#include "GameModeRegistry.h"
+#include "Communication.h"
 
-GameLogic::GameLogic(GameSessionManager& sessionManager)
-  : sessionManager(sessionManager) {}
+extern GameModeRegistry gameModeRegistry;
+extern Communication communication;
+
+GameLogic::GameLogic(GameSessionManager& sessionManager, PairingRegistry& registry)
+  : sessionManager(sessionManager), registry(registry) {}
 
 void GameLogic::reset() {
   for (uint8_t i = 0; i < MAX_TARGETS; i++) {
     // scores[i] = 0;
   }
 }
+
+// LitTarget
+  uint8_t GameLogic::litTargetSelectIndex() {
+    const EntityInfo* entities = sessionManager.getAllEntities();
+    uint8_t count = sessionManager.getEntityCount();
+    for (uint8_t i = 0; i < count; ++i) {
+      if (entities[i].targetCount > 1) {
+        return random(0, entities[i].targetCount);
+      }
+    }
+    return 0;
+  }
+
+  void GameLogic::litTargetSetup() {
+    ModeLitTargetState& litState = sessionManager.getLitTargetState();
+    const GameMode& gameMode = sessionManager.getSelectedGameMode();
+    const ModeSetting* settings = gameMode.getAllSettings();
+    uint8_t settingCount = gameMode.getSettingCount();
+
+    DifficultyLevel difficultyLevel = DifficultyLevel::Easy;
+    for (uint8_t i = 0; i < settingCount; ++i) {
+      if (settings[i].type == SettingType::DIFFICULTY) {
+        difficultyLevel = static_cast<DifficultyLevel>(settings[i].value);
+        break;
+      }
+    }
+
+    litState.active = true;
+    litState.onDuration = gameModeRegistry.getLitTargetDuration(difficultyLevel);
+    litState.startTime = millis();
+    litState.index = litTargetSelectIndex();
+    // communication.lit(litState.index);                           TODO      in communication.lit create a batch for update all targets                  <------------------------------ PRIORITY
+  }
+
+  void GameLogic::litTargetLoop() {
+    if (sessionManager.getStatus() != GameSessionStatus::Playing) return;
+
+    ModeLitTargetState& litState = sessionManager.getLitTargetState();
+    unsigned long now = millis();
+
+    if (!litState.active) return;
+
+    if (!litState.offPhase && now - litState.startTime >= litState.onDuration) {
+      if (sessionManager.allEntitiesHaveSingleTarget()) {
+        litState.offPhase = true;
+        litState.offDuration = random(500, 1500);
+        litState.startTime = now;
+      } else {
+        litState.index = litTargetSelectIndex();
+        // communication.lit(litState.index);                           TODO      in communication.lit create a batch for update all targets                  <------------------------------ PRIORITY
+        litState.startTime = now;
+      }
+    } else if (litState.offPhase && now - litState.startTime >= litState.offDuration) {
+      litState.offPhase = false;
+      litState.index = litTargetSelectIndex();
+      // communication.lit(litState.index);                           TODO      in communication.lit create a batch for update all targets                  <------------------------------ PRIORITY
+      litState.startTime = now;
+    }
+    Serial.print(F("🎯 New selected index: "));
+    Serial.println(litState.index);
+  }
+
+// Timer
+  void GameLogic::timerSetup() {
+    const GameMode& gameMode = sessionManager.getSelectedGameMode();
+    const ModeSetting* settings = gameMode.getAllSettings();
+    uint8_t settingCount = gameMode.getSettingCount();
+
+    for (uint8_t i = 0; i < settingCount; ++i) {
+      if (settings[i].type == SettingType::TIME) {
+        ModeTimerState& timer = sessionManager.getTimerState();
+        timer.duration = settings[i].value * 1000UL;  // convert seconds to ms
+        timer.startTime = millis();
+        timer.active = true;
+        break;
+      }
+    }
+  }
+
+  void GameLogic::timerLoop() {
+    if (sessionManager.getStatus() != GameSessionStatus::Playing) return;
+
+    ModeTimerState& timer = sessionManager.getTimerState();
+    if (!timer.active) return;
+
+    unsigned long now = millis();
+    if (now - timer.startTime >= timer.duration) {
+      timer.active = false;
+      ScoreUpdateBatch batch = gameTimerEnded();
+      if (communication.alertGameTimerEnded(batch)) {
+        Serial.println(F("✅ Alerted targets of timer game ended"));
+      } else {
+        Serial.println(F("❌ Not alerted targets of timer game ended"));
+      }
+    }
+  }
+
+  void GameLogic::timerPause() {
+    ModeTimerState& timer = sessionManager.getTimerState();
+    if (timer.active) {
+      timer.paused = true;
+      timer.pauseTime = millis();
+    }
+  }
+
+  void GameLogic::timerResume() {
+    ModeTimerState& timer = sessionManager.getTimerState();
+    if (timer.active && timer.paused) {
+      unsigned long pausedDuration = millis() - timer.pauseTime;
+      timer.startTime += pausedDuration;
+      timer.paused = false;
+    }
+  }
+  
 
 ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
   // Serial.println(F("Entered in updateEntityScore"));
@@ -23,9 +142,21 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
 
   // Having the id of the hitted target I retreive the assigned entity; after get the current score using the game logic I calculate the new score
   uint8_t entityId = sessionManager.getEntityIdForTarget(targetId);
-  int currentScore = sessionManager.getScoreForEntity(entityId);
   const GameMode& gameMode = sessionManager.getSelectedGameMode();
   String gameModeName = gameMode.getName();
+
+  if (gameModeName.equals(ModeName::LitTarget)) {
+    TargetInfo target = registry.getTargetByID(targetId);
+    ModeLitTargetState& litState = sessionManager.getLitTargetState();
+    // compare target.indexInEntity with the currently selected index in the game session
+    // if is not the right index then just return batch empty
+    // if is the right index then I think this function can continue execute as it is.
+    if (target.indexInEntity != litState.index) {
+      return batch;
+    }
+  }
+
+  int currentScore = sessionManager.getScoreForEntity(entityId);
   int updatedScore = calculateScore(gameMode, currentScore);
   sessionManager.setScoreForEntity(entityId, updatedScore);
   ScoreStatus status = evaluateScoreStatus(gameMode, updatedScore);

@@ -27,18 +27,15 @@ public:
     sessionManager.communicateTargetSessionInfo();
     sessionManager.setStatus(GameSessionStatus::Starting, true);
 
-    // ✅ Start countdown
-    countdownStarted = false;
-    countdownActive = true;
-    countdownValue = 5;
-    countdownStartTime = millis();
-    timeDisplay.showScore(countdownValue);
+    countdown = {};
+    countdown.active = true;
+    countdown.value = 5;
+    countdown.startTime = millis();
+    timeDisplay.showScore(countdown.value);
     screenRenderer.requestRefresh();
 
-    // Reset game timer
-    gameTimerActive = false;
-    gameTimerDuration = 0;
-    gameTimerStartTime = 0;
+    sessionManager.getTimerState() = {};
+    sessionManager.getLitTargetState() = {};
   }
 
   void onExit() override {
@@ -47,13 +44,13 @@ public:
 
   void render() override {
     display.clear();
-    if (!countdownStarted) {
+    if (!countdown.started) {
       display.showLine(1, "Ready...", "center");
       delay(1000);
-      countdownStarted = true;
-    } else if (countdownActive) {
+      countdown.started = true;
+    } else if (countdown.active) {
       display.showLine(0, "Starting in...", "center");
-      display.showLine(1, "0" + String(countdownValue), "center");
+      display.showLine(1, "0" + String(countdown.value), "center");
     } else if (sessionManager.getStatus() == GameSessionStatus::Paused) {
       display.showLine(1, "Paused", "center");
     } else if (sessionManager.getStatus() == GameSessionStatus::Ended) {
@@ -63,7 +60,7 @@ public:
       display.showLine(1, "progress...", "center");
     }
   }
-  
+
   void handleInput(RotaryEncoder& encoder, Button& left, Button& right) override {
     if (left.wasPressed()) {
       Serial.println(F("GameSessionStatus::Ended -> Going to Home"));
@@ -73,23 +70,12 @@ public:
     if (encoder.wasPressed()) {
       GameSessionStatus currentStatus = sessionManager.getStatus();
       if (currentStatus == GameSessionStatus::Playing || currentStatus == GameSessionStatus::Paused) {
-        // Toggle pause/play
         if (currentStatus == GameSessionStatus::Playing) {
           sessionManager.setStatus(GameSessionStatus::Paused, true);
-          // ✅ Pause game timer
-          if (gameTimerActive) {
-            gameTimerPaused = true;
-            gameTimerPauseTime = millis();
-          }
-        }
-        else if (currentStatus == GameSessionStatus::Paused) {
+          gameLogic.timerPause();
+        } else {
           sessionManager.setStatus(GameSessionStatus::Playing, true);
-          // ✅ Resume game timer
-          if (gameTimerActive && gameTimerPaused) {
-            unsigned long pausedDuration = millis() - gameTimerPauseTime;
-            gameTimerStartTime += pausedDuration;
-            gameTimerPaused = false;
-          }
+          gameLogic.timerResume();
         }
       }
     }
@@ -100,49 +86,38 @@ public:
   }
 
   void loop() override {
-    if (countdownActive) {
-      unsigned long now = millis();
-      if (now - countdownStartTime >= 1000) {
-        countdownStartTime = now;
-        countdownValue--;
+    unsigned long now = millis();
 
-        if (countdownValue > 0) {
-          timeDisplay.showScore(countdownValue);
-          screenRenderer.requestRefresh();
-        } else {
-          timeDisplay.clear();
-          countdownActive = false;
-          sessionManager.setStatus(GameSessionStatus::Playing, true);
-          screenRenderer.requestRefresh();
+    const GameMode& gameMode = sessionManager.getSelectedGameMode();
+    String gameModeName = gameMode.getName();
 
-          // ✅ Start game timer if TIME setting exists
-          const GameMode& gameMode = sessionManager.getSelectedGameMode();
-          const ModeSetting* settings = gameMode.getAllSettings();
-          for (uint8_t i = 0; i < gameMode.getSettingCount(); ++i) {
-            if (settings[i].type == SettingType::TIME) {
-              gameTimerDuration = settings[i].value * 1000UL;  // convert to ms
-              gameTimerStartTime = millis();
-              gameTimerActive = true;
-              break;
-            }
-          }
+    if (countdown.active && now - countdown.startTime >= 1000) {
+      countdown.startTime = now;
+      countdown.value--;
+
+      if (countdown.value > 0) {
+        timeDisplay.showScore(countdown.value);
+        screenRenderer.requestRefresh();
+      } else {
+        timeDisplay.clear();
+        countdown.active = false;
+        sessionManager.setStatus(GameSessionStatus::Playing, true);
+        screenRenderer.requestRefresh();
+        
+        if (gameModeName.equals(ModeName::Timer)) {
+          gameLogic.timerSetup();
+        }
+        if (gameModeName.equals(ModeName::LitTarget)) {
+          gameLogic.litTargetSetup();
         }
       }
     }
 
-    // ✅ Check game timer
-    if (gameTimerActive && sessionManager.getStatus() == GameSessionStatus::Playing) {
-      unsigned long now = millis();
-      if (now - gameTimerStartTime >= gameTimerDuration) {
-        gameTimerActive = false;
-        ScoreUpdateBatch batch = gameLogic.gameTimerEnded();
-        if (communication.alertGameTimerEnded(batch)) {
-          Serial.println(F("✅ Alerted targets of timer game ended"));
-        }
-        else {
-          Serial.println(F("❌ Not alerted targets of timer game ended"));
-        }
-      }
+    if (gameModeName.equals(ModeName::Timer)) {
+      gameLogic.timerLoop();
+    }
+    if (gameModeName.equals(ModeName::LitTarget)) {
+      gameLogic.litTargetLoop();
     }
   }
 
@@ -161,8 +136,8 @@ public:
   String getHash() const override {
     if (sessionManager.getStatus() == GameSessionStatus::Paused) return "Paused";
     if (sessionManager.getStatus() == GameSessionStatus::Ended) return "Ended";
-    if (!countdownStarted) return "Playing-ready";
-    if (countdownActive) return "Playing-countdown-" + String(countdownValue);
+    if (!countdown.started) return "Playing-ready";
+    if (countdown.active) return "Playing-countdown-" + String(countdown.value);
     return "Playing-active";
   }
 
@@ -171,18 +146,12 @@ private:
   GameLogic& gameLogic;
   Communication& communication;
 
-  bool countdownStarted = false;
-  bool countdownActive = false;
-  uint8_t countdownValue = 0;
-  unsigned long countdownStartTime = 0;
-
-  // ✅ Game timer fields
-  bool gameTimerActive = false;
-  unsigned long gameTimerStartTime = 0;
-  unsigned long gameTimerDuration = 0;
-
-  bool gameTimerPaused = false;
-  unsigned long gameTimerPauseTime = 0;
+  struct CountdownState {
+    bool started = false;
+    bool active = false;
+    uint8_t value = 0;
+    unsigned long startTime = 0;
+  } countdown;
 };
 
 #endif

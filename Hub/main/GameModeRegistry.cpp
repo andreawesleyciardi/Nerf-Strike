@@ -148,3 +148,12 @@ const GameMode& GameModeRegistry::getModeByName(const String& name) const {
 
   return modes[0];
 }
+
+uint32_t GameModeRegistry::getLitTargetDuration(DifficultyLevel level) {
+  switch (level) {
+    case DifficultyLevel::Easy: return 3000;
+    case DifficultyLevel::Medium: return 2000;
+    case DifficultyLevel::Hard: return 1000;
+    default: return 1500;
+  }
+}

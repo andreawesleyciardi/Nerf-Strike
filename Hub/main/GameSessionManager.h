@@ -4,7 +4,9 @@
 #include <Arduino.h>
 #include <Statuses.h>
 #include <ColorPalette.h>
+
 #include "GameMode.h"
+#include "GameModeRegistry.h"
 #include "GameSession.h"
 #include "PairingRegistry.h"
 #include "EntityInfo.h"
@@ -21,6 +23,7 @@ public:
 
   uint8_t calculateTargetsPerEntity(uint8_t totalPaired, uint8_t totalEntities) const;
   bool isMultiplayer() const;
+  
   int getScoreForEntity(uint8_t entityId) const;
   void setScoreForEntity(uint8_t entityId, int value);
   uint8_t getEntityIdForTarget(uint8_t targetId) const;
@@ -46,9 +49,16 @@ public:
   GameSession& getSession();
   const GameSession& getSession() const;
 
+  bool allEntitiesHaveSingleTarget() const;
+
+  ModeLitTargetState& getLitTargetState();
+  ModeTimerState& getTimerState();
+
 private:
   PairingRegistry& registry;
   GameSession session;
+  ModeLitTargetState litTargetState;
+  ModeTimerState timerState;
 };
 
 #endif

@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include <Score.h>
+#include <Target.h>
+
 #include "PairingRegistry.h"
 #include "GameSessionManager.h"
 
@@ -13,8 +15,18 @@ struct ScoreUpdateBatch {
 
 class GameLogic {
 public:
-  GameLogic(GameSessionManager& sessionManager);
+  GameLogic(GameSessionManager& sessionManager, PairingRegistry& registry);
   void reset();
+
+  uint8_t litTargetSelectIndex();
+  void litTargetSetup();
+  void litTargetLoop();
+
+  void timerSetup();
+  void timerLoop();
+  void timerPause();
+  void timerResume();
+
   ScoreUpdateBatch updateEntityScore(uint8_t targetId);
   int calculateScore(const GameMode& gameMode, int currentScore);
   ScoreStatus evaluateScoreStatus(const GameMode& gameMode, int score = 0);
@@ -22,6 +34,7 @@ public:
 
 private:
   GameSessionManager& sessionManager;
+  PairingRegistry& registry;
 };
 
 extern GameLogic gameLogic;

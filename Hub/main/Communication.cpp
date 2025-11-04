@@ -78,7 +78,9 @@ const bool Communication::hit(const byte* buffer) {
   const uint8_t* pipe = verifyPipeForID(request.id);
   if (pipe) {
     ScoreUpdateBatch batch = gameLogic.updateEntityScore(request.id);
-    return updateBatch(batch);
+    if (batch.count > 0) {
+      return updateBatch(batch);
+    }
   }
   return false;
 }
