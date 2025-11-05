@@ -9,11 +9,13 @@
 #include <DisplayFeedback.h>
 #include <Target.h>
 
+
 #include "Receive.h"
 #include "Send.h"
 #include "PairingRegistry.h"
 #include "GameLogic.h"
 #include "GameSessionManager.h"
+#include "EntityInfo.h"
 
 class Communication {
 public:
@@ -25,6 +27,7 @@ public:
   const bool targetSessionInfo(uint8_t targetId, const TargetSessionInfo& sessionInfo);
   const bool showTargetColor(uint8_t targetId, bool switchOn = true);
   const bool sessionStatus(uint8_t targetId, GameSessionStatus status);
+  const bool litTarget(uint8_t indexInEntity = 255);
   const bool alertGameTimerEnded(ScoreUpdateBatch batch);
 
 private:

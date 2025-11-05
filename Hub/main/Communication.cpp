@@ -85,6 +85,21 @@ const bool Communication::hit(const byte* buffer) {
   return false;
 }
 
+const bool Communication::litTarget(uint8_t indexInEntity) {
+  const EntityInfo* entities = sessionManager.getAllEntities();
+  uint8_t entityCount = sessionManager.getEntityCount();
+
+  bool result = true;
+  for (uint8_t i = 0; i < entityCount; ++i) {
+    for (uint8_t j = 0; j < entities[i].targetCount; ++j) {
+      if (!send.litTargetRequest(entities[i].targetIds[j], indexInEntity)) {
+        result = false;
+      }
+    }
+  }
+  return result;
+}
+
 const bool Communication::alertGameTimerEnded(ScoreUpdateBatch batch) {
   return updateBatch(batch);
 }

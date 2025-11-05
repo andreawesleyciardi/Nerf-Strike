@@ -202,3 +202,22 @@ const bool Send::sessionStatusRequest(uint8_t id, GameSessionStatus status) {
   }
   return false;
 }
+
+const bool Send::litTargetRequest(uint8_t id, uint8_t indexInEntity) {
+  GameModeLitTargetRequestPacket packet = {
+    OPCODE_GAMEMODE_LITTARGET,
+    indexInEntity
+  };
+
+  const uint8_t* pipe = registry.getPipeForID(id);
+  if (id != 0xFF && pipe) {
+    if (toTargetPipe(id, pipe, &packet, sizeof(packet))) {
+      Serial.print(F("📤 litTarget update sent to target ID "));
+      Serial.println(id);
+      return true;
+    }
+  }
+  return false;
+}
+
+

@@ -150,22 +150,6 @@ void GameSessionManager::restart(bool toCommunicate) {
   setStatus(GameSessionStatus::Playing, toCommunicate);
 }
 
-// void GameSessionManager::communicateEntityColor(uint8_t targetId) {
-//   for (uint8_t i = 0; i < session.entityCount; ++i) {
-//     const EntityInfo& entity = session.entities[i];
-//     const Color& color = entity.color;
-//     for (uint8_t j = 0; j < entity.targetCount; ++j) {
-//       uint8_t currentTargetId = entity.targetIds[j];
-//       char colorName[16];
-//       strncpy(colorName, color.name.c_str(), sizeof(colorName));
-//       colorName[sizeof(colorName) - 1] = '\0';
-//       if (((targetId != TARGET_ID_NONE) && (currentTargetId == targetId)) || (targetId == TARGET_ID_NONE)) {
-//         communication.entityColor(currentTargetId, colorName);
-//       }
-//     }
-//   }
-// }
-
 void GameSessionManager::communicateTargetSessionInfo(uint8_t targetId) {
   for (uint8_t i = 0; i < session.entityCount; ++i) {
     const EntityInfo& entity = session.entities[i];

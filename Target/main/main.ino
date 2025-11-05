@@ -208,7 +208,7 @@ void loop() {
       }
 
       case OPCODE_SESSION_STATUS: {
-          // TO ADD AN ID TO THE SESSION AND THE LAST ON GOING SESSION CAN BE KEPT IN MEMORY SO IF IS LOST THE CONNECTION, ONCE FIXED CAN CHECK IF THE SESSION ON GOING IS STILL THE PREVIOUS ONE AND CAN THEN CATCH UP WHAT LOST.
+          // TO DO MAYBE: ADD AN ID TO THE SESSION AND THE LAST ON GOING SESSION CAN BE KEPT IN MEMORY SO IF IS LOST THE CONNECTION, ONCE FIXED CAN CHECK IF THE SESSION ON GOING IS STILL THE PREVIOUS ONE AND CAN THEN CATCH UP WHAT LOST.
           SessionStatusPacket* packet = reinterpret_cast<SessionStatusPacket*>(buffer);
           GameSessionStatus newStatus = packet->status;
           Serial.print(F("🔦 New GameSessionStatus received: "));
@@ -230,7 +230,30 @@ void loop() {
             delay(500);
             scoreDisplay.updateScore(0, true);
           }
+          // To check if this happens already:
+          // if (newStatus == GameSessionStatus::Playing) {
+          //   entityRgbLed.on();
+          // }
           sessionStatus = newStatus;
+        break;
+      }
+
+      case OPCODE_GAMEMODE_LITTARGET: {
+          GameModeLitTargetRequestPacket* packet = reinterpret_cast<GameModeLitTargetRequestPacket*>(buffer);
+          uint8_t indexInEntity = packet->indexInEntity;
+          if (indexInEntity == 255) {
+            rgbRing.off();
+          }
+          else {
+            TargetInfo info = registry.getTargetInfo();
+            if (indexInEntity == info.indexInEntity) {
+              Color entityColor = ColorPalette::getByIndex(info.entityColorIndex);
+              rgbRing.fill(entityColor.name);
+            }
+            else {
+              rgbRing.off();
+            }
+          }
         break;
       }
 

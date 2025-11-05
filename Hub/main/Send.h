@@ -29,6 +29,8 @@ public:
   const bool showTargetColorRequest(uint8_t id, bool switchOn);
 
   const bool sessionStatusRequest(uint8_t id, GameSessionStatus status);
+
+  const bool litTargetRequest(uint8_t id, uint8_t indexInEntity);
   
 private:
   RF24& radio;

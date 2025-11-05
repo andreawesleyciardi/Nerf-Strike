@@ -46,7 +46,8 @@ void GameLogic::reset() {
     litState.onDuration = gameModeRegistry.getLitTargetDuration(difficultyLevel);
     litState.startTime = millis();
     litState.index = litTargetSelectIndex();
-    // communication.lit(litState.index);                           TODO      in communication.lit create a batch for update all targets                  <------------------------------ PRIORITY
+    // I communicate to the targets the new index; If is their index then they switch on
+    communication.litTarget(litState.index);
   }
 
   void GameLogic::litTargetLoop() {
@@ -58,23 +59,22 @@ void GameLogic::reset() {
     if (!litState.active) return;
 
     if (!litState.offPhase && now - litState.startTime >= litState.onDuration) {
-      if (sessionManager.allEntitiesHaveSingleTarget()) {
-        litState.offPhase = true;
-        litState.offDuration = random(500, 1500);
-        litState.startTime = now;
-      } else {
-        litState.index = litTargetSelectIndex();
-        // communication.lit(litState.index);                           TODO      in communication.lit create a batch for update all targets                  <------------------------------ PRIORITY
-        litState.startTime = now;
-      }
-    } else if (litState.offPhase && now - litState.startTime >= litState.offDuration) {
+      // ✅ Always enter off phase after onDuration
+      litState.offPhase = true;
+      litState.offDuration = random(500, 1500);
+      communication.litTarget(255);  // Turn off all targets
+      litState.startTime = now;
+      Serial.println(F("💤 Entering off phase"));
+    } 
+    else if (litState.offPhase && now - litState.startTime >= litState.offDuration) {
+      // ✅ Exit off phase and light a new target
       litState.offPhase = false;
       litState.index = litTargetSelectIndex();
-      // communication.lit(litState.index);                           TODO      in communication.lit create a batch for update all targets                  <------------------------------ PRIORITY
+      communication.litTarget(litState.index);
       litState.startTime = now;
+      Serial.print(F("🎯 New selected index: "));
+      Serial.println(litState.index);
     }
-    Serial.print(F("🎯 New selected index: "));
-    Serial.println(litState.index);
   }
 
 // Timer
@@ -151,7 +151,11 @@ ScoreUpdateBatch GameLogic::updateEntityScore(uint8_t targetId) {
     // compare target.indexInEntity with the currently selected index in the game session
     // if is not the right index then just return batch empty
     // if is the right index then I think this function can continue execute as it is.
-    if (target.indexInEntity != litState.index) {
+    Serial.print(F("LitTarget hit --> target.indexInEntity: "));
+    Serial.print(target.indexInEntity);
+    Serial.print(F(" - litState.index:"));
+    Serial.println(litState.index);
+    if (target.indexInEntity != litState.index || litState.offPhase == true) {
       return batch;
     }
   }
