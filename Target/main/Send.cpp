@@ -1,23 +1,29 @@
 #include "Send.h"
 #include <RF24.h>
 #include <OPCodes.h>
-#include <Protocol.h>
+
 #include "TargetConfig.h"
 
 Send::Send(RF24& radio, PairingRegistry& registry)
   : radio(radio), registry(registry) {}
 
-const bool Send::toHub(const byte* data, uint8_t length, bool onTargetPipe) {
+const bool Send::toHub(const byte* data, uint8_t length, OnPipe onPipe) {
   Serial.print(F("📤 Sending data to hub on pipe: "));
   radio.stopListening();
-  if (onTargetPipe == true) {
-    const uint8_t* targetPipe = registry.getTargetPipe();
-    Serial.println((char*)targetPipe);
-    radio.openWritingPipe(targetPipe);
-  } else {
+  if (onPipe == OnPipe::pairingPipe) {
     Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
     Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
     radio.openWritingPipe(pairingPipe);
+  }
+  else if (onPipe == OnPipe::pairingPollPipe) {
+    Serial.print((uint32_t)(pairingPollPipe >> 32), HEX);  // High 32 bits
+    Serial.println((uint32_t)(pairingPollPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
+    radio.openWritingPipe(pairingPollPipe);
+  }
+  else {
+    const uint8_t* targetPipe = registry.getTargetPipe();
+    Serial.println((char*)targetPipe);
+    radio.openWritingPipe(targetPipe);
   }
   bool success = radio.write(data, length);
   radio.startListening();
@@ -40,7 +46,7 @@ const bool Send::pairingRequest(uint32_t token) {
   Serial.print(F("📨 Sending active pairing request with token: "));
   Serial.println(token);
 
-  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), false);
+  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), OnPipe::pairingPollPipe);
 }
 
 const bool Send::verificationRequest(uint8_t id) {
@@ -52,7 +58,7 @@ const bool Send::verificationRequest(uint8_t id) {
   Serial.print(F("📨 Sending verification request for ID "));
   Serial.println(id);
 
-  bool success = toHub(reinterpret_cast<const byte*>(&request), sizeof(request), false);
+  bool success = toHub(reinterpret_cast<const byte*>(&request), sizeof(request));
 
   if (!success) {
     Serial.println(F("❌ Failed to send verification request."));

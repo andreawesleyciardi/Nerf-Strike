@@ -15,7 +15,7 @@ TargetInfo Communication::verifyAssignedTarget() {
   return target;
 }
 
-const bool Communication::activePairing() {
+const bool Communication::pairingRequest() {
   showStatus(statusRgbLed, STATUS_PAIRING);
   uint32_t token = registry.loadTokenFromEEPROM();
 
@@ -77,7 +77,7 @@ const bool Communication::verification() {
     if (!receive.verificationResponse(target.id)) {
       Serial.println(F("❌ Verification failed. Re-pairing..."));
       showStatus(statusRgbLed, STATUS_ERROR);
-      activePairing();
+      pairingRequest();
       return false;
     }
 

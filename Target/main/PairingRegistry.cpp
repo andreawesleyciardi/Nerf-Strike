@@ -58,6 +58,22 @@ void PairingRegistry::resetToken() {
   Serial.println(F("🧹 Token cleared from EEPROM."));
 }
 
+void PairingRegistry::switchToPairingPipe() {
+  radio.stopListening();
+  radio.openReadingPipe(1, pairingPipe);
+  radio.startListening();
+
+  Serial.println(F("🔀 Switched to pairing pipe."));
+}
+
+void PairingRegistry::switchToPairingPollPipe() {
+  radio.stopListening();
+  radio.openReadingPipe(1, pairingPollPipe);
+  radio.startListening();
+
+  Serial.println(F("🔀 Switched to pairing poll pipe."));
+}
+
 void PairingRegistry::switchToTargetPipe(uint8_t id) {
   sprintf((char*)target.pipe, "TGT%d", id);
   radio.stopListening();

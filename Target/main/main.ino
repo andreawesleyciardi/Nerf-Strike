@@ -40,10 +40,14 @@ void setup() {
   Serial.println(F("Radio listening on pairing pipe."));
   
   Serial.println(F("✅ Starting active pairing"));
-  if (communication.activePairing()) {
+  if (communication.pairingRequest()) {
     TargetInfo info = registry.getTargetInfo();
     targetRgbLed.setPrimaryColorName(info.getColorName());
     targetRgbLed.blink();
+  }
+  else {
+    registry.switchToPairingPollPipe();
+    showStatus(statusRgbLed, STATUS_DISCONNECTED);
   }
 
   showAssignedIDBriefly(registry.getTargetInfo().id);
@@ -74,7 +78,7 @@ void loop() {
     registry.resetToken();
     showStatus(statusRgbLed, STATUS_OK, 3);
     delay(500);
-    communication.activePairing();
+    communication.pairingRequest();
     awaitingAck = false;
     lastHeartbeat = millis();
     heartbeatLost = false;
@@ -87,6 +91,12 @@ void loop() {
     PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
 
     switch (header->opcode) {
+      case OPCODE_PAIRING_POLL: {
+          Serial.println(F("📡 Hub sent a pairing request. Replying with pairing request."));
+          communication.pairingRequest();
+        break;
+      }
+
       case OPCODE_HEARTBEAT: {
           lastHeartbeat = millis();
           heartbeatLost = false;
@@ -281,7 +291,7 @@ void loop() {
 
   // if (awaitingAck && millis() - lastHitTime > 5000) {
   //   Serial.println(F("🔄 Signal lost after hit. Re-pairing..."));
-  //   communication.activePairing();
+  //   communication.pairingRequest();
   //   awaitingAck = false;
   //   lastHeartbeat = millis();
   //   heartbeatLost = false;
@@ -289,15 +299,15 @@ void loop() {
   //   showAssignedIDBriefly(registry.getAssignedID());
   // }
 
-  // if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {                  // TO CHECK HOW TO REACTIVATE
-  //   Serial.println(F("💔 No heartbeat. Re-pairing..."));
-  //   heartbeatLost = true;
-  //   showStatus(statusRgbLed, STATUS_DISCONNECTED);
-  //   communication.activePairing();
-  //   lastHeartbeat = millis();
+  if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {
+    Serial.println(F("💔 No heartbeat. Waiting to be contacted by Hub..."));
+    heartbeatLost = true;
+    showStatus(statusRgbLed, STATUS_DISCONNECTED);
 
-  //   showAssignedIDBriefly(registry.getAssignedID());
-  // }
+    registry.switchToPairingPollPipe();
+    lastHeartbeat = millis();
+  }
+
 
   // uint8_t targetId = registry.getTargetInfo().id;
   TargetInfo info = registry.getTargetInfo();
