@@ -166,14 +166,14 @@ void GameSessionManager::communicateTargetSessionInfo(uint8_t targetId) {
       sessionInfo.entityColorIndex = ColorPalette::getIndexByName(entity.color.name);
 
       // ✅ Debug print
-      Serial.print(F("📤 Sending TargetSessionInfo to Target ID: "));
-      Serial.println(currentTargetId);
-      Serial.print(F("  - enabled: "));
-      Serial.println(sessionInfo.enabled ? "true" : "false");
-      Serial.print(F("  - indexInEntity: "));
-      Serial.println(sessionInfo.indexInEntity);
-      Serial.print(F("  - entityColorIndex: "));
-      Serial.println(sessionInfo.entityColorIndex);
+      // Serial.print(F("📤 Sending TargetSessionInfo to Target ID: "));
+      // Serial.println(currentTargetId);
+      // Serial.print(F("  - enabled: "));
+      // Serial.println(sessionInfo.enabled ? "true" : "false");
+      // Serial.print(F("  - indexInEntity: "));
+      // Serial.println(sessionInfo.indexInEntity);
+      // Serial.print(F("  - entityColorIndex: "));
+      // Serial.println(sessionInfo.entityColorIndex);
 
       communication.targetSessionInfo(currentTargetId, sessionInfo);
     }

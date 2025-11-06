@@ -27,6 +27,30 @@ const bool Send::toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packe
   return true;
 }
 
+void Send::pairingRequest() {
+  HubPairingRequestPacket packet = {
+    OPCODE_PAIRING_POLL
+  };
+
+  Serial.print(F("📡 Hub sending pairing request on pairing poll pipe: 0x"));
+  Serial.print((uint32_t)(pairingPollPipe >> 32), HEX);  // High 32 bits
+  Serial.println((uint32_t)(pairingPollPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
+
+  radio.stopListening();
+  radio.openWritingPipe(pairingPollPipe);
+  delay(50);
+  bool success = radio.write(&packet, sizeof(packet));
+  delay(100);  // ✅ Give target time to switch pipes
+  radio.startListening();
+
+  if (!success) {
+    Serial.println(F("❌ Failed to send pairing request packet."));
+    return;
+  }
+
+  Serial.println(F("✅ Sent pairing packet"));
+}
+
 void Send::pairingResponse(const TargetInfo& target) {
   PairingResponsePacket response = {
     OPCODE_PAIRING_RESPONSE,

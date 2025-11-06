@@ -28,12 +28,12 @@ public:
 
   void onEnter() override {
     // ✅ Clear the session
-    Serial.println(F("Entered HomeScreen"));
+    // Serial.println(F("Entered HomeScreen"));
     GameSession defaultSession = createDefaultSession(registry);
     sessionManager.setSession(defaultSession);
     sessionManager.setStatus(GameSessionStatus::Setting, true);
-    Serial.print(F("GameSessionStatus: "));
-    Serial.println(GameSessionStatusToString(sessionManager.getStatus()));
+    // Serial.print(F("GameSessionStatus: "));
+    // Serial.println(GameSessionStatusToString(sessionManager.getStatus()));
     screenRenderer.requestRefresh();
   }
 

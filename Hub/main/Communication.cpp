@@ -13,7 +13,11 @@ const uint8_t* Communication::verifyPipeForID(uint8_t targetId) {
   return pipe;
 }
 
-void Communication::pairing(const byte* buffer) {                 // TODO: Transform in boolean and move outside this: showStatus(statusRgbLed, STATUS_PAIRING, 2); 
+void Communication::pairingRequest() {
+  send.pairingRequest();
+}
+
+void Communication::pairingResponse(const byte* buffer) {                 // TODO: Transform in boolean and move outside this: showStatus(statusRgbLed, STATUS_PAIRING, 2); 
   TargetInfo target = receive.pairingRequest(buffer);
   if (!target.isValid()) {
     Serial.println(F("❌ Failed to assign ID."));

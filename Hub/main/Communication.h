@@ -21,7 +21,8 @@ class Communication {
 public:
   Communication(Receive& receive, Send& send, PairingRegistry& registry, GameLogic& gameLogic, RGBLed& statusRgbLed, GameSessionManager& sessionManager);
 
-  void pairing(const byte* buffer);
+  void pairingRequest();
+  void pairingResponse(const byte* buffer);
   void verification(const byte* buffer);
   const bool hit(const byte* buffer);
   const bool targetSessionInfo(uint8_t targetId, const TargetSessionInfo& sessionInfo);

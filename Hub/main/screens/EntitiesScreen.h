@@ -25,7 +25,7 @@ public:
    : display(display), registry(registry) {}
 
   void onEnter() override {
-    Serial.println("Entered the EntitiesScreen");
+    // Serial.println("Entered the EntitiesScreen");
     screenRenderer.requestRefresh();
   }
 
@@ -45,13 +45,13 @@ public:
       request = ScreenRequest::to(ScreenType::Pairing);
     }
     if (encoder.hasChanged()) {
-      Serial.println("encoder has changed");
+      // Serial.println("encoder has changed");
       int delta = encoder.getDelta();  // +1 or -1 depending on rotation
       uint8_t current = sessionManager.getEntityCount();
       uint8_t maxEntities = registry.getPairedTargetCount();
       uint8_t updated = constrain(current + delta, 1, maxEntities);
-      Serial.print("updated value: ");
-      Serial.println(updated);
+      // Serial.print("updated value: ");
+      // Serial.println(updated);
       sessionManager.setEntityCount(updated);
     }
     if (right.wasPressed()) {

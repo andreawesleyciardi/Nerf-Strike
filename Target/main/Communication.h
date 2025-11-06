@@ -13,7 +13,7 @@ class Communication {
 public:
   Communication(Receive& receive, Send& send, PairingRegistry& registry, RGBLed& statusRgbLed);
 
-  const bool activePairing();
+  const bool pairingRequest(uint32_t token = 0xFFFFFFFF);
   const bool verification();
   HitResponsePacket hit();
   // const String entityColor(const byte* buffer);

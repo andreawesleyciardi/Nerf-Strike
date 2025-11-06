@@ -1,6 +1,7 @@
 #include "PairingRegistry.h"
 
 #define EEPROM_TOKEN_ADDR 0  // Starting address to store token
+#define EEPROM_TARGET_INFO_ADDR 10  // Leave space after token
 
 PairingRegistry::PairingRegistry(RF24& radio) : radio(radio) {
   target.id = 0xFF;
@@ -51,11 +52,51 @@ void PairingRegistry::saveTokenToEEPROM(uint32_t token) {
   EEPROM.put(EEPROM_TOKEN_ADDR, token);
 }
 
+void PairingRegistry::saveTargetInfoToEEPROM(const TargetInfo& info) {
+  EEPROM.put(EEPROM_TARGET_INFO_ADDR, info);
+}
+
+TargetInfo PairingRegistry::loadTargetInfoFromEEPROM() {
+  TargetInfo stored;
+  EEPROM.get(EEPROM_TARGET_INFO_ADDR, stored);
+  return stored;
+}
+
+void PairingRegistry::resetTargetInfoEEPROM() {
+  TargetInfo blank;
+  blank.id = 0xFF;
+  blank.token = 0xFFFFFFFF;
+  memset(blank.pipe, 0, sizeof(blank.pipe));
+  blank.colorIndex = 0xFF;
+  blank.enabled = true;
+
+  EEPROM.put(EEPROM_TARGET_INFO_ADDR, blank);
+  target = blank;
+
+  Serial.println(F("🧹 TargetInfo cleared from EEPROM."));
+}
+
 void PairingRegistry::resetToken() {
   uint32_t blank = 0xFFFFFFFF;
   EEPROM.put(EEPROM_TOKEN_ADDR, blank);
   target.token = blank;
   Serial.println(F("🧹 Token cleared from EEPROM."));
+}
+
+void PairingRegistry::switchToPairingPipe() {
+  radio.stopListening();
+  radio.openReadingPipe(1, pairingPipe);
+  radio.startListening();
+
+  Serial.println(F("🔀 Switched to pairing pipe."));
+}
+
+void PairingRegistry::switchToPairingPollPipe() {
+  radio.stopListening();
+  radio.openReadingPipe(1, pairingPipe);
+  radio.startListening();
+
+  Serial.println(F("🔀 Switched to pairing pipe."));
 }
 
 void PairingRegistry::switchToTargetPipe(uint8_t id) {

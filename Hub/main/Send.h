@@ -16,6 +16,7 @@ public:
   const bool toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length);
 
   // void pairingResponse(uint8_t assignedID);
+  void pairingRequest();
   void pairingResponse(const TargetInfo& target);
   void verificationResponse(uint8_t id);
   

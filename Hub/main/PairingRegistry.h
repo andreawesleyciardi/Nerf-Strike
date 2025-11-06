@@ -22,12 +22,12 @@ public:
   TargetInfo getTargetByID(uint8_t id) const;
   void logTargets() const;
 
+  int findTargetByToken(uint32_t token);
+  int findTargetByID(uint8_t id) const;
+
 private:
   TargetInfo targets[MAX_TARGETS];
   uint8_t nextID;
-
-  int findTargetByToken(uint32_t token);
-  int findTargetByID(uint8_t id) const;
 };
 
 #endif
