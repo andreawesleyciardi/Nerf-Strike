@@ -8,20 +8,18 @@ Send::Send(RF24& radio, PairingRegistry& registry)
   : radio(radio), registry(registry) {}
 
 const bool Send::toHub(const byte* data, uint8_t length, OnPipe onPipe) {
-  Serial.print(F("📤 Sending data to hub on pipe: "));
+  Serial.println();
+  Serial.print(F("📤 Sending data to hub on "));
   radio.stopListening();
   if (onPipe == OnPipe::pairingPipe) {
+    Serial.print(F("Pairing Pipe: "));
     Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
     Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
     radio.openWritingPipe(pairingPipe);
   }
-  else if (onPipe == OnPipe::pairingPollPipe) {
-    Serial.print((uint32_t)(pairingPollPipe >> 32), HEX);  // High 32 bits
-    Serial.println((uint32_t)(pairingPollPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
-    radio.openWritingPipe(pairingPollPipe);
-  }
-  else {
+  else if (onPipe == OnPipe::targetPipe) {
     const uint8_t* targetPipe = registry.getTargetPipe();
+    Serial.print(F("Target Pipe: "));
     Serial.println((char*)targetPipe);
     radio.openWritingPipe(targetPipe);
   }
@@ -32,7 +30,7 @@ const bool Send::toHub(const byte* data, uint8_t length, OnPipe onPipe) {
     Serial.println(F("❌ Failed to send data to hub."));
     return false;
   }
-  Serial.println(F("✅ Sent data to hub via target pipe."));
+  Serial.println(F("✅ Sent data to hub."));
   return true;
 }
 
@@ -43,10 +41,11 @@ const bool Send::pairingRequest(uint32_t token) {
     targetType  // from TargetConfig.h
   };
 
-  Serial.print(F("📨 Sending active pairing request with token: "));
+  Serial.println();
+  Serial.print(F("📤 Sending active pairing request with token: "));
   Serial.println(token);
 
-  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), OnPipe::pairingPollPipe);
+  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request));
 }
 
 const bool Send::verificationRequest(uint8_t id) {

@@ -84,13 +84,13 @@ public:
 
     if (encoder.hasChanged()) {
       int delta = encoder.getDirection();  // +1 or -1 depending on rotation
-      Serial.print(F("delta: "));
-      Serial.println(delta);
+      // Serial.print(F("delta: "));
+      // Serial.println(delta);
       currentIndex = constrain(currentIndex + delta, 0, filteredModesCount - 1);
-      Serial.print(F("+ filteredModesCount: "));
-      Serial.print(filteredModesCount);
-      Serial.print(F(" currentIndex: "));
-      Serial.println(currentIndex);
+      // Serial.print(F("+ filteredModesCount: "));
+      // Serial.print(filteredModesCount);
+      // Serial.print(F(" currentIndex: "));
+      // Serial.println(currentIndex);
       delay(100);
       screenRenderer.requestRefresh();
 

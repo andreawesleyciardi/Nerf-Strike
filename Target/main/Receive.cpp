@@ -18,7 +18,9 @@ TargetInfo Receive::pairingResponse() {
   TargetInfo target;  // Default-initialized (invalid)
 
   unsigned long startTime = millis();
-  while (millis() - startTime < 1000) {
+
+                                                                                                  // THE PROBLEM IS HERE...looks that radio is never available...
+  while (millis() - startTime < 6000) {                                                           // Maybe the time is too short
     if (radio.available()) {
       PairingResponsePacket response;
       radio.read(&response, sizeof(response));
@@ -29,22 +31,26 @@ TargetInfo Receive::pairingResponse() {
       if (response.opcode == OPCODE_PAIRING_RESPONSE) {
         target.id = response.assignedID;
         target.colorIndex = response.colorIndex;
-        // target.active = true;
 
-        Serial.print(F("✅ Received pairing response. Assigned ID: "));
-        Serial.print(target.id);
-        Serial.print(F(" with color index: "));
+        Serial.print(F("✅ Received pairing response."));
+        Serial.print(F("🆔 Assigned ID: "));
+        Serial.println(response.assignedID);
+        Serial.print(F("🎨 Assigned Color Index: "));
         Serial.println(target.colorIndex);
         break;
+      }
+      else {
+        Serial.print(F("❌ Received wrong opcode for Pairing Response. Expected "));
+        Serial.println(OPCODE_PAIRING_RESPONSE);
       }
     }
   }
 
   radio.stopListening();
 
-  // if (!target.isValid()) {
-  //   Serial.println(F("❌ No valid pairing response received."));
-  // }
+  if (!target.isValid()) {
+    Serial.println(F("❌ No valid pairing response received."));
+  }
 
   return target;
 }

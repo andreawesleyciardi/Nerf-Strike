@@ -29,6 +29,8 @@ GameSessionStatus sessionStatus = GameSessionStatus::Setting;
 void setup() {
   delay(1000);
   Serial.begin(9600);
+  Serial.println();
+  Serial.println(F("🚀🚀🚀🚀🚀🚀🚀"));
   Serial.println(F("🔧 Target booting..."));
 
   randomSeed(analogRead(0));  // ✅ Better token randomness
@@ -36,23 +38,27 @@ void setup() {
   initializeTargetPins();
   wireless.setup();
 
-  Serial.println(F("✅ Radio initialized and chip connected."));
-  Serial.println(F("Radio listening on pairing pipe."));
+  Serial.println();
+  Serial.println(F("📡 Radio initialized and chip connected."));
+  Serial.println(F("📡 Radio listening on pairing pipe."));
   
-  Serial.println(F("✅ Starting active pairing"));
+  Serial.println();
+  Serial.println(F("🛰️ Starting active pairing"));
   if (communication.pairingRequest()) {
     TargetInfo info = registry.getTargetInfo();
     targetRgbLed.setPrimaryColorName(info.getColorName());
     targetRgbLed.blink();
+    showAssignedIDBriefly(registry.getTargetInfo().id);
   }
   else {
+    Serial.println();
+    Serial.println(F("❌ Active pairing failed."));
+    Serial.println(F("📡 Switch to listen on pairing pool pipe."));
     registry.switchToPairingPollPipe();
     showStatus(statusRgbLed, STATUS_DISCONNECTED);
   }
 
-  showAssignedIDBriefly(registry.getTargetInfo().id);
-
-  Serial.println(F("Setup complete."));
+  Serial.println(F("🔧 Setup complete."));
 }
 
 void loop() {
@@ -93,6 +99,8 @@ void loop() {
     switch (header->opcode) {
       case OPCODE_PAIRING_POLL: {
           Serial.println(F("📡 Hub sent a pairing request. Replying with pairing request."));
+          registry.switchToPairingPipe();
+          delay(150);
           communication.pairingRequest();
         break;
       }
@@ -105,10 +113,10 @@ void loop() {
 
       case OPCODE_BLINK_COMMAND: {
           Serial.println(F("🔦 Blink command received."));
-          uint8_t assignedID = registry.getTargetInfo().id;
-          scoreDisplay.showScore(assignedID);
+          TargetInfo info = registry.getTargetInfo();
+          scoreDisplay.showScore(info.id);
           showStatus(statusRgbLed, STATUS_PAIRING);
-          rgbRing.chase("Blue", 30);
+          rgbRing.chase(info.getColorName(), 30);
           delay(1000);
           scoreDisplay.clear();
         break;

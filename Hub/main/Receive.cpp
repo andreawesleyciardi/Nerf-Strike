@@ -13,8 +13,8 @@ TargetInfo Receive::pairingRequest(const byte* buffer) {
 
   Serial.print(F("🔐 Pairing request received with token: "));
   Serial.println(token);
-  Serial.print(F("📦 Incoming target type: "));
-  Serial.println(targetTypeToString(incomingType));
+  // Serial.print(F("📦 Incoming target type: "));
+  // Serial.println(targetTypeToString(incomingType));
 
   if (!targetTypeManager.isCompatible(incomingType)) {
     Serial.print(F("❌ Target type mismatch. Expected "));
@@ -24,7 +24,22 @@ TargetInfo Receive::pairingRequest(const byte* buffer) {
     return TargetInfo();  // Return default (invalid)
   }
 
-  TargetInfo target = registry.setTarget(token);  // ✅ Assign ID and color
+  // TargetInfo target = registry.setTarget(token);  // ✅ Assign ID and color
+
+  TargetInfo target;
+
+  if (registry.hasToken(token)) {
+    target = registry.getInfoByToken(token);
+    Serial.println(F("🔁 Known token — restoring previous TargetInfo."));
+  } else {
+    target = registry.setTarget(token);  // Assign new ID, pipe, color
+    if (target.isValid()) {
+      Serial.println(F("🆕 New token — assigning fresh TargetInfo."));
+    } else {
+      Serial.println(F("❌ Failed to assign target info."));
+    }
+  }
+
   if (!target.isValid()) {
     Serial.println(F("❌ Failed to assign target info."));
   } else {

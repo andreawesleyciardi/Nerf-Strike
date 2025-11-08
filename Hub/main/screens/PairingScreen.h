@@ -91,7 +91,7 @@ public:
     }
 
     if (right.wasPressed()) {
-      Serial.println(F("New Pairing"));  // Placeholder for future broadcast
+      communication.pairingRequest();
     }
   }
 

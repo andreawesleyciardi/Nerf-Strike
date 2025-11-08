@@ -12,6 +12,10 @@ public:
 
   TargetInfo setTarget(uint32_t token);  // Assigns or retrieves target info by token
   void storeTargetInfo(const TargetInfo& info);
+
+  bool hasToken(uint32_t token) const;
+  TargetInfo getInfoByToken(uint32_t token) const;
+
   const uint8_t* getPipeForID(uint8_t id);
   uint8_t getIDAt(uint8_t index);
   void clearAll();

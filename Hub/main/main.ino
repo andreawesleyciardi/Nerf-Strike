@@ -67,8 +67,8 @@ void setup() {
   statusRgbLed.off();
 
   targetTypeManager.loadFromEEPROM();
-  Serial.print(F("📦 Allowed target type: "));
-  Serial.println(targetTypeToString(targetTypeManager.getAllowedType()));
+  // Serial.print(F("📦 Allowed target type: "));
+  // Serial.println(targetTypeToString(targetTypeManager.getAllowedType()));
 
   display.setup();
   screenManager.setup();
@@ -80,10 +80,17 @@ void loop() {
   screenRenderer.render();
   console.processSerial();
 
-  if (statusButton.isLongPressed()) {
+  if (statusButton.wasPressed()) {
     // I NEED TO KEEP IN MEMORY WHAT WAS PREVIOUSLY ON THE DISPLAY SO THAT AFTER I CAN RESET IT
+    Serial.println(F("statusButton.wasPressed()"));
     send.blinkAll(registry);
-    showStatus(statusRgbLed, STATUS_OK, 3);
+    showStatus(statusRgbLed, STATUS_OK, 2);
+  }
+
+  if (statusButton.isLongPressed()) {
+    Serial.println(F("statusButton.isLongPressed()"));
+    registry.clearAll();
+    showStatus(statusRgbLed, STATUS_OK, 4);
   }
 
   if (batteryButton.wasPressed()) {

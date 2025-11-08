@@ -18,7 +18,9 @@ void Communication::pairingRequest() {
 }
 
 void Communication::pairingResponse(const byte* buffer) {                 // TODO: Transform in boolean and move outside this: showStatus(statusRgbLed, STATUS_PAIRING, 2); 
-  TargetInfo target = receive.pairingRequest(buffer);
+  TargetInfo target = receive.pairingRequest(buffer);             // To Check the values of target if they arrive wrong or something happens in "registry.storeTargetInfo(target);" or "send.pairingResponse(target);"
+  Serial.print(F("📡 receive.pairingRequest gives target with ID "));
+  Serial.println(target.id);
   if (!target.isValid()) {
     Serial.println(F("❌ Failed to assign ID."));
     showStatus(statusRgbLed, STATUS_ERROR, 2);

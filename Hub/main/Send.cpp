@@ -16,14 +16,13 @@ const bool Send::toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packe
   radio.startListening();
 
   if (!success) {
-    Serial.println(F("❌ Failed to send data to target."));
+    Serial.print(F("❌ Failed to send data to target ID on pipe "));
+    Serial.print(id);
+    Serial.print(F(" on pipe "));
+    Serial.println((char*)pipe);
     return false;
   }
-  
-  // Serial.print("📤 Sent data to target ID ");                                  // TO RESTORE
-  // Serial.print(id);
-  // Serial.print(" via pipe ");
-  // Serial.println((char*)pipe);
+
   return true;
 }
 
@@ -38,9 +37,9 @@ void Send::pairingRequest() {
 
   radio.stopListening();
   radio.openWritingPipe(pairingPollPipe);
-  radio.openReadingPipe(1, pairingPollPipe);                                      // TO FIX MAYBE WRONG <--------------------------
-  delay(50);
+  // delay(50);
   bool success = radio.write(&packet, sizeof(packet));
+  radio.openReadingPipe(1, pairingPipe);                                          // TO FIX MAYBE WRONG <--------------------------
   delay(100);  // ✅ Give target time to switch pipes
   radio.startListening();
 
@@ -221,8 +220,8 @@ const bool Send::sessionStatusRequest(uint8_t id, GameSessionStatus status) {
   const uint8_t* pipe = registry.getPipeForID(id);
   if (id != 0xFF && pipe) {
     if (toTargetPipe(id, pipe, &packet, sizeof(packet))) {
-      Serial.print(F("📤 Status update sent to target ID "));
-      Serial.println(id);
+      // Serial.print(F("📤 Status update sent to target ID "));
+      // Serial.println(id);
       return true;
     }
   }

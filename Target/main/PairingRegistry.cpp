@@ -13,10 +13,16 @@ PairingRegistry::PairingRegistry(RF24& radio) : radio(radio) {
 
 void PairingRegistry::setTargetInfo(const TargetInfo& info) {
   target = info;
-
+  Serial.println();
+  
   if (target.id != 0xFF) {
-    Serial.println(F("✅ setTargetInfo: Switching to assigned pipe..."));
+    Serial.println(F("🧍 Setted Target Infos."));
+    Serial.println();
+    Serial.println(F("🔀 setTargetInfo: Switching to assigned pipe..."));
     switchToTargetPipe(target.id);
+  }
+  else {
+    Serial.println(F("❌ Target Infos not setted."));
   }
 }
 

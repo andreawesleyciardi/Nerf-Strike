@@ -19,51 +19,55 @@ const bool Communication::pairingRequest() {
   showStatus(statusRgbLed, STATUS_PAIRING);
   uint32_t token = registry.loadTokenFromEEPROM();
 
-  bool result = false;
   if (token == 0xFFFFFFFF || token == 0) {
     token = random(100000, 999999);
     registry.saveTokenToEEPROM(token);
-    Serial.print(F("🆕 Generated new token: "));
-    Serial.println(token);
+    Serial.print(F("🧾 Generated new token: "));
   } else {
     registry.setToken(token);
-    Serial.print(F("🔁 Reusing stored token: "));
-    Serial.println(token);
+    Serial.print(F("🧾 Reusing stored token: "));
   }
+  Serial.println(token);
 
   for (int attempt = 1; attempt <= 3; attempt++) {
-    Serial.print(F("📨 Attempt "));
+    Serial.println();
+    Serial.print(F("🛰️ Attempt "));
     Serial.print(attempt);
     Serial.println(F(" to pair..."));
 
     if (send.pairingRequest(token)) {
-      Serial.println(F("✅ Pairing request sent."));
+      Serial.println();
       TargetInfo target = receive.pairingResponse();
       if (target.isValid()) {
         target.token = token;
-        registry.setTargetInfo(target);
-        Serial.print(F("✅ Paired successfully with ID: "));
-        Serial.print(target.id);
-        Serial.print(F(" and color index: "));
-        Serial.println(target.colorIndex);
+        registry.setTargetInfo(target);                         // keep an eye on this function
+        target = registry.getTargetInfo();                      // To test if keep this line
+        Serial.println(F("🟢 Paired successfully"));
+        Serial.print(F("🆔 Target ID: "));
+        Serial.println(target.id);
+        Serial.print(F("🎨 Color Index: "));
+        Serial.println(target.colorIndex);                      // check why here looks to be always 255
         return true;
       }
       else {
-        Serial.println(F("❌ No valid pairing response received."));
+        Serial.println(F("🔴 No valid pairing response received."));
       }
     }
     else {
-      Serial.println(F("❌ Failed to send pairing request."));
+      Serial.println();
+      Serial.println(F("🔴 Failed to send pairing request."));
     }
 
     delay(500);
   }
 
-  Serial.println(F("❌ Pairing failed after multiple attempts."));
+  Serial.println();
+  Serial.println(F("🔴 Pairing failed after multiple attempts."));
   TargetInfo failed;
   failed.id = 0xFF;
   registry.setTargetInfo(failed);
-  return result;
+  Serial.println(F("⚠️ Setted failed Target."));
+  return false;
 }
 
 const bool Communication::verification() {
