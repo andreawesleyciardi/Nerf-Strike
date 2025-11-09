@@ -34,7 +34,7 @@ void CommandConsole::processSerial() {
       uint8_t id = registry.getIDAt(i);
       const uint8_t* pipe = registry.getPipeForID(id);
       if (id != 0xFF && pipe) {
-        send.toTargetPipe(id, pipe, &packet, sizeof(packet));
+        send.toTarget(id, pipe, &packet, sizeof(packet));
       }
     }
     return;

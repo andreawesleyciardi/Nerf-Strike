@@ -98,9 +98,10 @@ void loop() {
 
     switch (header->opcode) {
       case OPCODE_PAIRING_POLL: {
-          Serial.println(F("📡 Hub sent a pairing request. Replying with pairing request."));
-          registry.switchToPairingPipe();
-          delay(150);
+          Serial.println();
+          Serial.println(F("📡 Hub sent a pairing pool request. Replying with pairing request."));
+          // registry.switchToPairingPipe();
+          delay(50);
           communication.pairingRequest();
         break;
       }

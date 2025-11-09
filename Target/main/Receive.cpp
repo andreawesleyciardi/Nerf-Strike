@@ -8,7 +8,7 @@ Receive::Receive(RF24& radio, PairingRegistry& registry)
   : radio(radio), registry(registry) {}
 
 TargetInfo Receive::pairingResponse() {
-  Serial.print(F("📡 Target waiting for pairing response on pairing pipe: 0x"));
+  Serial.print(F("📡 Target waiting for pairing response on pairing pool pipe: 0x"));
   Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
   Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
 
@@ -19,8 +19,8 @@ TargetInfo Receive::pairingResponse() {
 
   unsigned long startTime = millis();
 
-                                                                                                  // THE PROBLEM IS HERE...looks that radio is never available...
-  while (millis() - startTime < 6000) {                                                           // Maybe the time is too short
+                                                                                                  // THE PROBLEM IS HERE...I should add token to the response from Hub and check it
+  while (millis() - startTime < 6000) {
     if (radio.available()) {
       PairingResponsePacket response;
       radio.read(&response, sizeof(response));
@@ -32,7 +32,7 @@ TargetInfo Receive::pairingResponse() {
         target.id = response.assignedID;
         target.colorIndex = response.colorIndex;
 
-        Serial.print(F("✅ Received pairing response."));
+        Serial.println(F("✅ Received pairing response."));
         Serial.print(F("🆔 Assigned ID: "));
         Serial.println(response.assignedID);
         Serial.print(F("🎨 Assigned Color Index: "));
@@ -59,7 +59,7 @@ const bool Receive::verificationResponse(uint8_t id) {
   Serial.println(F("⏳ Waiting for verification acknowledgment..."));
   unsigned long startTime = millis();
   while (millis() - startTime < 1000) {
-    if (radio.available()) {
+    if (radio.available()) {                                                        // MOVE TO main.ino with others opcodes
       VerificationResponsePacket response;
       radio.read(&response, sizeof(response));
 

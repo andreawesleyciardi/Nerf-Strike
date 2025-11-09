@@ -50,25 +50,31 @@ unsigned long lastHeartbeat = 0;
 
 void setup() {
   Serial.begin(9600);
+  Serial.println();
+  Serial.println(F("🚀🚀🚀🚀🚀🚀🚀"));
   Serial.println(F("🧠 Hub starting..."));
   initializeHubPins();
   wireless.initialize();
 
-  // 🔍 Broadcast pairing poll for 5 seconds after boot
-  Serial.println(F("📡 Broadcasting pairing poll..."));
-  // unsigned long pairingPollStart = millis();
-  // while (millis() - pairingPollStart < 5000) {
-    communication.pairingRequest();  // Sends OPCODE_PAIRING_POLL
-  //   delay(500);  // Poll every 500ms
-  // }
-
-  showStatus(statusRgbLed, STATUS_PAIRING);
-  delay(500);
-  statusRgbLed.off();
-
   targetTypeManager.loadFromEEPROM();
   // Serial.print(F("📦 Allowed target type: "));
   // Serial.println(targetTypeToString(targetTypeManager.getAllowedType()));
+
+  // 🔍 Broadcast pairing poll for 5 seconds after boot
+  Serial.println();
+  Serial.println(F("📡 Broadcasting pairing poll..."));
+  // unsigned long pairingPollStart = millis();
+  // while (millis() - pairingPollStart < 5000) {
+    if (communication.pairingRequest()){                                                   // Sends OPCODE_PAIRING_POLL      TO RESTORE
+      showStatus(statusRgbLed, STATUS_PAIRING);
+    }
+    else {
+      showStatus(statusRgbLed, STATUS_ERROR);
+    }
+  //   delay(500);  // Poll every 500ms
+  // }
+  delay(500);
+  statusRgbLed.off();
 
   display.setup();
   screenManager.setup();
@@ -115,7 +121,16 @@ void loop() {
 
   switch (header->opcode) {
     case OPCODE_VERIFICATION_REQUEST: communication.verification(buffer); break;
-    case OPCODE_PAIRING_REQUEST:      communication.pairingResponse(buffer); break;
+    case OPCODE_PAIRING_REQUEST: {
+        Serial.println();
+        if (communication.pairingResponse(buffer)) {
+          showStatus(statusRgbLed, STATUS_CONNECTED, 2);
+        }
+        else {
+          showStatus(statusRgbLed, STATUS_ERROR, 2);
+        }
+      break;
+    }
     case OPCODE_HIT_REQUEST: {
         if (sessionManager.getStatus() == GameSessionStatus::Playing) {
           communication.hit(buffer);

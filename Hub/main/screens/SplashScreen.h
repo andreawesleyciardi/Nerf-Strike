@@ -13,7 +13,7 @@ public:
     : display(display), registry(registry), duration(durationMs), startTime(0), initialized(false) {}
 
   void render() override {
-    Serial.println(F("SplashScreen rendered"));
+    // Serial.println(F("SplashScreen rendered"));
     if (!initialized) {
       startTime = millis();
       initialized = true;
