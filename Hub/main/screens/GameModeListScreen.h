@@ -50,13 +50,13 @@ public:
         // Serial.println(mode.getName());
       }
     }
-    Serial.print(F("Filtered count: "));
-    Serial.println(filteredModesCount);
+    // Serial.print(F("Filtered count: "));
+    // Serial.println(filteredModesCount);
     for (uint8_t i = 0; i < filteredModesCount; ++i) {
-      Serial.print(F("filteredModes["));
-      Serial.print(i);
-      Serial.print(F("] name: "));
-      Serial.println(filteredModes[i].getName());
+      // Serial.print(F("filteredModes["));
+      // Serial.print(i);
+      // Serial.print(F("] name: "));
+      // Serial.println(filteredModes[i].getName());
     }
   }
 
@@ -93,33 +93,6 @@ public:
       // Serial.println(currentIndex);
       delay(100);
       screenRenderer.requestRefresh();
-
-      // int direction = encoder.getDirection();
-      // if (direction > 0) {
-      //   if (currentIndex < filteredModesCount) {
-      //     currentIndex++;
-      //   }
-      //   Serial.print(F("+ filteredModesCount: "));
-      //   Serial.print(filteredModesCount);
-      //   Serial.print(F(" currentIndex: "));
-      //   Serial.println(currentIndex);
-      //   // if (filteredModesCount == currentIndex) {
-      //   //   currentIndex = 0;
-      //   // }
-      // }
-      // if (direction < 0) {
-      //   if (currentIndex > 0) {
-      //     currentIndex--;
-      //   }
-      //   Serial.print(F("- filteredModesCount: "));
-      //   Serial.print(filteredModesCount);
-      //   Serial.print(F(" currentIndex: "));
-      //   Serial.println(currentIndex);
-      //   // if (currentIndex == 255) {
-      //   //   currentIndex = filteredModesCount - 1;
-      //   // }
-      // }
-      // screenRenderer.requestRefresh();
     }
     
     if (right.wasPressed() && filteredModesCount > 0) {
@@ -128,7 +101,6 @@ public:
 
       if (selectedMode.getSettingCount() > 0) {
         request = ScreenRequest::to(ScreenType::GameModeOptions);
-        // request = ScreenRequest::to(ScreenType::Playing);
       } else {
         request = ScreenRequest::to(ScreenType::Playing);
       }

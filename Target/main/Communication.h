@@ -16,11 +16,10 @@ public:
   const bool pairingRequest();
   const bool verification();
   HitResponsePacket hit();
-  // const String entityColor(const byte* buffer);
   const bool identifyTarget(const byte* buffer);
 
 private:
-  TargetInfo verifyAssignedTarget();  // 🔄 Updated from uint8_t to TargetInfo
+  TargetInfo verifyAssignedTarget();
   Receive& receive;
   Send& send;
   PairingRegistry& registry;

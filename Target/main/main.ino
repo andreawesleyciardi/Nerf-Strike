@@ -46,6 +46,7 @@ void setup() {
   Serial.println(F("🛰️ Starting active pairing"));
   if (communication.pairingRequest()) {
     TargetInfo info = registry.getTargetInfo();
+    registry.switchToTargetPipe(info.id);
     targetRgbLed.setPrimaryColorName(info.getColorName());
     targetRgbLed.blink();
     showAssignedIDBriefly(registry.getTargetInfo().id);
@@ -79,7 +80,7 @@ void loop() {
 
   if (statusButton.wasLongPressed(feedback)) {
     Serial.println(F("🧹 Token reset triggered..."));
-    registry.resetToken();
+    registry.resetTargetInfoEEPROM();
     showStatus(statusRgbLed, STATUS_OK, 3);
     delay(500);
     communication.pairingRequest();
@@ -303,7 +304,6 @@ void loop() {
     registry.switchToPairingPipe();
     lastHeartbeat = millis();
   }
-
 
   // uint8_t targetId = registry.getTargetInfo().id;
   TargetInfo info = registry.getTargetInfo();

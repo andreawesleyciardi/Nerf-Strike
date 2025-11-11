@@ -51,7 +51,6 @@ const bool Send::pairingSollecitation() {
   return true;
 }
 
-
 void Send::pairingResponse(const TargetInfo& target) {
   PairingResponsePacket response = {
     OPCODE_PAIRING_RESPONSE,

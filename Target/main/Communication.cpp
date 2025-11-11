@@ -17,7 +17,6 @@ TargetInfo Communication::verifyAssignedTarget() {
 
 const bool Communication::pairingRequest() {
   showStatus(statusRgbLed, STATUS_PAIRING);
-  uint32_t token = registry.loadTokenFromEEPROM();
 
   if (token == 0xFFFFFFFF || token == 0) {
     token = random(100000, 999999);
@@ -28,6 +27,8 @@ const bool Communication::pairingRequest() {
     Serial.print(F("🧾 Reusing stored token: "));
   }
   Serial.println(token);
+
+  registry.setToken(token);
 
   for (int attempt = 1; attempt <= 3; attempt++) {
     Serial.println();
@@ -67,6 +68,7 @@ const bool Communication::pairingRequest() {
   failed.id = 0xFF;
   registry.setTargetInfo(failed);
   Serial.println(F("⚠️ Setted failed Target."));
+
   return false;
 }
 
