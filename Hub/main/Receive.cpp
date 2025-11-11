@@ -12,11 +12,12 @@ TargetInfo Receive::pairingRequest(const byte* buffer) {
 
   Serial.print(F("🔐 Pairing request received with token: "));
   Serial.println(token);
-  Serial.print(F("📦 Incoming target type: "));
-  Serial.println(targetTypeToString(incomingType));
+  // Serial.print(F("📦 Incoming target type: "));
+  // Serial.println(targetTypeToString(incomingType));
 
   // 🔒 Validate target type compatibility
   if (!targetTypeManager.isCompatible(incomingType)) {
+    Serial.println();
     Serial.print(F("❌ Target type mismatch. Expected "));
     Serial.print(targetTypeToString(targetTypeManager.getAllowedType()));
     Serial.print(F(", but got "));
@@ -24,34 +25,29 @@ TargetInfo Receive::pairingRequest(const byte* buffer) {
     return TargetInfo();  // Return default (invalid)
   }
 
-  // 🔍 Check if token is already paired
-  int existingIndex = registry.findTargetByToken(token);
   TargetInfo target;
 
-  if (existingIndex != -1) {
-    // ✅ Reuse existing TargetInfo
-    target = registry.getTargetByID(registry.getIDAt(existingIndex));
-    Serial.print(F("🔁 Re-pairing known target with ID: "));
-    Serial.println(target.id);
+  Serial.println();
+  if (registry.hasToken(token)) {
+    target = registry.getInfoByToken(token);
+    Serial.println(F("🧾 Received known token."));
+    Serial.println(F("🧍 Restoring previous TargetInfo."));
   } else {
-    // 🆕 Assign new ID and color
-    target = registry.setTarget(token);
-    if (!target.isValid()) {
-      Serial.println(F("❌ Failed to assign target info."));
-      return TargetInfo();
+    target = registry.setTarget(token);  // Assign new ID, pipe, color
+    if (target.isValid()) {
+      Serial.println(F("🧾 Received new token."));
+      Serial.println(F("🧍 Assigning new TargetInfo."));
     }
+  }
 
-    // 🧬 Assign pipe name
-    char pipeName[6];
-    sprintf(pipeName, "TGT%d", target.id);
-    memcpy(target.pipe, reinterpret_cast<uint8_t*>(pipeName), 6);
-
-    // 💾 Store full target info
-    registry.storeTargetInfo(target);
-
-    Serial.print(F("✅ Assigned new ID: "));
-    Serial.print(target.id);
-    Serial.print(F(" with color index: "));
+  Serial.println();
+  if (!target.isValid()) {
+    Serial.println(F("❌ Failed to assign target info."));
+  } else {
+    Serial.println(F("✅ Assigned TargetInfo"));
+    Serial.print(F("🆔 Assigned ID: "));
+    Serial.println(target.id);
+    Serial.print(F("🎨 Assigned Color Index: "));
     Serial.println(target.colorIndex);
     Serial.print(F("📡 Assigned pipe: "));
     Serial.println(pipeName);

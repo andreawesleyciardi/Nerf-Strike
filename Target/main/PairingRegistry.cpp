@@ -14,28 +14,22 @@ PairingRegistry::PairingRegistry(RF24& radio) : radio(radio) {
 
 void PairingRegistry::setTargetInfo(const TargetInfo& info) {
   target = info;
-
+  Serial.println();
+  
   if (target.id != 0xFF) {
-    Serial.println(F("✅ setTargetInfo: Switching to assigned pipe..."));
+    Serial.println(F("🧍 Setted Target Infos."));
+    Serial.println();
+    Serial.println(F("🔀 setTargetInfo: Switching to assigned pipe..."));
     switchToTargetPipe(target.id);
+  }
+  else {
+    Serial.println(F("❌ Target Infos not setted."));
   }
 }
 
 TargetInfo PairingRegistry::getTargetInfo() const {
   return target;
 }
-
-// void PairingRegistry::setAssignedID(uint8_t id) {
-//   target.id = id;
-//   if (id != 0xFF) {
-//     Serial.println("Switched to Target Pipe");
-//     switchToTargetPipe(id);
-//   }
-// }
-
-// void PairingRegistry::setAssignedColor(uint8_t colorIndex) {
-//   target.colorIndex = colorIndex;
-// }
 
 void PairingRegistry::setToken(uint32_t token) {
   target.token = token;
@@ -84,14 +78,6 @@ void PairingRegistry::resetToken() {
 }
 
 void PairingRegistry::switchToPairingPipe() {
-  radio.stopListening();
-  radio.openReadingPipe(1, pairingPipe);
-  radio.startListening();
-
-  Serial.println(F("🔀 Switched to pairing pipe."));
-}
-
-void PairingRegistry::switchToPairingPollPipe() {
   radio.stopListening();
   radio.openReadingPipe(1, pairingPipe);
   radio.startListening();

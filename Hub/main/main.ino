@@ -50,32 +50,34 @@ unsigned long lastHeartbeat = 0;
 
 void setup() {
   Serial.begin(9600);
+  Serial.println();
+  Serial.println(F("🚀🚀🚀🚀🚀🚀🚀"));
   Serial.println(F("🧠 Hub starting..."));
 
   // 🛠️ Initialize hardware and wireless
   initializeHubPins();
   wireless.initialize();
-  Serial.println(F("✅ Radio initialized."));
+
+  targetTypeManager.loadFromEEPROM();
+  // Serial.print(F("📦 Allowed target type: "));
+  // Serial.println(targetTypeToString(targetTypeManager.getAllowedType()));
 
   // 🔍 Broadcast pairing poll for 5 seconds after boot
+  Serial.println();
   Serial.println(F("📡 Broadcasting pairing poll..."));
-  unsigned long pairingPollStart = millis();
-  while (millis() - pairingPollStart < 5000) {
-    communication.pairingRequest();  // Sends OPCODE_PAIRING_POLL
-    delay(500);  // Poll every 500ms
-  }
-
-  // 🎯 Pairing visual feedback
-  showStatus(statusRgbLed, STATUS_PAIRING);
+  // unsigned long pairingPollStart = millis();
+  // while (millis() - pairingPollStart < 5000) {
+    if (communication.pairingSollecitation()){                                                   // Sends OPCODE_PAIRING_SOLLECITATION
+      showStatus(statusRgbLed, STATUS_PAIRING);
+    }
+    else {
+      showStatus(statusRgbLed, STATUS_ERROR);
+    }
+  //   delay(500);  // Poll every 500ms
+  // }
   delay(500);
   statusRgbLed.off();
 
-  // 🎮 Load allowed target type
-  targetTypeManager.loadFromEEPROM();
-  Serial.print(F("📦 Allowed target type: "));
-  Serial.println(targetTypeToString(targetTypeManager.getAllowedType()));
-
-  // 🖥️ Setup display and screen system
   display.setup();
   screenManager.setup();
   timeDisplay.setup(4);
@@ -113,14 +115,26 @@ void loop() {
   screenRenderer.render();
   console.processSerial();
 
-  if (statusButton.isLongPressed()) {
+  if (statusButton.wasPressed()) {
     // I NEED TO KEEP IN MEMORY WHAT WAS PREVIOUSLY ON THE DISPLAY SO THAT AFTER I CAN RESET IT
+    Serial.println();
+    Serial.println(F("👆 Status button was pressed."));
     send.blinkAll(registry);
-    showStatus(statusRgbLed, STATUS_OK, 3);
+    Serial.println(F("✨ Sent blink request to all targets."));
+    showStatus(statusRgbLed, STATUS_OK, 2);
+  }
+
+  if (statusButton.isLongPressed()) {
+    Serial.println();
+    Serial.println(F("👆 Status button was long pressed."));
+    registry.clearAll();
+    Serial.println(F("🧰 Registry was completely cleared."));
+    showStatus(statusRgbLed, STATUS_OK, 4);
   }
 
   if (batteryButton.wasPressed()) {
-    Serial.println(F("🔋 Battery check triggered"));
+    Serial.println();
+    Serial.println(F("👆 Battery button was pressed."));
     // showStatus(batteryRgbLed, STATUS_OK);                  // TO FIX BATTERY CHECK
     // batteryRgbLed.pulse("Yellow", 10, 20);
   }
@@ -141,7 +155,18 @@ void loop() {
 
   switch (header->opcode) {
     case OPCODE_VERIFICATION_REQUEST: communication.verification(buffer); break;
-    case OPCODE_PAIRING_REQUEST:      communication.pairingResponse(buffer); break;
+
+    case OPCODE_PAIRING_REQUEST: {
+        Serial.println();
+        if (communication.pairingResponse(buffer)) {
+          showStatus(statusRgbLed, STATUS_CONNECTED, 2);
+        }
+        else {
+          showStatus(statusRgbLed, STATUS_ERROR, 2);
+        }
+      break;
+    }
+
     case OPCODE_HIT_REQUEST: {
         if (sessionManager.getStatus() == GameSessionStatus::Playing) {
           communication.hit(buffer);

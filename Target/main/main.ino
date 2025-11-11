@@ -29,53 +29,36 @@ GameSessionStatus sessionStatus = GameSessionStatus::Setting;
 void setup() {
   delay(1000);
   Serial.begin(9600);
+  Serial.println();
+  Serial.println(F("🚀🚀🚀🚀🚀🚀🚀"));
   Serial.println(F("🔧 Target booting..."));
 
   randomSeed(analogRead(0));  // ✅ Better token randomness
 
   initializeTargetPins();
   wireless.setup();
-  Serial.println(F("✅ Radio initialized and chip connected."));
 
-  // 🔐 Always attempt pairing — token handling is now internal
+  Serial.println();
+  Serial.println(F("📡 Radio initialized and chip connected."));
+  Serial.println(F("📡 Radio listening on pairing pipe."));
+  
+  Serial.println();
+  Serial.println(F("🛰️ Starting active pairing"));
   if (communication.pairingRequest()) {
-    Serial.println(F("✅ Pairing successful."));
     TargetInfo info = registry.getTargetInfo();
     registry.switchToTargetPipe(info.id);
     targetRgbLed.setPrimaryColorName(info.getColorName());
     targetRgbLed.blink();
-    showAssignedIDBriefly(info.id);
-  } else {
-    registry.switchToPairingPollPipe();
+    showAssignedIDBriefly(registry.getTargetInfo().id);
+  }
+  else {
+    Serial.println();
+    Serial.println(F("❌ Active pairing failed."));
     showStatus(statusRgbLed, STATUS_DISCONNECTED);
   }
 
-  Serial.println(F("✅ Setup complete."));
+  Serial.println(F("🔧 Setup complete."));
 }
-// void setup() {
-//   delay(1000);
-//   Serial.begin(9600);
-//   Serial.println(F("🔧 Target booting..."));
-
-//   randomSeed(analogRead(0));  // ✅ Better token randomness
-
-//   initializeTargetPins();
-//   wireless.setup();
-
-//   Serial.println(F("✅ Radio initialized and chip connected."));
-//   Serial.println(F("Radio listening on pairing pipe."));
-  
-//   Serial.println(F("✅ Starting active pairing"));
-//   if (communication.pairingRequest()) {
-//     TargetInfo info = registry.getTargetInfo();
-//     targetRgbLed.setPrimaryColorName(info.getColorName());
-//     targetRgbLed.blink();
-//   }
-
-//   showAssignedIDBriefly(registry.getTargetInfo().id);
-
-//   Serial.println(F("Setup complete."));
-// }
 
 void loop() {
   static unsigned long lastHitTime = 0;
@@ -113,15 +96,14 @@ void loop() {
     PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
 
     switch (header->opcode) {
-      case OPCODE_PAIRING_POLL: {
-        Serial.println(F("Hub sent a pairing request."));
-          TargetInfo info = registry.getTargetInfo();
-          // if (info.id == 0xFF) {
-            Serial.println(F("📡 Received pairing poll — replying with token."));
-            communication.pairingRequest(info.token);
-          // }
+      case OPCODE_PAIRING_SOLLECITATION: {
+          Serial.println();
+          Serial.println(F("📡 Hub sent a pairing sollecitation. Replying with pairing request."));
+          delay(50);
+          communication.pairingRequest();
         break;
       }
+
       case OPCODE_HEARTBEAT: {
           lastHeartbeat = millis();
           heartbeatLost = false;
@@ -130,10 +112,10 @@ void loop() {
 
       case OPCODE_BLINK_COMMAND: {
           Serial.println(F("🔦 Blink command received."));
-          uint8_t assignedID = registry.getTargetInfo().id;
-          scoreDisplay.showScore(assignedID);
+          TargetInfo info = registry.getTargetInfo();
+          scoreDisplay.showScore(info.id);
           showStatus(statusRgbLed, STATUS_PAIRING);
-          rgbRing.chase("Blue", 30);
+          rgbRing.chase(info.getColorName(), 30);
           delay(1000);
           scoreDisplay.clear();
         break;
@@ -176,14 +158,17 @@ void loop() {
         break;
       }
 
-      case OPCODE_SHOW_TARGET_COLOR: {
-          bool switchOn = communication.showTargetColor(buffer);
+      case OPCODE_IDENTIFY_TARGET: {
+          bool switchOn = communication.identifyTarget(buffer);
           if (switchOn == true) {
             targetRgbLed.on();
             Serial.println(F("🌈 Target rgb led is ON."));
+            TargetInfo info = registry.getTargetInfo();
+            scoreDisplay.showScore(info.id);
           } else {
             targetRgbLed.off();
             Serial.println(F("❌ Target rgb led is OFF."));
+            scoreDisplay.showScore(0);
           }
         break;
       }
@@ -291,8 +276,28 @@ void loop() {
     }
   }
 
+  //   if (wireless.send HitPacket(targetId)) {
+  //     Serial.println(F("📡 Hit packet sent to hub."));
+  //     awaitingAck = false;
+  //   } else {
+  //     Serial.println(F("⚠️ No response from hub. Will retry pairing."));
+  //     awaitingAck = true;
+  //   }
+  //   lastHitTime = millis();
+  // }
+
+  // if (awaitingAck && millis() - lastHitTime > 5000) {
+  //   Serial.println(F("🔄 Signal lost after hit. Re-pairing..."));
+  //   communication.pairingRequest();
+  //   awaitingAck = false;
+  //   lastHeartbeat = millis();
+  //   heartbeatLost = false;
+
+  //   showAssignedIDBriefly(registry.getAssignedID());
+  // }
+
   if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {
-    Serial.println(F("💔 No heartbeat. Waiting to be contacted by Hub..."));
+    Serial.println(F("💔 No heartbeat. Waiting to be contacted by Hub..."));                                          // TO ADD AN HEARTBEAT REPLY SO THAT THE HUB CAN KNOW WHO IS STILL CONNECTED
     heartbeatLost = true;
     showStatus(statusRgbLed, STATUS_DISCONNECTED);
 

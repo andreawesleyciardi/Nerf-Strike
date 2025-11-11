@@ -13,22 +13,23 @@ const uint8_t* Communication::verifyPipeForID(uint8_t targetId) {
   return pipe;
 }
 
-void Communication::pairingRequest() {
-  send.pairingRequest();
+const bool Communication::pairingSollecitation() {
+  return send.pairingSollecitation();
 }
 
-void Communication::pairingResponse(const byte* buffer) {                 // TODO: Transform in boolean and move outside this: showStatus(statusRgbLed, STATUS_PAIRING, 2); 
-  TargetInfo target = receive.pairingRequest(buffer);
+const bool Communication::pairingResponse(const byte* buffer) {                 // TODO: Transform in boolean and move outside this: showStatus(statusRgbLed, STATUS_PAIRING, 2); 
+  TargetInfo target = receive.pairingRequest(buffer);                           // To Check the values of target if they arrive wrong or something happens in "registry.storeTargetInfo(target);" or "send.pairingResponse(target);"
+  Serial.print(F("📡 receive.pairingRequest gives target with ID "));
+  Serial.println(target.id);
   if (!target.isValid()) {
-    Serial.println(F("❌ Failed to assign ID."));
-    showStatus(statusRgbLed, STATUS_ERROR, 2);
-    return;
+    Serial.println(F("🔴 Failed to assign ID."));
+    return false;
   }
 
   // Assign pipe name and copy into target.pipe
   char pipeName[6];
   sprintf(pipeName, "TGT%d", target.id);
-  memcpy(target.pipe, reinterpret_cast<uint8_t*>(pipeName), 6);  // ✅ Fill pipe field
+  memcpy(target.pipe, reinterpret_cast<uint8_t*>(pipeName), 6);  // Fill pipe field
 
   // Store full target info (pipe + color)
   registry.storeTargetInfo(target);
@@ -36,13 +37,15 @@ void Communication::pairingResponse(const byte* buffer) {                 // TOD
   // Send pairing response with full TargetInfo
   send.pairingResponse(target);
 
-  Serial.print(F("📡 Stored pipe for ID "));
-  Serial.print(target.id);
-  Serial.print(F(": "));
+  Serial.println();
+  Serial.println(F("🟢 Stored pipe in memory."));
+  Serial.print(F("🆔 Target ID: "));
+  Serial.println(target.id);
+  Serial.print(F("🧬 Pipe name: "));
   Serial.println(pipeName);
 
-  showStatus(statusRgbLed, STATUS_PAIRING, 2);
   delay(100);
+  return true;
 }
 
 void Communication::verification(const byte* buffer) {

@@ -13,10 +13,9 @@ class Send {
 public:
   Send(RF24& radio, PairingRegistry& registry);
 
-  const bool toTargetPipe(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length);
+  const bool toTarget(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length);
 
-  // void pairingResponse(uint8_t assignedID);
-  void pairingRequest();
+  const bool pairingSollecitation();
   void pairingResponse(const TargetInfo& target);
   void verificationResponse(uint8_t id);
   

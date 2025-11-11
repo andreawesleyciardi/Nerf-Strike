@@ -24,7 +24,6 @@ public:
   void resetTargetInfoEEPROM();
 
   void switchToPairingPipe();
-  void switchToPairingPollPipe();
   void switchToTargetPipe(uint8_t id);
   const uint8_t* getTargetPipe() const;
 

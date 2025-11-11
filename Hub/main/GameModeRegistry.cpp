@@ -134,13 +134,13 @@ uint8_t GameModeRegistry::getModeCount() const {
 // }
 
 const GameMode& GameModeRegistry::getModeByName(const String& name) const {
-  Serial.print("getModeByName name: ");
-  Serial.println(name);
+  // Serial.print("getModeByName name: ");
+  // Serial.println(name);
   for (uint8_t i = 0; i < MAX_MODES; ++i) {
-    Serial.print(F("modes["));
-    Serial.print(i);
-    Serial.print(F("].getName(): "));
-    Serial.println(modes[i].getName());
+    // Serial.print(F("modes["));
+    // Serial.print(i);
+    // Serial.print(F("].getName(): "));
+    // Serial.println(modes[i].getName());
     if (modes[i].getName() == name) {
       return modes[i];
     }

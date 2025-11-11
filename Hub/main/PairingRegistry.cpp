@@ -53,6 +53,15 @@ TargetInfo PairingRegistry::setTarget(uint32_t token) {
   return TargetInfo();
 }
 
+bool PairingRegistry::hasToken(uint32_t token) const {
+  return findTargetByToken(token) != -1;
+}
+
+TargetInfo PairingRegistry::getInfoByToken(uint32_t token) const {
+  int index = findTargetByToken(token);
+  return (index != -1) ? targets[index] : TargetInfo();  // Invalid if not found
+}
+
 TargetInfo PairingRegistry::getTargetByID(uint8_t id) const {
   int index = findTargetByID(id);
   return (index != -1) ? targets[index] : TargetInfo();
@@ -60,8 +69,13 @@ TargetInfo PairingRegistry::getTargetByID(uint8_t id) const {
 
 void PairingRegistry::storeTargetInfo(const TargetInfo& info) {
   int index = findTargetByID(info.id);
+
   if (index != -1) {
     targets[index] = info;
+    Serial.println();
+    Serial.println(F("🧍 Recognized stored Target"));
+    Serial.print(F("🆔 Stored Target ID: "));
+    Serial.println(targets[index].id);
   }
 }
 
