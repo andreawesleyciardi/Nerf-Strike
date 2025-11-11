@@ -65,7 +65,7 @@ void setup() {
   Serial.println(F("📡 Broadcasting pairing poll..."));
   // unsigned long pairingPollStart = millis();
   // while (millis() - pairingPollStart < 5000) {
-    if (communication.pairingRequest()){                                                   // Sends OPCODE_PAIRING_POLL      TO RESTORE
+    if (communication.pairingSollecitation()){                                                   // Sends OPCODE_PAIRING_SOLLECITATION
       showStatus(statusRgbLed, STATUS_PAIRING);
     }
     else {
@@ -88,19 +88,24 @@ void loop() {
 
   if (statusButton.wasPressed()) {
     // I NEED TO KEEP IN MEMORY WHAT WAS PREVIOUSLY ON THE DISPLAY SO THAT AFTER I CAN RESET IT
-    Serial.println(F("statusButton.wasPressed()"));
+    Serial.println();
+    Serial.println(F("👆 Status button was pressed."));
     send.blinkAll(registry);
+    Serial.println(F("✨ Sent blink request to all targets."));
     showStatus(statusRgbLed, STATUS_OK, 2);
   }
 
   if (statusButton.isLongPressed()) {
-    Serial.println(F("statusButton.isLongPressed()"));
+    Serial.println();
+    Serial.println(F("👆 Status button was long pressed."));
     registry.clearAll();
+    Serial.println(F("🧰 Registry was completely cleared."));
     showStatus(statusRgbLed, STATUS_OK, 4);
   }
 
   if (batteryButton.wasPressed()) {
-    Serial.println(F("🔋 Battery check triggered"));
+    Serial.println();
+    Serial.println(F("👆 Battery button was pressed."));
     // showStatus(batteryRgbLed, STATUS_OK);                  // TO FIX BATTERY CHECK
     // batteryRgbLed.pulse("Yellow", 10, 20);
   }

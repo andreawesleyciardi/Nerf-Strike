@@ -91,7 +91,7 @@ public:
     }
 
     if (right.wasPressed()) {
-      communication.pairingRequest();
+      communication.pairingSollecitation();
     }
   }
 

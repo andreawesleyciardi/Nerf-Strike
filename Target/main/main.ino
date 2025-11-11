@@ -53,8 +53,6 @@ void setup() {
   else {
     Serial.println();
     Serial.println(F("❌ Active pairing failed."));
-    Serial.println(F("📡 Switch to listen on pairing pool pipe."));
-    registry.switchToPairingPollPipe();
     showStatus(statusRgbLed, STATUS_DISCONNECTED);
   }
 
@@ -97,10 +95,9 @@ void loop() {
     PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
 
     switch (header->opcode) {
-      case OPCODE_PAIRING_POLL: {
+      case OPCODE_PAIRING_SOLLECITATION: {
           Serial.println();
-          Serial.println(F("📡 Hub sent a pairing pool request. Replying with pairing request."));
-          // registry.switchToPairingPipe();
+          Serial.println(F("📡 Hub sent a pairing sollecitation. Replying with pairing request."));
           delay(50);
           communication.pairingRequest();
         break;
@@ -123,19 +120,6 @@ void loop() {
         break;
       }
 
-      // case OPCODE_ENTITY_COLOR: {
-      //     entityColorName = communication.entityColor(buffer);
-      //     if (entityColorName != "") {
-      //       rgbRing.chase(entityColorName, 30);
-      //       entityRgbLed.on(entityColorName, true);  // TEMPORARY: To add an "entityRgbLed"
-      //       sessionStatus = GameSessionStatus::Setting;
-      //       Serial.println(F("🌈 Entity color is set to: "));
-      //       Serial.println(entityColorName);
-      //     } else {
-      //       Serial.println(F("❌ Was not possible to set the entity color"));
-      //     }
-      //   break;
-      // }
       case OPCODE_TARGET_SESSION_INFO: {
           TargetSessionInfoRequestPacket* packet = reinterpret_cast<TargetSessionInfoRequestPacket*>(buffer);
           TargetSessionInfo sessionInfo = packet->sessionInfo;
@@ -173,14 +157,17 @@ void loop() {
         break;
       }
 
-      case OPCODE_SHOW_TARGET_COLOR: {
-          bool switchOn = communication.showTargetColor(buffer);
+      case OPCODE_IDENTIFY_TARGET: {
+          bool switchOn = communication.identifyTarget(buffer);
           if (switchOn == true) {
             targetRgbLed.on();
             Serial.println(F("🌈 Target rgb led is ON."));
+            TargetInfo info = registry.getTargetInfo();
+            scoreDisplay.showScore(info.id);
           } else {
             targetRgbLed.off();
             Serial.println(F("❌ Target rgb led is OFF."));
+            scoreDisplay.showScore(0);
           }
         break;
       }
@@ -309,11 +296,11 @@ void loop() {
   // }
 
   if (millis() - lastHeartbeat > 10000 && !heartbeatLost) {
-    Serial.println(F("💔 No heartbeat. Waiting to be contacted by Hub..."));
+    Serial.println(F("💔 No heartbeat. Waiting to be contacted by Hub..."));                                          // TO ADD AN HEARTBEAT REPLY SO THAT THE HUB CAN KNOW WHO IS STILL CONNECTED
     heartbeatLost = true;
     showStatus(statusRgbLed, STATUS_DISCONNECTED);
 
-    registry.switchToPairingPollPipe();
+    registry.switchToPairingPipe();
     lastHeartbeat = millis();
   }
 

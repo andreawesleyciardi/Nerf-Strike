@@ -13,12 +13,12 @@ const uint8_t* Communication::verifyPipeForID(uint8_t targetId) {
   return pipe;
 }
 
-const bool Communication::pairingRequest() {
-  return send.pairingRequest();
+const bool Communication::pairingSollecitation() {
+  return send.pairingSollecitation();
 }
 
 const bool Communication::pairingResponse(const byte* buffer) {                 // TODO: Transform in boolean and move outside this: showStatus(statusRgbLed, STATUS_PAIRING, 2); 
-  TargetInfo target = receive.pairingRequest(buffer);             // To Check the values of target if they arrive wrong or something happens in "registry.storeTargetInfo(target);" or "send.pairingResponse(target);"
+  TargetInfo target = receive.pairingRequest(buffer);                           // To Check the values of target if they arrive wrong or something happens in "registry.storeTargetInfo(target);" or "send.pairingResponse(target);"
   Serial.print(F("📡 receive.pairingRequest gives target with ID "));
   Serial.println(target.id);
   if (!target.isValid()) {

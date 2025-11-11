@@ -7,8 +7,8 @@
 Receive::Receive(RF24& radio, PairingRegistry& registry)
   : radio(radio), registry(registry) {}
 
-TargetInfo Receive::pairingResponse() {
-  Serial.print(F("📡 Target waiting for pairing response on pairing pool pipe: 0x"));
+TargetInfo Receive::pairingResponse(uint32_t token) {
+  Serial.print(F("📡 Target waiting for pairing response on pairing pipe: 0x"));
   Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
   Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
 
@@ -28,9 +28,11 @@ TargetInfo Receive::pairingResponse() {
       Serial.print(F("⏳ Receiving pairing response with opcode: "));
       Serial.println(response.opcode);
 
-      if (response.opcode == OPCODE_PAIRING_RESPONSE) {
+      Serial.println();
+      if (response.opcode == OPCODE_PAIRING_RESPONSE && response.token == token) {
         target.id = response.assignedID;
         target.colorIndex = response.colorIndex;
+        target.token = token;
 
         Serial.println(F("✅ Received pairing response."));
         Serial.print(F("🆔 Assigned ID: "));
@@ -40,8 +42,15 @@ TargetInfo Receive::pairingResponse() {
         break;
       }
       else {
-        Serial.print(F("❌ Received wrong opcode for Pairing Response. Expected "));
+        Serial.println(F("❌ Received wrong credentials for Pairing Response."));
+        Serial.print(F("📜 Received OPCODE: "));
+        Serial.println(response.opcode);
+        Serial.print(F("📜 Expected OPCODE: "));
         Serial.println(OPCODE_PAIRING_RESPONSE);
+        Serial.print(F("🧾 Received token: "));
+        Serial.println(response.token);
+        Serial.print(F("🧾 Expected token: "));
+        Serial.println(token);
       }
     }
   }
@@ -126,7 +135,7 @@ HitResponsePacket Receive::hitResponse() {
 //   return String(request->name);
 // }
 
-const bool Receive::showTargetColorRequest(const byte* buffer) {
-  const ShowTargetColorRequestPacket* request = reinterpret_cast<const ShowTargetColorRequestPacket*>(buffer);
+const bool Receive::identifyTargetRequest(const byte* buffer) {
+  const IdentifyTargetRequestPacket* request = reinterpret_cast<const IdentifyTargetRequestPacket*>(buffer);
   return request->switchOn;
 }

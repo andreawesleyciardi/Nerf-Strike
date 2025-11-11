@@ -69,8 +69,13 @@ TargetInfo PairingRegistry::getTargetByID(uint8_t id) const {
 
 void PairingRegistry::storeTargetInfo(const TargetInfo& info) {
   int index = findTargetByID(info.id);
+
   if (index != -1) {
     targets[index] = info;
+    Serial.println();
+    Serial.println(F("🧍 Recognized stored Target"));
+    Serial.print(F("🆔 Stored Target ID: "));
+    Serial.println(targets[index].id);
   }
 }
 

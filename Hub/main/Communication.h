@@ -21,7 +21,7 @@ class Communication {
 public:
   Communication(Receive& receive, Send& send, PairingRegistry& registry, GameLogic& gameLogic, RGBLed& statusRgbLed, GameSessionManager& sessionManager);
 
-  const bool pairingRequest();
+  const bool pairingSollecitation();
   const bool pairingResponse(const byte* buffer);
   void verification(const byte* buffer);
   const bool hit(const byte* buffer);

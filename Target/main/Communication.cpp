@@ -37,16 +37,16 @@ const bool Communication::pairingRequest() {
 
     if (send.pairingRequest(token)) {
       Serial.println();
-      TargetInfo target = receive.pairingResponse();
+      TargetInfo target = receive.pairingResponse(token);
       if (target.isValid()) {
         target.token = token;
-        registry.setTargetInfo(target);                         // keep an eye on this function
-        target = registry.getTargetInfo();                      // To test if keep this line
+        registry.setTargetInfo(target);
+        target = registry.getTargetInfo(); 
         Serial.println(F("🟢 Paired successfully"));
         Serial.print(F("🆔 Target ID: "));
         Serial.println(target.id);
         Serial.print(F("🎨 Color Index: "));
-        Serial.println(target.colorIndex);                      // check why here looks to be always 255
+        Serial.println(target.colorIndex);
         return true;
       }
       else {
@@ -103,10 +103,6 @@ HitResponsePacket Communication::hit() {
   return { OPCODE_SCORE_UPDATE, 0xFF, ScoreStatus::Error };
 }
 
-// const String Communication::entityColor(const byte* buffer) {
-//   return receive.entityColor(buffer);
-// }
-
-const bool Communication::showTargetColor(const byte* buffer) {
-  return receive.showTargetColorRequest(buffer);
+const bool Communication::identifyTarget(const byte* buffer) {
+  return receive.identifyTargetRequest(buffer);
 }

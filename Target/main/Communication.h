@@ -17,7 +17,7 @@ public:
   const bool verification();
   HitResponsePacket hit();
   // const String entityColor(const byte* buffer);
-  const bool showTargetColor(const byte* buffer);
+  const bool identifyTarget(const byte* buffer);
 
 private:
   TargetInfo verifyAssignedTarget();  // 🔄 Updated from uint8_t to TargetInfo

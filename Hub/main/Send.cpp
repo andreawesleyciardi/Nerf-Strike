@@ -25,29 +25,29 @@ const bool Send::toTarget(uint8_t id, const uint8_t* pipe, const void* packet, u
   return true;
 }
 
-const bool Send::pairingRequest() {
-  HubPairingRequestPacket packet = {
-    OPCODE_PAIRING_POLL
+const bool Send::pairingSollecitation() {
+  PairingSollecitationPacket packet = {
+    OPCODE_PAIRING_SOLLECITATION
   };
 
   Serial.println();
-  Serial.print(F("📤 Sending pairing request on pairing poll pipe: 0x"));
-  Serial.print((uint32_t)(pairingPollPipe >> 32), HEX);  // High 32 bits
-  Serial.println((uint32_t)(pairingPollPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
+  Serial.print(F("📤 Sending pairing request on pairing pipe: 0x"));
+  Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
+  Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
 
   radio.stopListening();
-  radio.openWritingPipe(pairingPollPipe);
+  radio.openWritingPipe(pairingPipe);
   delay(5); // Give target time to listen
   bool success = radio.write(&packet, sizeof(packet));
   radio.startListening();
 
   Serial.println();
   if (!success) {
-    Serial.println(F("❌ Failed to send pairing request."));
+    Serial.println(F("❌ Failed to send pairing sollecitation."));
     return false;
   }
 
-  Serial.println(F("✅ Sent pairing request"));
+  Serial.println(F("✅ Sent pairing sollecitation"));
   return true;
 }
 
@@ -55,11 +55,12 @@ const bool Send::pairingRequest() {
 void Send::pairingResponse(const TargetInfo& target) {
   PairingResponsePacket response = {
     OPCODE_PAIRING_RESPONSE,
+    target.token,
     target.id,
     target.colorIndex
   };
 
-  Serial.print(F("📡 Hub sending pairing response on pairing poll pipe: 0x"));
+  Serial.print(F("📡 Hub sending pairing response on pairing pipe: 0x"));
   Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
   Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
 
@@ -195,8 +196,8 @@ const bool Send::targetSessionInfoRequest(uint8_t id, const TargetSessionInfo& s
 }
 
 const bool Send::showTargetColorRequest(uint8_t id, bool switchOn) {
-  ShowTargetColorRequestPacket packet = {
-    OPCODE_SHOW_TARGET_COLOR,
+  IdentifyTargetRequestPacket packet = {
+    OPCODE_IDENTIFY_TARGET,
     switchOn
   };
 

@@ -21,7 +21,6 @@ public:
   void saveTokenToEEPROM(uint32_t token);
 
   void switchToPairingPipe();
-  void switchToPairingPollPipe();
   void switchToTargetPipe(uint8_t id);
   const uint8_t* getTargetPipe() const;
 

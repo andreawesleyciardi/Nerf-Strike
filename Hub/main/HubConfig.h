@@ -9,7 +9,6 @@
 const uint8_t transmitterCEPin = 9;
 const uint8_t transmitterCSNPin = 10;
 const uint64_t pairingPipe = 0xF0F0F0F0E1LL;
-const uint64_t pairingPollPipe = 0xF1F1F1F1D2;
 
 // 📟 7-Segment Display (Shift Register Interface)
 const uint8_t displayDataPin   = 26;
