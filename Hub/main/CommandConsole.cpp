@@ -4,12 +4,8 @@
 #include "CommandConsole.h"
 #include "TargetTypeManager.h"
 
-CommandConsole::CommandConsole(PairingRegistry& registry, Send& send,
-                               RotaryEncoder& encoder, Button& left, Button& right,
-                               TargetTypeManager& typeManager)
-  : registry(registry), send(send),
-    encoder(encoder), leftButton(left), rightButton(right),
-    targetTypeManager(typeManager) {}
+CommandConsole::CommandConsole(PairingRegistry& registry, Send& send, RotaryEncoder& encoder, Button& left, Button& right, TargetTypeManager& typeManager, Communication& communication)
+  : registry(registry), send(send), encoder(encoder), leftButton(left), rightButton(right), targetTypeManager(typeManager), communication(communication) {}
 
 void CommandConsole::processSerial() {
   if (!Serial.available()) return;
@@ -26,17 +22,7 @@ void CommandConsole::processSerial() {
   }
 
   if (command == "blink") {
-    Serial.println(F("🔦 Triggering blink..."));
-    BlinkCommandPacket packet = {
-      OPCODE_BLINK_COMMAND
-    };
-    for (uint8_t i = 0; i < MAX_TARGETS; i++) {
-      uint8_t id = registry.getIDAt(i);
-      const uint8_t* pipe = registry.getPipeForID(id);
-      if (id != 0xFF && pipe) {
-        send.toTarget(id, pipe, &packet, sizeof(packet));
-      }
-    }
+    communication.blinkAll();
     return;
   }
 

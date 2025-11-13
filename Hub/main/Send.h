@@ -13,16 +13,14 @@ class Send {
 public:
   Send(RF24& radio, PairingRegistry& registry);
 
-  const bool toTarget(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length);
-
   const bool pairingSollecitation();
   void pairingResponse(const TargetInfo& target);
   void verificationResponse(uint8_t id);
   
-  void blinkAll(PairingRegistry& registry);
-  void heartbeatAll(PairingRegistry& registry);
+  void blinkAll();
+  void heartbeatAll();
 
-  const bool scoreUpdate(uint8_t id, const uint8_t* pipe, ScoreUpdated result);
+  const bool scoreUpdate(uint8_t id, ScoreUpdated result);
 
   // const bool entityColorRequest(uint8_t id, char colorName[16]);
   const bool targetSessionInfoRequest(uint8_t id, const TargetSessionInfo& sessionInfo);
@@ -35,6 +33,9 @@ public:
 private:
   RF24& radio;
   PairingRegistry& registry;
+
+  const bool toTarget(uint8_t id, const void* packet, size_t packetSize, String label = "");
+  const bool toAllTargets(const void* packet, size_t packetSize, String label = "");
 };
 
 extern Send send;

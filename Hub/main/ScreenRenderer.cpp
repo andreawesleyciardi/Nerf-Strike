@@ -48,8 +48,8 @@ void ScreenRenderer::render() {
   if (mode == EncoderMode::SelectItem || mode == EncoderMode::AdjustField) {
     // display.printAligned("<>", display.getRowCount() - 1, "center");
     display.setCursor(9, 3);
-    display.write(1);
-    display.write(2);
+    display.write(7);
+    display.write(8);
   }
 
   // 🧪 Debug trace (optional)

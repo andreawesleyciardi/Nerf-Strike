@@ -62,19 +62,24 @@ void Communication::verification(const byte* buffer) {
   send.verificationResponse(targetId);
 }
 
+void Communication::blinkAll() {
+  send.blinkAll();
+}
+
+void Communication::heartbeatAll() {
+  send.heartbeatAll();
+}
+
 bool Communication::updateBatch(ScoreUpdateBatch batch, uint8_t id) {
   bool sent = false;
   for (uint8_t i = 0; i < batch.count; ++i) {
     const ScoreUpdatedPerTarget& result = batch.updates[i];
-    const uint8_t* targetPipe = verifyPipeForID(result.targetId);
-    if (targetPipe) {
-      const bool wasSent = send.scoreUpdate(result.targetId, targetPipe, {result.newScore, result.status});
-      if (id != TARGET_ID_NONE && result.targetId == id) {
-        sent = wasSent;
-      }
-      else {
-        sent = true;
-      }
+    const bool wasSent = send.scoreUpdate(result.targetId, {result.newScore, result.status});
+    if (id != TARGET_ID_NONE && result.targetId == id) {
+      sent = wasSent;
+    }
+    else {
+      sent = true;
     }
   }
   return sent;

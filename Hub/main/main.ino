@@ -35,8 +35,6 @@ GameSessionManager sessionManager(registry);
 
 GameLogic gameLogic(sessionManager, registry);
 
-CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager);
-
 Receive receive(targetTypeManager, registry);
 Send send(wireless.getRadio(), registry);
 Communication communication(receive, send, registry, gameLogic, statusRgbLed, sessionManager);
@@ -44,6 +42,8 @@ Communication communication(receive, send, registry, gameLogic, statusRgbLed, se
 ScreenManager screenManager(display, hubState, gameModeRegistry, registry, gameLogic, communication);
 ScreenRenderer screenRenderer(display, screenManager, hubState, gameModeRegistry);
 ScreenController screenController(screenManager, hubState, registry, gameModeRegistry, encoder, leftButton, rightButton);
+
+CommandConsole console(registry, send, encoder, leftButton, rightButton, targetTypeManager, communication);
 
 // ⏱️ Timing
 unsigned long lastHeartbeat = 0;
@@ -119,7 +119,7 @@ void loop() {
     // I NEED TO KEEP IN MEMORY WHAT WAS PREVIOUSLY ON THE DISPLAY SO THAT AFTER I CAN RESET IT
     Serial.println();
     Serial.println(F("👆 Status button was pressed."));
-    send.blinkAll(registry);
+    communication.blinkAll();
     Serial.println(F("✨ Sent blink request to all targets."));
     showStatus(statusRgbLed, STATUS_OK, 2);
   }
@@ -140,7 +140,7 @@ void loop() {
   }
 
   if (millis() - lastHeartbeat > 3000) {
-    send.heartbeatAll(registry);
+    communication.heartbeatAll();
     lastHeartbeat = millis();
   }
 

@@ -7,22 +7,42 @@
 Send::Send(RF24& radio, PairingRegistry& registry)
   : radio(radio), registry(registry) {}
 
-const bool Send::toTarget(uint8_t id, const uint8_t* pipe, const void* packet, uint8_t length) {
-  radio.stopListening();
-  radio.openWritingPipe(pipe);
-  delay(5);  // Give target time to listen
-  bool success = radio.write(packet, length);
-  radio.startListening();
-
-  if (!success) {
-    Serial.print(F("❌ Failed to send data to target ID on pipe "));
-    Serial.print(id);
-    Serial.print(F(" on pipe "));
-    Serial.println((char*)pipe);
+const bool Send::toTarget(uint8_t id, const void* packet, size_t packetSize, String label) {
+  const uint8_t* pipe = registry.getPipeForID(id);
+  if (!pipe) {
+    Serial.println();
+    Serial.println("❌ It was not possible to send " + (label != "" ? label : "data") + " to Target.");
+    Serial.print(F("🆔 No pipe found for ID: "));
+    Serial.println(id);
     return false;
   }
 
-  return true;
+  radio.stopListening();
+  radio.openWritingPipe(pipe);
+  delay(5);  // Give target time to listen
+  bool success = radio.write(packet, packetSize);
+  radio.startListening();
+
+  Serial.println();
+  if (!success) {
+    Serial.println("❌ Failed to send " + (label != "" ? label : "data") + " to Target:");
+  }
+  else {
+    Serial.println("📤 Sent " + (label != "" ? label : "data") + " to Target:");
+  }
+  Serial.print(F("🆔 Id: "));
+  Serial.println(id);
+  Serial.print(F("🧬 Pipe: "));
+  Serial.println((char*)pipe);
+
+  return success;
+}
+
+const bool Send::toAllTargets(const void* packet, size_t packetSize, String label) {
+  for (uint8_t i = 0; i < MAX_TARGETS; i++) {
+    uint8_t id = registry.getIDAt(i);
+    toTarget(id, packet, packetSize, label);
+  }
 }
 
 const bool Send::pairingSollecitation() {
@@ -86,77 +106,37 @@ void Send::verificationResponse(uint8_t id) {
     OPCODE_VERIFICATION_RESPONSE,
     id
   };
-
-  const uint8_t* pipe = registry.getPipeForID(id);
-  Serial.print(F("📤 Trying to send verification response to target ID "));
-  Serial.print(id);
-  Serial.print(F(" via pipe "));
-  Serial.println((char*)pipe);
-  bool success = toTarget(id, pipe, &response, sizeof(response));
-
-  if (!success) {
-    Serial.print(F("❌ Failed to send verification response for ID: "));
-    Serial.println(id);
-    return;
-  }
-
-  Serial.print(F("✅ Sent verification response for ID: "));
-  Serial.println(id);
+  toTarget(id, &response, sizeof(response), "verification response");
 }
 
-void Send::blinkAll(PairingRegistry& registry) {
-  Serial.println(F("🔦 Triggering blink on all paired targets..."));
+void Send::blinkAll() {
+  BlinkCommandPacket packet = {
+    OPCODE_BLINK_COMMAND
+  };
 
-  BlinkCommandPacket packet;
-  packet.opcode = OPCODE_BLINK_COMMAND;
-
-  for (uint8_t i = 0; i < MAX_TARGETS; i++) {
-    uint8_t id = registry.getIDAt(i);
-    const uint8_t* pipe = registry.getPipeForID(id);
-    if (id != 0xFF && pipe) {
-      Serial.print(F("🔦 Sending blink to ID: "));
-      Serial.println(id);
-      toTarget(id, pipe, &packet, sizeof(packet));
-    }
-  }
+  toAllTargets(&packet, sizeof(packet), "blink");
 }
 
-void Send::heartbeatAll(PairingRegistry& registry) {
+void Send::heartbeatAll() {
   HeartbeatPacket packet = {
     OPCODE_HEARTBEAT
   };
 
-  for (uint8_t i = 0; i < MAX_TARGETS; i++) {
-    // Serial.print(F("Index: "));
-    // Serial.print(i);
-    
-    uint8_t id = registry.getIDAt(i);
-    // Serial.print(F(" - id: "));
-    // Serial.println(id);
-    const uint8_t* pipe = registry.getPipeForID(id);
-    if (id != 0xFF && pipe) {
-      toTarget(id, pipe, &packet, sizeof(packet));
-    }
-  }
+  toAllTargets(&packet, sizeof(packet), "heartbeat");
 }
 
-const bool Send::scoreUpdate(uint8_t id, const uint8_t* pipe, ScoreUpdated result) {
+const bool Send::scoreUpdate(uint8_t id, ScoreUpdated result) {
   HitResponsePacket packet = {
     OPCODE_SCORE_UPDATE,
     result.newScore,
     result.status
   };
 
-  if (toTarget(id, pipe, &packet, sizeof(packet))) {
-    Serial.print(F("📤 Score update sent to target ID "));
-    Serial.print(id);
-    Serial.print(F(": "));
-    Serial.println(result.newScore);
-    return true;
-  }
-  else {
-    return false;
-  }
+  Serial.println();
+  Serial.print(F("⭐ New score: "));
+  Serial.println(result.newScore);
+
+  return toTarget(id, &packet, sizeof(packet), "score update");
 }
 
 // const bool Send::entityColorRequest(uint8_t id, char colorName[16]) {
@@ -183,15 +163,7 @@ const bool Send::targetSessionInfoRequest(uint8_t id, const TargetSessionInfo& s
     sessionInfo
   };
 
-  const uint8_t* pipe = registry.getPipeForID(id);
-  if (id != 0xFF && pipe) {
-    if (toTarget(id, pipe, &packet, sizeof(packet))) {
-      Serial.print(F("🌈 Target Session Infos sent to target ID: "));
-      Serial.println(id);
-      return true;
-    }
-  }
-  return false;
+  return toTarget(id, &packet, sizeof(packet), "Target session infos");
 }
 
 const bool Send::showTargetColorRequest(uint8_t id, bool switchOn) {
@@ -200,13 +172,10 @@ const bool Send::showTargetColorRequest(uint8_t id, bool switchOn) {
     switchOn
   };
 
-  const uint8_t* pipe = registry.getPipeForID(id);
-  if (id != 0xFF && pipe) {
-    if (toTarget(id, pipe, &packet, sizeof(packet))) {
-      Serial.print(F("🌈 Target color is "));
-      Serial.println(switchOn == true ? "ON" : "OFF");
-      return true;
-    }
+  if (toTarget(id, &packet, sizeof(packet))) {
+    Serial.print(F("🌈 Target color is "));
+    Serial.println(switchOn == true ? "ON" : "OFF");
+    return true;
   }
   return false;
 }
@@ -217,15 +186,7 @@ const bool Send::sessionStatusRequest(uint8_t id, GameSessionStatus status) {
     status
   };
 
-  const uint8_t* pipe = registry.getPipeForID(id);
-  if (id != 0xFF && pipe) {
-    if (toTarget(id, pipe, &packet, sizeof(packet))) {
-      // Serial.print(F("📤 Status update sent to target ID "));
-      // Serial.println(id);
-      return true;
-    }
-  }
-  return false;
+  return toTarget(id, &packet, sizeof(packet), "session infos");
 }
 
 const bool Send::litTargetRequest(uint8_t id, uint8_t indexInEntity) {
@@ -234,15 +195,7 @@ const bool Send::litTargetRequest(uint8_t id, uint8_t indexInEntity) {
     indexInEntity
   };
 
-  const uint8_t* pipe = registry.getPipeForID(id);
-  if (id != 0xFF && pipe) {
-    if (toTarget(id, pipe, &packet, sizeof(packet))) {
-      Serial.print(F("📤 litTarget update sent to target ID "));
-      Serial.println(id);
-      return true;
-    }
-  }
-  return false;
+  return toTarget(id, &packet, sizeof(packet), "litTarget update");
 }
 
 

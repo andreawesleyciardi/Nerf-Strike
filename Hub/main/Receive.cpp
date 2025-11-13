@@ -49,8 +49,8 @@ TargetInfo Receive::pairingRequest(const byte* buffer) {
     Serial.println(target.id);
     Serial.print(F("🎨 Assigned Color Index: "));
     Serial.println(target.colorIndex);
-    Serial.print(F("📡 Assigned pipe: "));
-    Serial.println(pipeName);
+    // Serial.print(F("📡 Assigned pipe: "));
+    // Serial.println(pipeName);
   }
 
   return target;

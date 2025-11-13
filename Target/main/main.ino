@@ -107,6 +107,7 @@ void loop() {
       case OPCODE_HEARTBEAT: {
           lastHeartbeat = millis();
           heartbeatLost = false;
+          communication.heartbeatResponse();
         break;
       }
 

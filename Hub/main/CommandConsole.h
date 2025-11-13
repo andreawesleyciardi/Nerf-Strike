@@ -8,10 +8,11 @@
 #include "PairingRegistry.h"
 #include "Send.h"
 #include "TargetTypeManager.h"
+#include "Communication.h"
 
 class CommandConsole {
 public:
-  CommandConsole(PairingRegistry& registry, Send& send, RotaryEncoder& encoder, Button& leftButton, Button& rightButton, TargetTypeManager& typeManager);
+  CommandConsole(PairingRegistry& registry, Send& send, RotaryEncoder& encoder, Button& leftButton, Button& rightButton, TargetTypeManager& typeManager, Communication& communication);
   void processSerial();
   void processInput();  // 🧠 Unified input handler
 
@@ -22,6 +23,7 @@ private:
   Button& leftButton;
   Button& rightButton;
   TargetTypeManager& targetTypeManager;
+  Communication& communication;
 
   bool verbose = true;
   unsigned long startTime;

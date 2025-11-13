@@ -25,11 +25,36 @@ byte customArrowRight[] = {
   B01110
 };
 
+// awg logo version 1
+// byte name0x6[8] = { B00000, B00000, B00000, B00011, B00101, B01001, B01001, B00110 };
+// byte name0x7[8] = { B00000, B00000, B00000, B01000, B01010, B01010, B01111, B11010 };
+// byte name0x8[8] = { B00000, B00000, B00000, B10011, B11100, B10100, B00010, B00111 };
+// byte name0x9[8] = { B00000, B00000, B00000, B00000, B10100, B11000, B10000, B00000 };
+// byte name1x8[8] = { B01001, B10010, B11100, B00000, B00000, B00000, B00000, B00000 };
+
 void LcdDisplay::setup() {
   begin(cols, rows);
   backlight();
-  createChar(1, customArrowLeft);
-  createChar(2, customArrowRight);
+  createChar(7, customArrowLeft);
+  createChar(8, customArrowRight);
+
+  // awg logo
+  // createChar(1, name0x6);
+  // createChar(2, name0x7);
+  // createChar(3, name0x8);
+  // createChar(4, name0x9);
+  // createChar(5, name1x8);
+    // display.setCursor(6, 1);
+    // display.write(1);
+    // display.setCursor(7, 1);
+    // display.write(2);
+    // display.setCursor(8, 1);
+    // display.write(3);
+    // display.setCursor(9, 1);
+    // display.write(4);
+    // display.setCursor(8, 2);
+    // display.write(5);
+
   clear();
 }
 

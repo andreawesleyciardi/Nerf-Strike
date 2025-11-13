@@ -18,12 +18,13 @@ TargetInfo Communication::verifyAssignedTarget() {
 const bool Communication::pairingRequest() {
   showStatus(statusRgbLed, STATUS_PAIRING);
 
+  uint32_t token = registry.loadTokenFromEEPROM();
   if (token == 0xFFFFFFFF || token == 0) {
     token = random(100000, 999999);
     registry.saveTokenToEEPROM(token);
     Serial.print(F("🧾 Generated new token: "));
-  } else {
-    registry.setToken(token);
+  }
+  else {
     Serial.print(F("🧾 Reusing stored token: "));
   }
   Serial.println(token);
@@ -92,6 +93,10 @@ const bool Communication::verification() {
     return true;
   }
   return false;
+}
+
+const bool Communication::heartbeatResponse() {
+  return send.heartbeatResponse();
 }
 
 HitResponsePacket Communication::hit() {

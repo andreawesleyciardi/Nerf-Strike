@@ -24,6 +24,8 @@ public:
   const bool pairingSollecitation();
   const bool pairingResponse(const byte* buffer);
   void verification(const byte* buffer);
+  void blinkAll();
+  void heartbeatAll();
   const bool hit(const byte* buffer);
   const bool targetSessionInfo(uint8_t targetId, const TargetSessionInfo& sessionInfo);
   const bool showTargetColor(uint8_t targetId, bool switchOn = true);
