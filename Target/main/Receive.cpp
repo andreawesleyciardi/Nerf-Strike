@@ -8,19 +8,21 @@ Receive::Receive(RF24& radio, PairingRegistry& registry)
   : radio(radio), registry(registry) {}
 
 TargetInfo Receive::pairingResponse(uint32_t token) {
+  radio.openReadingPipe(1, pairingPipe);
+  radio.startListening();
+
   Serial.print(F("📡 Target waiting for pairing response on pairing pipe: 0x"));
   Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
   Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
 
-  radio.openReadingPipe(1, pairingPipe);
-  radio.startListening();
-
-  TargetInfo target;  // Default-initialized (invalid)
+  TargetInfo target;
 
   unsigned long startTime = millis();
 
+  bool hasTimedOut = true;
   while (millis() - startTime < 6000) {
     if (radio.available()) {
+      hasTimedOut = false;
       PairingResponsePacket response;
       radio.read(&response, sizeof(response));
 
@@ -58,6 +60,9 @@ TargetInfo Receive::pairingResponse(uint32_t token) {
 
   if (!target.isValid()) {
     Serial.println(F("❌ No valid pairing response received."));
+    if (hasTimedOut) {
+      Serial.println(F("❌ Cause: Time Out."));
+    }
   }
 
   return target;

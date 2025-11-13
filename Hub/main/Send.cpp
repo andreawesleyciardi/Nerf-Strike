@@ -7,11 +7,11 @@
 Send::Send(RF24& radio, PairingRegistry& registry)
   : radio(radio), registry(registry) {}
 
-const bool Send::toTarget(uint8_t id, const void* packet, size_t packetSize, String label) {
+const bool Send::toTarget(uint8_t id, const void* packet, size_t packetSize, String label, bool logging) {
   const uint8_t* pipe = registry.getPipeForID(id);
   if (!pipe) {
     Serial.println();
-    Serial.println("❌ It was not possible to send " + (label != "" ? label : "data") + " to Target.");
+    Serial.println("❌ It was not possible to send " + label + " to Target.");
     Serial.print(F("🆔 No pipe found for ID: "));
     Serial.println(id);
     return false;
@@ -23,27 +23,33 @@ const bool Send::toTarget(uint8_t id, const void* packet, size_t packetSize, Str
   bool success = radio.write(packet, packetSize);
   radio.startListening();
 
-  Serial.println();
-  if (!success) {
-    Serial.println("❌ Failed to send " + (label != "" ? label : "data") + " to Target:");
+  if (logging) {
+    Serial.println();
+    if (!success) {
+      Serial.println("❌ Failed to send " + label + " to Target:");
+    }
+    else {
+      Serial.println("📤 Sent " + label + " to Target:");
+    }
+    Serial.print(F("🆔 Id: "));
+    Serial.println(id);
+    Serial.print(F("🧬 Pipe: "));
+    Serial.println((char*)pipe);
   }
-  else {
-    Serial.println("📤 Sent " + (label != "" ? label : "data") + " to Target:");
-  }
-  Serial.print(F("🆔 Id: "));
-  Serial.println(id);
-  Serial.print(F("🧬 Pipe: "));
-  Serial.println((char*)pipe);
 
   return success;
 }
 
-const bool Send::toAllTargets(const void* packet, size_t packetSize, String label) {
+const bool Send::toAllTargets(const void* packet, size_t packetSize, String label, bool logging) {
   for (uint8_t i = 0; i < MAX_TARGETS; i++) {
     uint8_t id = registry.getIDAt(i);
-    toTarget(id, packet, packetSize, label);
+    if (id != 0xFF) {
+      toTarget(id, packet, packetSize, label, logging);
+    }
   }
 }
+
+// ************************************************************************************************************************************************************************************************
 
 const bool Send::pairingSollecitation() {
   PairingSollecitationPacket packet = {
@@ -51,7 +57,7 @@ const bool Send::pairingSollecitation() {
   };
 
   Serial.println();
-  Serial.print(F("📤 Sending pairing request on pairing pipe: 0x"));
+  Serial.print(F("📤 Sending pairing sollecitation on pairing pipe: 0x"));
   Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
   Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
 
@@ -95,9 +101,11 @@ void Send::pairingResponse(const TargetInfo& target) {
     return;
   }
 
-  Serial.print(F("✅ Sent pairing response with ID: "));
-  Serial.print(target.id);
-  Serial.print(F(" and color index: "));
+  Serial.println();
+  Serial.print(F("✅ Sent pairing response."));
+  Serial.print(F("🆔 Id: "));
+  Serial.println(target.id);
+  Serial.print(F("🌈 Color index: "));
   Serial.println(target.colorIndex);
 }
 
@@ -118,11 +126,11 @@ void Send::blinkAll() {
 }
 
 void Send::heartbeatAll() {
-  HeartbeatPacket packet = {
-    OPCODE_HEARTBEAT
+  HeartbeatRequestPacket packet = {
+    OPCODE_HEARTBEAT_REQUEST
   };
 
-  toAllTargets(&packet, sizeof(packet), "heartbeat");
+  toAllTargets(&packet, sizeof(packet), "heartbeat", false);
 }
 
 const bool Send::scoreUpdate(uint8_t id, ScoreUpdated result) {

@@ -33,9 +33,7 @@ const bool Communication::pairingRequest() {
 
   for (int attempt = 1; attempt <= 3; attempt++) {
     Serial.println();
-    Serial.print(F("🛰️ Attempt "));
-    Serial.print(attempt);
-    Serial.println(F(" to pair..."));
+    Serial.println("🛰️ Attempt " + String(attempt) + " to pair...");
 
     if (send.pairingRequest(token)) {
       Serial.println();
@@ -43,7 +41,7 @@ const bool Communication::pairingRequest() {
       if (target.isValid()) {
         target.token = token;
         registry.setTargetInfo(target);
-        target = registry.getTargetInfo(); 
+        target = registry.getTargetInfo();
         Serial.println(F("🟢 Paired successfully"));
         Serial.print(F("🆔 Target ID: "));
         Serial.println(target.id);
@@ -95,8 +93,9 @@ const bool Communication::verification() {
   return false;
 }
 
-const bool Communication::heartbeatResponse() {
-  return send.heartbeatResponse();
+const bool Communication::heartbeat() {
+  TargetInfo target = registry.getTargetInfo();
+  return send.heartbeatResponse(target.id);
 }
 
 HitResponsePacket Communication::hit() {

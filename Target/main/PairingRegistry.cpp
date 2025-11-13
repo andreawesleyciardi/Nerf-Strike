@@ -96,10 +96,10 @@ void PairingRegistry::switchToTargetPipe(uint8_t id) {
 }
 
 const uint8_t* PairingRegistry::getTargetPipe() const {
-  Serial.print(F("📡 getTargetPipe returns: "));
-  for (int i = 0; i < 6; i++) {
-    Serial.print((char)target.pipe[i]);
-  }
-  Serial.println();
+  // Serial.print(F("📡 getTargetPipe returns: "));
+  // for (int i = 0; i < 6; i++) {
+  //   Serial.print((char)target.pipe[i]);
+  // }
+  // Serial.println();
   return target.pipe;
 }

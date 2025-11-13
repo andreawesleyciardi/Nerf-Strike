@@ -104,10 +104,10 @@ void loop() {
         break;
       }
 
-      case OPCODE_HEARTBEAT: {
+      case OPCODE_HEARTBEAT_REQUEST: {
           lastHeartbeat = millis();
           heartbeatLost = false;
-          communication.heartbeatResponse();
+          communication.heartbeat();
         break;
       }
 
@@ -224,19 +224,26 @@ void loop() {
           if (newStatus == GameSessionStatus::Starting || newStatus == GameSessionStatus::Resetting) {
             scoreDisplay.updateScore(0, true);
           }
+          TargetInfo info = registry.getTargetInfo();
           if (newStatus == GameSessionStatus::Paused) {
-            TargetInfo info = registry.getTargetInfo();
             Color entityColor = ColorPalette::getByIndex(info.entityColorIndex);
             entityRgbLed.startPulse(entityColor.name);
           }
+          targetRgbLed.off();
           if (sessionStatus == GameSessionStatus::Paused && (newStatus == GameSessionStatus::Playing || newStatus == GameSessionStatus::Ended)) {
             entityRgbLed.stopPulse();
             entityRgbLed.on();
-          } else if (newStatus == GameSessionStatus::Ended || newStatus == GameSessionStatus::Setting || newStatus == GameSessionStatus::Resetting) {
+          } else if (newStatus == GameSessionStatus::Ended || newStatus == GameSessionStatus::Resetting) {
             entityRgbLed.off();
             rgbRing.off();
             delay(500);
             scoreDisplay.updateScore(0, true);
+          } else if (newStatus == GameSessionStatus::Setting) {
+            entityRgbLed.off();
+            targetRgbLed.on();
+            rgbRing.off();
+            delay(500);
+            scoreDisplay.updateScore(info.id, true);
           }
           // To check if this happens already:
           // if (newStatus == GameSessionStatus::Playing) {

@@ -20,22 +20,20 @@ public:
   void blinkAll();
   void heartbeatAll();
 
-  const bool scoreUpdate(uint8_t id, ScoreUpdated result);
-
   // const bool entityColorRequest(uint8_t id, char colorName[16]);
+  const bool sessionStatusRequest(uint8_t id, GameSessionStatus status);
   const bool targetSessionInfoRequest(uint8_t id, const TargetSessionInfo& sessionInfo);
   const bool showTargetColorRequest(uint8_t id, bool switchOn);
 
-  const bool sessionStatusRequest(uint8_t id, GameSessionStatus status);
-
+  const bool scoreUpdate(uint8_t id, ScoreUpdated result);
   const bool litTargetRequest(uint8_t id, uint8_t indexInEntity);
   
 private:
   RF24& radio;
   PairingRegistry& registry;
 
-  const bool toTarget(uint8_t id, const void* packet, size_t packetSize, String label = "");
-  const bool toAllTargets(const void* packet, size_t packetSize, String label = "");
+  const bool toTarget(uint8_t id, const void* packet, size_t packetSize, String label = "data", bool logging = true);
+  const bool toAllTargets(const void* packet, size_t packetSize, String label = "data", bool logging = true);
 };
 
 extern Send send;

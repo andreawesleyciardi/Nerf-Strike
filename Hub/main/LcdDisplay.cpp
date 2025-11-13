@@ -35,8 +35,8 @@ byte customArrowRight[] = {
 void LcdDisplay::setup() {
   begin(cols, rows);
   backlight();
-  createChar(7, customArrowLeft);
-  createChar(8, customArrowRight);
+  createChar(1, customArrowLeft);
+  createChar(2, customArrowRight);
 
   // awg logo
   // createChar(1, name0x6);

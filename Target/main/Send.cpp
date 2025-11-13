@@ -7,32 +7,44 @@
 Send::Send(RF24& radio, PairingRegistry& registry)
   : radio(radio), registry(registry) {}
 
-const bool Send::toHub(const byte* data, uint8_t length, OnPipe onPipe) {
-  Serial.println();
-  Serial.print(F("📤 Sending data to hub on "));
+const bool Send::toHub(const byte* data, uint8_t length, String label, bool logging, OnPipe onPipe) {
+  if (logging) {
+    Serial.println();
+    Serial.println("📤 Sending " + label + " to Hub");
+  }
   radio.stopListening();
   if (onPipe == OnPipe::pairingPipe) {
-    Serial.print(F("Pairing Pipe: "));
-    Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
-    Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
+    if (logging) {
+      Serial.print(F("🧬 Communicating on Pairing Pipe: "));
+      Serial.print((uint32_t)(pairingPipe >> 32), HEX);  // High 32 bits
+      Serial.println((uint32_t)(pairingPipe & 0xFFFFFFFF), HEX);  // Low 32 bits
+    }
     radio.openWritingPipe(pairingPipe);
   }
   else if (onPipe == OnPipe::targetPipe) {
     const uint8_t* targetPipe = registry.getTargetPipe();
-    Serial.print(F("Target Pipe: "));
-    Serial.println((char*)targetPipe);
+    if (logging) {
+      Serial.print(F("🧬 Communicating on Target Pipe: "));
+      Serial.println((char*)targetPipe);
+    }
     radio.openWritingPipe(targetPipe);
   }
   bool success = radio.write(data, length);
   radio.startListening();
 
   if (!success) {
-    Serial.println(F("❌ Failed to send data to hub."));
+    if (logging) {
+      Serial.println("❌ Failed to send " + label + " to Hub.");
+    }
     return false;
   }
-  Serial.println(F("✅ Sent data to hub."));
+  if (logging) {
+    Serial.println("✅ Sent " + label + " to Hub.");
+  }
   return true;
 }
+
+// ************************************************************************************************************************************************************************************************
 
 const bool Send::pairingRequest(uint32_t token) {
   PairingRequestPacket request = {
@@ -42,10 +54,10 @@ const bool Send::pairingRequest(uint32_t token) {
   };
 
   Serial.println();
-  Serial.print(F("📤 Sending active pairing request with token: "));
+  Serial.print(F("🧾 Token: "));
   Serial.println(token);
 
-  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request));
+  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), "pairing request", true, OnPipe::pairingPipe);
 }
 
 const bool Send::verificationRequest(uint8_t id) {
@@ -54,25 +66,16 @@ const bool Send::verificationRequest(uint8_t id) {
     id
   };
 
-  Serial.print(F("📨 Sending verification request for ID "));
-  Serial.println(id);
-
-  bool success = toHub(reinterpret_cast<const byte*>(&request), sizeof(request));
-
-  if (!success) {
-    Serial.println(F("❌ Failed to send verification request."));
-    return false;
-  }
-  Serial.println(F("✅ Verification request sent."));
-  return true;
+  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), "verification request");
 }
 
-const bool Send::heartbeatResponse() {
-  HeartbeatPacket response = {
-    OPCODE_HEARTBEAT
+const bool Send::heartbeatResponse(uint8_t targetId) {
+  HeartbeatResponsePacket response = {
+    OPCODE_HEARTBEAT_RESPONSE,
+    targetId
   };
 
-  return toHub(reinterpret_cast<const byte*>(&response), sizeof(response));
+  return toHub(reinterpret_cast<const byte*>(&response), sizeof(response), "heartbeat", false);
 }
 
 const bool Send::hitRequest(uint8_t targetId) {
@@ -81,25 +84,5 @@ const bool Send::hitRequest(uint8_t targetId) {
     targetId
   };
 
-  bool success = toHub(reinterpret_cast<const byte*>(&request), sizeof(request));
-
-  if (!success) {
-    Serial.println(F("❌ Failed to send hit request."));
-    return false;
-  }
-  Serial.println(F("📡 Hit request sent successfully."));
-  return true;
+  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), "hit request");
 }
-
-// void Send::toHub(const byte* data, uint8_t length) {
-//   radio.stopListening();
-//   radio.openWritingPipe(targetPipe);
-//   bool success = radio.write(data, length);
-//   radio.startListening();
-
-//   if (success) {
-//     Serial.println(F("📤 Sent data to hub via target pipe."));
-//   } else {
-//     Serial.println(F("❌ Failed to send data to hub."));
-//   }
-// }

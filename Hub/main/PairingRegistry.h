@@ -24,10 +24,15 @@ public:
   uint8_t getPairedTargetCount() const;
   const uint8_t* getAllPairedTargetIds() const;
   TargetInfo getTargetByID(uint8_t id) const;
-  void logTargets() const;
 
-  int findTargetByToken(uint32_t token);
-  int findTargetByID(uint8_t id) const;
+  int findTargetByToken(uint32_t token) const;
+  int findTargetIndexByID(uint8_t id) const;
+
+  bool removeTargetById(uint8_t id);
+
+  TargetInfo& getTargetRefByID(uint8_t id);
+
+  void logTargets() const;
 
 private:
   TargetInfo targets[MAX_TARGETS];
