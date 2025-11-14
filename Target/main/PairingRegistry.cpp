@@ -79,7 +79,7 @@ void PairingRegistry::resetToken() {
 
 void PairingRegistry::switchToPairingPipe() {
   radio.stopListening();
-  radio.openReadingPipe(1, pairingPipe);
+  radio.openReadingPipe(0, pairingPipe);
   radio.startListening();
 
   Serial.println(F("🔀 Switched to pairing pipe."));

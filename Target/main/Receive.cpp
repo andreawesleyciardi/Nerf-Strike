@@ -8,7 +8,7 @@ Receive::Receive(RF24& radio, PairingRegistry& registry)
   : radio(radio), registry(registry) {}
 
 TargetInfo Receive::pairingResponse(uint32_t token) {
-  radio.openReadingPipe(1, pairingPipe);
+  radio.openReadingPipe(0, pairingPipe);
   radio.startListening();
 
   Serial.print(F("📡 Target waiting for pairing response on pairing pipe: 0x"));

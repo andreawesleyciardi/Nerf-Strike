@@ -15,7 +15,7 @@ public:
 
   const bool pairingRequest();
   const bool verification();
-  const bool heartbeat();
+  // const bool heartbeat();
   HitResponsePacket hit();
   const bool identifyTarget(const byte* buffer);
 

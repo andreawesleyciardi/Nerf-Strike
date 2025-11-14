@@ -167,42 +167,12 @@ void loop() {
       break;
     }
 
-    case OPCODE_HEARTBEAT_RESPONSE: {
-      HeartbeatResponsePacket* packet = reinterpret_cast<HeartbeatResponsePacket*>(buffer);
-      uint8_t targetId = packet->id;
-
-      TargetInfo& info = registry.getTargetRefByID(targetId);
-      if (info.isValid()) {
-        unsigned long now = millis();
-        const unsigned long TIMEOUT = 10000; // 10 seconds
-
-        if (info.inactiveFrom != 0) {
-          unsigned long inactiveDuration = now - info.inactiveFrom;
-
-          if (inactiveDuration > TIMEOUT) {
-            Serial.print(F("❌ Target "));
-            Serial.print(targetId);
-            Serial.println(F(" has been inactive for too long. Removing..."));
-            registry.removeTargetById(targetId);
-          } else {
-            Serial.print(F("✅ Target "));
-            Serial.print(targetId);
-            Serial.println(F(" responded again. Clearing inactivity."));
-            info.inactiveFrom = 0;
-          }
-        } else {
-          // Target is active, no previous inactivity
-          Serial.print(F("🎯 Target "));
-          Serial.print(targetId);
-          Serial.println(F(" responded to heartbeat."));
-        }
-      } else {
-        Serial.print(F("⚠️ Received heartbeat response from unknown or invalid target ID: "));
-        Serial.println(targetId);
-      }
-
-      break;
-    }
+    // case OPCODE_HEARTBEAT_RESPONSE: {
+    //     HeartbeatResponsePacket* packet = reinterpret_cast<HeartbeatResponsePacket*>(buffer);
+    //     Serial.print(F("📥 Received heartbeat response from Target ID: "));
+    //     Serial.println(packet->id);
+    //   break;
+    // }
 
     case OPCODE_HIT_REQUEST: {
         if (sessionManager.getStatus() == GameSessionStatus::Playing) {

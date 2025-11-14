@@ -24,7 +24,7 @@ void WirelessTarget::setup() {
   radio.setDataRate(RF24_1MBPS);
   radio.setChannel(100);
 
-  radio.openReadingPipe(1, pairingPipe);
+  radio.openReadingPipe(0, pairingPipe);
   radio.startListening();
 
   Serial.println(F("📡 Radio listening on active pairing pipe."));

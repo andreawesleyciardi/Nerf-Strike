@@ -93,10 +93,10 @@ const bool Communication::verification() {
   return false;
 }
 
-const bool Communication::heartbeat() {
-  TargetInfo target = registry.getTargetInfo();
-  return send.heartbeatResponse(target.id);
-}
+// const bool Communication::heartbeat() {
+//   TargetInfo target = registry.getTargetInfo();
+//   return send.heartbeatResponse(target.id);
+// }
 
 HitResponsePacket Communication::hit() {
   TargetInfo target = verifyAssignedTarget();

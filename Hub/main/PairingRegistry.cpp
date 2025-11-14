@@ -146,7 +146,7 @@ bool PairingRegistry::removeTargetById(uint8_t id) {
   targets[index].entityColorIndex = 0xFF;
   targets[index].enabled = true;
   targets[index].indexInEntity = -1;
-  targets[index].inactiveFrom = 0;
+  targets[index].unreachableFrom = 0;
 
   Serial.println();
   Serial.println(F("🗑️ Removed Target."));

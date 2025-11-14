@@ -21,14 +21,14 @@ const bool Send::toHub(const byte* data, uint8_t length, String label, bool logg
     }
     radio.openWritingPipe(pairingPipe);
   }
-  else if (onPipe == OnPipe::targetPipe) {
-    const uint8_t* targetPipe = registry.getTargetPipe();
-    if (logging) {
-      Serial.print(F("🧬 Communicating on Target Pipe: "));
-      Serial.println((char*)targetPipe);
-    }
-    radio.openWritingPipe(targetPipe);
-  }
+  // else if (onPipe == OnPipe::targetPipe) {                           // Targets write always on pairingPipe
+  //   const uint8_t* targetPipe = registry.getTargetPipe();
+  //   if (logging) {
+  //     Serial.print(F("🧬 Communicating on Target Pipe: "));
+  //     Serial.println((char*)targetPipe);
+  //   }
+  //   radio.openWritingPipe(targetPipe);
+  // }
   bool success = radio.write(data, length);
   radio.startListening();
 
@@ -57,7 +57,7 @@ const bool Send::pairingRequest(uint32_t token) {
   Serial.print(F("🧾 Token: "));
   Serial.println(token);
 
-  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), "pairing request", true, OnPipe::pairingPipe);
+  return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), "pairing request");
 }
 
 const bool Send::verificationRequest(uint8_t id) {
@@ -69,14 +69,14 @@ const bool Send::verificationRequest(uint8_t id) {
   return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), "verification request");
 }
 
-const bool Send::heartbeatResponse(uint8_t targetId) {
-  HeartbeatResponsePacket response = {
-    OPCODE_HEARTBEAT_RESPONSE,
-    targetId
-  };
+// const bool Send::heartbeatResponse(uint8_t targetId) {
+//   HeartbeatResponsePacket response = {
+//     OPCODE_HEARTBEAT_RESPONSE,
+//     targetId
+//   };
 
-  return toHub(reinterpret_cast<const byte*>(&response), sizeof(response), "heartbeat", false);
-}
+//   return toHub(reinterpret_cast<const byte*>(&response), sizeof(response), "heartbeat", false);
+// }
 
 const bool Send::hitRequest(uint8_t targetId) {
   HitRequestPacket request = {

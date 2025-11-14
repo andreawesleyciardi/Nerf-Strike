@@ -130,7 +130,38 @@ void Send::heartbeatAll() {
     OPCODE_HEARTBEAT_REQUEST
   };
 
-  toAllTargets(&packet, sizeof(packet), "heartbeat", false);
+  const unsigned long TIMEOUT = 10000; // 10 seconds
+  unsigned long now = millis();
+
+  for (uint8_t i = 0; i < MAX_TARGETS; i++) {
+    uint8_t id = registry.getIDAt(i);
+    if (id != 0xFF) {
+      TargetInfo& info = registry.getTargetRefByID(id);
+      bool success = toTarget(id, &packet, sizeof(packet), "heartbeat", false);
+
+      if (success) {
+        // Target responded to heartbeat — clear unreachable flag
+        if (info.unreachableFrom != 0) {
+          Serial.print(F("🎯 Target "));
+          Serial.print(id);
+          Serial.println(F(" responded again. Clearing unreachable flag."));
+          info.unreachableFrom = 0;
+        }
+      } else {
+        // Failed to send heartbeat — track unreachable time
+        if (info.unreachableFrom == 0) {
+          info.unreachableFrom = now;
+          Serial.print(F("⚠️ First failed heartbeat to Target "));
+          Serial.println(id);
+        } else if (now - info.unreachableFrom > TIMEOUT) {
+          Serial.print(F("❌ Target "));
+          Serial.print(id);
+          Serial.println(F(" has been unreachable for too long. Removing..."));
+          registry.removeTargetById(id);
+        }
+      }
+    }
+  }
 }
 
 const bool Send::scoreUpdate(uint8_t id, ScoreUpdated result) {
