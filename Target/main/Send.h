@@ -14,7 +14,6 @@ public:
   
   const bool pairingRequest(uint32_t token);
   const bool verificationRequest(uint8_t assignedID);
-  // const bool heartbeatResponse(uint8_t targetId);
   const bool hitRequest(uint8_t targetId);
 
 private:

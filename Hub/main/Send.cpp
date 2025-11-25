@@ -102,7 +102,7 @@ void Send::pairingResponse(const TargetInfo& target) {
   }
 
   Serial.println();
-  Serial.print(F("✅ Sent pairing response."));
+  Serial.println(F("✅ Sent pairing response."));
   Serial.print(F("🆔 Id: "));
   Serial.println(target.id);
   Serial.print(F("🌈 Color index: "));

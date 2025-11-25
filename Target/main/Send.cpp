@@ -69,15 +69,6 @@ const bool Send::verificationRequest(uint8_t id) {
   return toHub(reinterpret_cast<const byte*>(&request), sizeof(request), "verification request");
 }
 
-// const bool Send::heartbeatResponse(uint8_t targetId) {
-//   HeartbeatResponsePacket response = {
-//     OPCODE_HEARTBEAT_RESPONSE,
-//     targetId
-//   };
-
-//   return toHub(reinterpret_cast<const byte*>(&response), sizeof(response), "heartbeat", false);
-// }
-
 const bool Send::hitRequest(uint8_t targetId) {
   HitRequestPacket request = {
     OPCODE_HIT_REQUEST,
